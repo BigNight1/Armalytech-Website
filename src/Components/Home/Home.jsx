@@ -11,6 +11,7 @@ import { WhatsAppWidget } from "react-whatsapp-widget";
 import "react-whatsapp-widget/dist/index.css";
 import Location from "../Location.jsx";
 import Navbar from "../Navbar/NavBar.jsx";
+import VideosTikTok from "../TikToks/VideosTikTok.jsx";
 
 const Home = () => {
   return (
@@ -21,6 +22,7 @@ const Home = () => {
       <WhyUs />
       <Services />
       <SuccessStories />
+      <VideosTikTok/>
       <Location />
       <CustomerReviews />
       <FAQ />

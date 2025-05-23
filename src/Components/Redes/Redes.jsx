@@ -51,6 +51,14 @@ const Redes = () => {
           >
             TIKTOK
           </a>
+          <a
+            href="https://www.armalytech.com" /* Cambia por la URL de Instagram */
+            target="_blank"
+            rel="noopener noreferrer"
+            className="caja-redes"
+          >
+            Pagina Web
+          </a>
         </div>
         {/* PREGUNTAS Y RESPUESTAS  */}
         <FAQ />
