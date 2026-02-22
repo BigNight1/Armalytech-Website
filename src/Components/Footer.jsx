@@ -20,7 +20,7 @@ const Footer = () => {
                             <a href="https://www.instagram.com/Armalytech/" target='_BLANK' className="hover:underline ">Instagram</a>
                         </li>
                         <li>
-                            <a href="https://www.tiktok.com/@martyelsinamigos" target='_BLANK' className="hover:underline">TikTok</a>
+                            <a href="https://www.tiktok.com/@elsinamigos0?lang=es-419" target='_BLANK' className="hover:underline">TikTok</a>
                         </li>
                         <li>
                             <a href="/redes" target='_BLANK' className="hover:underline">Redes</a>
