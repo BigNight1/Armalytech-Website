@@ -22,8 +22,8 @@ const AdditionalServicesSection = () => {
         <div className="additional-services__list">
           {items.map((item, index) => (
             <div key={index} className="additional-services__item">
-              <h3 className="additional-services__item-name">{item.name}</h3>
-              <div className="additional-services__item-line-row">
+              <div className="additional-services__item-header">
+                <h3 className="additional-services__item-name">{item.name}</h3>
                 <span className="additional-services__item-line" aria-hidden="true" />
                 <span className="additional-services__item-price">{item.price}</span>
               </div>

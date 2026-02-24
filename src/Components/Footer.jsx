@@ -15,7 +15,7 @@ const FOOTER_LINKS = {
     { label: "Nosotros", href: "/sobre-nosotros" },
     { label: "Servicios", to: "services" },
     { label: "Precios", href: "/precios" },
-    { label: "Testimonios", to: "testimonios" },
+    { label: "Redes", href: "/redes" },
   ],
   services: [
     { label: "Cambio de pantalla", href: "/precios", scrollTo: "reparacion-pantalla" },

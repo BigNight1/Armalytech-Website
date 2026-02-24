@@ -1,40 +1,65 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import "./faq-section.css";
 
 const FAQ_ITEMS = [
   {
     id: 1,
     question: "¿Cuánto demora una reparación típica?",
-    answer: "Depende del equipo y la falla, pero la mayoría se resuelve el mismo día o en 24–48 horas.",
+    answer:
+      "Depende del equipo y la falla, pero la mayoría se resuelve el mismo día o en 24–48 horas.",
   },
   {
     id: 2,
     question: "¿Ofrecen garantía por sus servicios?",
-    answer: "Sí, brindamos garantía según el tipo de reparación y los repuestos utilizados.",
+    answer:
+      "Sí, brindamos garantía según el tipo de reparación y los repuestos utilizados.",
   },
   {
     id: 3,
     question: "¿El diagnóstico tiene costo?",
-    answer: "En muchos casos es gratuito. Si requiere revisión avanzada, te informamos antes de proceder.",
+    answer:
+      "En muchos casos es gratuito. Si requiere revisión avanzada, te informamos antes de proceder.",
   },
   {
     id: 4,
     question: "¿Reparan todas las marcas y modelos?",
-    answer: "Trabajamos con la mayoría de marcas. Si tu equipo es poco común, lo evaluamos y te confirmamos.",
+    answer:
+      "Trabajamos con la mayoría de marcas. Si tu equipo es poco común, lo evaluamos y te confirmamos.",
   },
   {
     id: 5,
     question: "¿Qué métodos de pago aceptan?",
-    answer: "Aceptamos efectivo, transferencias y Yape/Plin. También otras opciones según disponibilidad.",
+    answer:
+      "Aceptamos efectivo, transferencias y Yape/Plin. También otras opciones según disponibilidad.",
   },
 ];
 
 const FaqSection = () => {
   const [openId, setOpenId] = useState(FAQ_ITEMS[0].id);
+  const answerInnerRef = useRef(null);
+  const [answerMaxHeight, setAnswerMaxHeight] = useState(0);
 
   const toggle = (id) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
+
+  useLayoutEffect(() => {
+    if (!openId) {
+      setAnswerMaxHeight(0);
+      return;
+    }
+
+    const el = answerInnerRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      setAnswerMaxHeight(el.scrollHeight);
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [openId]);
 
   return (
     <section className="faq-section" id="faq-section">
@@ -42,7 +67,8 @@ const FaqSection = () => {
         <div className="faq-section__left">
           <p className="faq-section__kicker">FAQ</p>
           <h2 className="faq-section__title">
-            Resolvemos tus dudas al instante<span className="faq-section__title-dot">.</span>
+            Resolvemos tus dudas al instante
+            <span className="faq-section__title-dot">.</span>
           </h2>
           <p className="faq-section__subtitle">
             ¿Tienes preguntas? Revisa la sección de abajo.
@@ -64,9 +90,20 @@ const FaqSection = () => {
                     aria-controls={`faq-answer-${item.id}`}
                     id={`faq-question-${item.id}`}
                   >
-                    <span className="faq-section__question">{item.question}</span>
+                    <span className="faq-section__question">
+                      {item.question}
+                    </span>
                     <span className="faq-section__chevron" aria-hidden="true">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                     </span>
@@ -76,8 +113,16 @@ const FaqSection = () => {
                     className="faq-section__answer-wrap"
                     role="region"
                     aria-labelledby={`faq-question-${item.id}`}
+                    style={{ maxHeight: isOpen ? `${answerMaxHeight}px` : "0px" }}
                   >
-                    <p className="faq-section__answer">{item.answer}</p>
+                    <div
+                      className="faq-section__answer-inner"
+                      ref={(el) => {
+                        if (isOpen) answerInnerRef.current = el;
+                      }}
+                    >
+                      <p className="faq-section__answer">{item.answer}</p>
+                    </div>
                   </div>
                   <div className="faq-section__separator" />
                 </div>

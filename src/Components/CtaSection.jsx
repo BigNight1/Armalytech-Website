@@ -9,43 +9,25 @@ const CARDS = [
     id: 1,
     title: "Servicio con garantía",
     description: "Reparaciones con garantía según el servicio.",
-    icon: (
-      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    ),
+    img: "/reparaciones/baterylow.svg",
   },
   {
     id: 2,
     title: "Reparación rápida",
     description: "Tiempos ágiles y atención clara.",
-    icon: (
-      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
-      </svg>
-    ),
+    img: "/reparaciones/pantallarota.svg",
   },
   {
     id: 3,
     title: "Diagnóstico gratis",
     description: "Evaluación sin costo en muchos casos.",
-    icon: (
-      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-        <polyline points="22 4 12 14.01 9 11.01" />
-      </svg>
-    ),
+    img: "/reparaciones/aguadaño.svg",
   },
   {
     id: 4,
     title: "Atención al cliente",
     description: "Soporte y seguimiento personalizado.",
-    icon: (
-      <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-    ),
+    img: "/reparaciones/nowifiorblue.svg",
   },
 ];
 
@@ -65,27 +47,27 @@ const CtaSection = () => {
         </div>
 
         {/* Contenido superior: izquierda (kicker + título) y derecha (párrafo + botón) */}
-        <div className="relative z-10 max-w-[1160px] mx-auto px-4 md:px-6 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 items-end">
+        <div className="relative z-10 max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-start">
             {/* Izquierda: kicker + título */}
-            <div>
+            <div className="min-w-0">
               <p className="text-[#ff5a2a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-2 md:mb-3">
                 CTA
               </p>
               <h2 className="text-white text-2xl md:text-4xl lg:text-[2.75rem] font-semibold leading-tight">
-                Contáctanos y obtén{" "}
+                Obtén{" "}
                 <span className="text-[#ff5a2a]">20%</span>
-                {" "}de descuento en tu servicio<span className="text-[#ff5a2a]">.</span>
+                {" "}de descuento<span className="text-[#ff5a2a]">.</span>
               </h2>
             </div>
             {/* Derecha: texto + botón */}
-            <div className="flex flex-col items-start md:items-end md:text-right gap-3 md:gap-4">
-              <p className="text-white/85 text-sm md:text-lg max-w-md">
-                El descuento aplica en tu primer servicio de reparación en ArmalyTech.
+            <div className="flex flex-col gap-3 md:gap-4 w-full md:max-w-md md:ml-auto md:items-end md:text-right">
+              <p className="text-white/85 text-sm md:text-base leading-relaxed">
+                Si nos dejas un comentario en Google Maps (ArmalyTech), te llevas un descuento del 20% en tu próxima reparación.
               </p>
               <ScrollToLink
                 to="contacto"
-                className="inline-block px-6 md:px-8 py-3 md:py-3.5 bg-[#ff5a2a] text-white font-semibold rounded-lg hover:bg-[#e54e1f] transition-colors cursor-pointer text-sm md:text-base"
+                className="inline-block shrink-0 px-6 md:px-8 py-3 md:py-3.5 bg-[#ff5a2a] text-white font-semibold rounded-lg hover:bg-[#e54e1f] transition-colors cursor-pointer text-sm md:text-base text-center"
               >
                 Contáctanos
               </ScrollToLink>
@@ -94,20 +76,21 @@ const CtaSection = () => {
         </div>
 
         {/* Tarjetas: en móvil sin translateY (flujo normal), en desktop flotan */}
-        <div className="relative z-20 max-w-[1160px] mx-auto px-4 md:px-6 w-full mt-8 md:mt-16 md:translate-y-[90px] md:-mb-[90px]">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 justify-items-center">
+        <div className="relative z-20 max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-8 w-full mt-8 md:mt-16 md:translate-y-[90px] md:-mb-[90px]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6 items-stretch justify-items-center">
             {CARDS.map((card) => (
               <div
                 key={card.id}
-                className="w-full max-w-[280px] min-h-0 md:min-h-[210px] bg-white rounded-2xl p-4 md:p-7 shadow-lg border border-gray-100"
+                className="w-full max-w-[280px] min-h-0 md:min-h-[210px] bg-white rounded-2xl p-4 md:p-7 shadow-lg border border-gray-100 flex flex-col"
               >
-                <div className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#ff5a2a]/15 flex items-center justify-center text-[#ff5a2a] mb-3 md:mb-4">
-                  {card.icon}
+                <div className="w-10 h-10 md:w-14 md:h-14  flex items-center justify-center mb-3 md:mb-4 overflow-hidden">
+                  <img src={card.img} alt={card.title} className="w-10 h-10 md:w-14 md:h-14 object-contain" />
                 </div>
-                <h3 className="text-gray-900 font-bold text-sm md:text-lg mb-1 pb-1 border-b-2 border-[#ff5a2a] w-fit">
+                <h3 className="text-gray-900 font-bold text-sm md:text-lg mb-1 pb-1">
                   {card.title}
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm leading-relaxed">
+                <div className="w-1/4 h-0.5 bg-[#ff5a2a] rounded mb-3 " aria-hidden="true" />
+                <p className="text-gray-600 text-xs md:text-sm leading-relaxed ">
                   {card.description}
                 </p>
               </div>
@@ -117,7 +100,7 @@ const CtaSection = () => {
       </section>
 
       {/* Barra CTA inferior (blanco): padding-top generoso para dejar espacio a las tarjetas flotantes */}
-      <section className="bg-white pt-10 md:pt-36 pb-10 md:py-24 px-4">
+      <section className="bg-white pt-10 md:pt-36 pb-10 md:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-[#ff5a2a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3">
             LLÁMANOS

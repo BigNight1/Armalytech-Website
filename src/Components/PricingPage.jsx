@@ -43,6 +43,13 @@ const PricingPage = () => {
         </div>
       </div>
 
+      {/* Aviso: precios en promedio */}
+      <div className="pricing-disclaimer">
+        <p className="pricing-disclaimer__text">
+          <span className="pricing-disclaimer__label">Promedio.</span> Los precios son de referencia y pueden variar según el modelo del equipo, la marca y el tipo de falla. Te damos una cotización exacta al revisar tu celular.
+        </p>
+      </div>
+
       {/* Listado de categorías — zig-zag: par imagen izq, impar contenido izq */}
       <main>
         {pricingCategories.map((category, index) => (

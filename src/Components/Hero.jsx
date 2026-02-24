@@ -38,7 +38,7 @@ const Hero = () => {
                   Soporte
                 </ScrollToLink>
               </div>
-              <div className="flex items-center gap-3 justify-start">
+              {/* <div className="flex items-center gap-3 justify-start">
                 <button
                   type="button"
                   aria-label="Ver video"
@@ -47,7 +47,7 @@ const Hero = () => {
                   <span className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-orange-500 border-b-[6px] border-b-transparent ml-0.5" />
                 </button>
                 <span className="text-white font-medium">Ver video</span>
-              </div>
+              </div> */}
             </div>
 
             {/* COLUMNA CENTRO - Imagen iPhone */}

@@ -42,12 +42,12 @@ const Home = () => {
       <FaqSection />
       <ContactSection />
       <Footer />
-      <WhatsAppWidget
+      {/* <WhatsAppWidget
         phoneNumber="+51924548268"
         companyName="Armalytech"
         message="Hola! ¿Cómo podemos ayudarte?"
         replyTimeText="Normalmente respondemos en unos minutos"
-      />
+      /> */}
     </div>
   );
 };

@@ -12,56 +12,54 @@ const Redes = () => {
               <img
                 src="/logoarmaly.webp"
                 alt="Logo de armalytech"
-                className="h-[125px] rounded-full "
+                className="redes-logo"
               />
             </a>
           </div>
 
           <div className="sub-description">
-            <h3 className="color-titulo">ARMALYTECH</h3>
+            <h3 className="color-titulo">ARMALY<span className="color-tech">TECH</span></h3>
             <span className="text-white">Servicio tecnico de celulares</span>
             <span className="text-white">Lima - Peru</span>
           </div>
         </div>
         <div className="box-redes">
-          {/* Enlace a Instagram */}
           <a
-            href="https://www.instagram.com/armalytech/" /* Cambia por la URL de Instagram */
+            href="https://www.instagram.com/armalytech/"
             target="_blank"
             rel="noopener noreferrer"
-            className="caja-redes"
+            className="link-btn"
           >
-            INSTAGRAM
+            Instagram
           </a>
-
-          {/* Enlace a WhatsApp */}
           <a
             href="https://api.whatsapp.com/send/?phone=%2B51924548268&text&type=phone_number&app_absent=0"
             target="_blank"
             rel="noopener noreferrer"
-            className="caja-redes"
+            className="link-btn"
           >
-            WHATSAPP
+            WhatsApp
           </a>
           <a
-            href="https://www.tiktok.com/@armalytech" /* Cambia por la URL de Instagram */
+            href="https://www.tiktok.com/@armalytech"
             target="_blank"
             rel="noopener noreferrer"
-            className="caja-redes"
+            className="link-btn"
           >
-            TIKTOK
+            TikTok
           </a>
           <a
-            href="https://www.armalytech.com" /* Cambia por la URL de Instagram */
+            href="https://www.armalytech.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="caja-redes"
+            className="link-btn"
           >
-            Pagina Web
+            Página Web
           </a>
         </div>
-        {/* PREGUNTAS Y RESPUESTAS  */}
-        <FAQ />
+        <div className="redes-faq-wrapper">
+          <FAQ />
+        </div>
       </div>
     </div>
   );

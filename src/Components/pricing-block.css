@@ -63,7 +63,7 @@
 .pricing-block__item {
   padding-bottom: 1rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: none;
 }
 
 .pricing-block__item:last-child {
@@ -74,22 +74,35 @@
 
 .pricing-block__item-header {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 0.35rem;
 }
 
+/* Título a la izquierda */
 .pricing-block__item-name {
   font-size: 1rem;
   font-weight: 600;
   color: #111827;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
+/* Línea que va del título hasta el precio (misma fila) */
+.pricing-block__item-line {
+  flex: 1;
+  min-width: 0.5rem;
+  height: 0;
+  border-bottom: 1px solid #e5e7eb;
+  align-self: center;
+}
+
+/* Precio al final de la línea */
 .pricing-block__item-price {
   font-size: 0.95rem;
   font-weight: 600;
   color: #ff5a2a;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 

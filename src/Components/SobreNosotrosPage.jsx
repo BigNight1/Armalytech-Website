@@ -107,7 +107,7 @@ const SobreNosotrosPage = () => {
         </div>
       </div>
 
-      {/* 1) ABOUT US — 2 columnas (estilo TechPro) */}
+      {/* 1) ABOUT US — 2 columnas */}
       <section className="sn-about">
         <div className="sn-about__container">
           <div className="sn-about__left">
@@ -118,7 +118,7 @@ const SobreNosotrosPage = () => {
             <p className="sn-about__subtitle">
               Confía en ArmalyTech — Donde la tecnología se encuentra con lo profesional.
             </p>
-            <p className="sn-about__body">
+            <p className="sn-about__body ">
               En ArmalyTech estamos dedicados a ser tu destino principal para todo lo relacionado con la reparación de celulares en Lima. Con años de experiencia, nuestro equipo de técnicos especializados destaca en diagnosticar y resolver una amplia variedad de problemas que afectan a tus dispositivos.
             </p>
             <div className="sn-about__img-block">

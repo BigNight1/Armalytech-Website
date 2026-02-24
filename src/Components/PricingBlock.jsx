@@ -15,6 +15,7 @@ const PricingBlock = ({ id, title, image, items, imageLeft }) => {
               <li key={index} className="pricing-block__item">
                 <div className="pricing-block__item-header">
                   <span className="pricing-block__item-name">{item.name}</span>
+                  <span className="pricing-block__item-line" aria-hidden="true" />
                   <span className="pricing-block__item-price">{item.price}</span>
                 </div>
                 <p className="pricing-block__item-desc">{item.description}</p>

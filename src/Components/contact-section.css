@@ -5,6 +5,13 @@
   background: linear-gradient(180deg, #0a0d12 0%, #0f1419 50%, #0a0d12 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 5vw, 2rem);
+}
+
+@media (min-width: 768px) {
+  .contact-section {
+    padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 3rem);
+  }
 }
 
 /* Patrón sutil: puntos y líneas */
@@ -41,6 +48,7 @@
   z-index: 1;
   max-width: 1150px;
   margin: 0 auto;
+  padding: 0;
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(2.5rem, 6vw, 4rem);

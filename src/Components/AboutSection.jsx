@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-scroll";
+import { Link } from "react-router-dom";
 import "./about-section.css";
 
 const AboutSection = () => {
@@ -32,7 +32,7 @@ const AboutSection = () => {
             Sabemos lo frustrante que es cuando un equipo falla. Por eso ofrecemos soluciones rápidas y confiables para que vuelvas a usar tu celular sin preocupaciones.
           </p>
           <Link
-            to="sobre-nosotros"
+            to="/sobre-nosotros"
             
             className="about-section__cta"
           >
