@@ -1,0 +1,136 @@
+
+.additional-services {
+  background: #fff;
+  padding: 4rem 1.5rem 5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (min-width: 768px) {
+  .additional-services {
+    padding: 5rem 1.5rem 6rem;
+  }
+}
+
+.additional-services__inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+/* Primer div: 2 columnas — título (izq) | intro (der) */
+.additional-services__header {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem 0;
+}
+
+@media (min-width: 992px) {
+  .additional-services__header {
+    grid-template-columns: 38% 1fr;
+    gap: 0 10rem;
+    align-items: start;
+  }
+}
+
+.additional-services__title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
+  color: #ff5a2a;
+  line-height: 1.2;
+  margin: 0;
+  text-align: left;
+}
+
+@media (min-width: 992px) {
+  .additional-services__title {
+    font-size: 2.25rem;
+  }
+}
+
+.additional-services__intro {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #4b5563;
+  margin: 0;
+  max-width: 52ch;
+}
+
+@media (min-width: 992px) {
+  .additional-services__intro {
+    padding-top: 0;
+  }
+}
+
+/* Otro div: los 4 servicios en grid 2x2 */
+.additional-services__list {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 0;
+}
+
+@media (min-width: 640px) {
+  .additional-services__list {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .additional-services__list {
+    margin-top: 3rem;
+  }
+}
+
+.additional-services__item {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1.75rem;
+  margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  .additional-services__item {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Fila: nombre [línea leader] precio — misma altura, línea centrada */
+.additional-services__item-header {
+  display: flex;
+  align-items: center;
+  gap: 14px; /* 12–16px entre nombre, línea y precio */
+  min-height: 0;
+}
+
+.additional-services__item-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+/* Línea leader: 1px gris claro, ocupa todo el espacio entre nombre y precio */
+.additional-services__item-leader {
+  flex: 1;
+  min-width: 0;
+  height: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  align-self: center;
+}
+
+.additional-services__item-price {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #ff5a2a;
+  flex-shrink: 0;
+}
+
+/* Descripción debajo, sin línea */
+.additional-services__item-desc {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #6b7280;
+  margin: 0.5rem 0 0;
+}

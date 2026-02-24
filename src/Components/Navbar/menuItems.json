@@ -1,7 +1,12 @@
 [
-    { "name": "Home", "to": "Home"},
-    { "name": "Servicios", "to": "services" },
-    { "name": "Historias", "to": "Historias" },
-    { "name": "Ubicación", "to": "Ubicación" },
-    { "name": "FAQ", "to": "faq-section" }
-  ]
+  {
+    "name": "Nosotros",
+    "to": "/sobre-nosotros",
+    "route": true,
+    "current": false
+  },
+  { "name": "Precios", "to": "/precios", "route": true, "current": false },
+  { "name": "Testimonios", "to": "testimonios", "current": false },
+  { "name": "Servicios", "to": "services", "current": false },
+  { "name": "Contacto", "to": "contacto", "current": false }
+]

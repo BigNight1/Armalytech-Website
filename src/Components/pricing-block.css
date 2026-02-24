@@ -1,0 +1,119 @@
+/* PricingBlock — zig-zag layout */
+.pricing-block {
+  padding: 2.5rem 1.5rem;
+  background: #fff;
+}
+
+@media (min-width: 768px) {
+  .pricing-block {
+    padding: 3rem 2rem;
+  }
+}
+
+.pricing-block__inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .pricing-block__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+
+  .pricing-block__inner--img-right .pricing-block__img-wrap {
+    order: 2;
+  }
+
+  .pricing-block__inner--img-right .pricing-block__content {
+    order: 1;
+  }
+}
+
+.pricing-block__img-wrap {
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.pricing-block__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pricing-block__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem;
+}
+
+.pricing-block__list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+}
+
+.pricing-block__item {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pricing-block__item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.pricing-block__item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.pricing-block__item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.pricing-block__item-price {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ff5a2a;
+  flex-shrink: 0;
+}
+
+.pricing-block__item-desc {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pricing-block__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background: #ff5a2a;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.pricing-block__cta:hover {
+  background: #e54e1f;
+}

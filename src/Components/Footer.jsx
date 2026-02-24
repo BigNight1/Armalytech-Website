@@ -1,52 +1,117 @@
-import React from 'react'
+import React from "react";
+import { Link } from "react-router-dom";
+import ScrollToLink from "./ScrollToLink.jsx";
+import { useLocation } from "react-router-dom";
+import "./footer.css";
+
+const SOCIAL_LINKS = [
+  { name: "Instagram", img: "/redes_sociales/instagram.svg", href: "https://instagram.com/armalytech" },
+  { name: "TikTok", img: "/redes_sociales/tik-tok.svg", href: "https://tiktok.com/@armalytech" },
+  { name: "WhatsApp", img: "/redes_sociales/whatsapp.svg", href: "https://api.whatsapp.com/send/?phone=%2B51924548268&text&type=phone_number&app_absent=0" },
+];
+
+const FOOTER_LINKS = {
+  useful: [
+    { label: "Nosotros", href: "/sobre-nosotros" },
+    { label: "Servicios", to: "services" },
+    { label: "Precios", href: "/precios" },
+    { label: "Testimonios", to: "testimonios" },
+  ],
+  services: [
+    { label: "Cambio de pantalla", href: "/precios", scrollTo: "reparacion-pantalla" },
+    { label: "Cambio de batería", href: "/precios", scrollTo: "cambio-bateria" },
+    { label: "Puerto de carga", href: "/precios", scrollTo: "puerto-carga" },
+    { label: "Daño por agua", href: "/precios", scrollTo: "danio-agua" },
+  ],
+  support: [
+    { label: "Garantía", href: "/contactanos" },
+    { label: "Términos", href: "/contactanos" },
+    { label: "Ayuda", href: "/contactanos" },
+    { label: "Contacto", href: "/contactanos" },
+  ],
+};
 
 const Footer = () => {
-  return (
-    <footer className="p-4 bg-white sm:p-6 dark:bg-gray-800">
-    <div className="mx-auto max-w-screen-xl">
-        <div className="md:flex md:justify-between">
-            <div className="mb-6 md:mb-0">
-                <a href="/" className="flex items-center">
-                    <img src="/logoarmaly.webp" className="mr-2 h-14 rounded" alt="FlowBite Logo" />
-                    <span className="self-center text-2xl  whitespace-nowrap dark:text-white font-extrabold font-OpenSans uppercase">Armalytech</span>
-                </a>
-            </div>
-            <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-2">
-                
-                <div>
-                    <h2 className="mb-4 text-sm font-semibold text-gray-900 uppercase dark:text-white">Siguenos</h2>
-                    <ul className="text-gray-600 dark:text-gray-400 flex flex-col gap-3">
-                        <li className="">
-                            <a href="https://www.instagram.com/Armalytech/" target='_BLANK' className="hover:underline ">Instagram</a>
-                        </li>
-                        <li>
-                            <a href="https://www.tiktok.com/@elsinamigos0?lang=es-419" target='_BLANK' className="hover:underline">TikTok</a>
-                        </li>
-                        <li>
-                            <a href="/redes" target='_BLANK' className="hover:underline">Redes</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h2 className="mb-4 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h2>
-                    <ul className="text-gray-600 dark:text-gray-400">
-                        {/* <li class="mb-4">
-                            <a href="#" class="hover:underline">Privacy Policy</a>
-                        </li> */}
-                        <li>
-                            <a href="/terminos-y-condiciones" className="hover:underline">Terminos Y Condiciones</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-        <div className="border-t border-gray-800 mt-8 pt-2 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} ArmalyTech. Todos los derechos reservados.</p>
-        </div>
-    </div>
-</footer>
-  )
-}
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
-export default Footer
+  const renderLink = (item) => {
+    if (item.href) {
+      return (
+        <Link
+          to={item.href}
+          state={item.scrollTo ? { scrollTo: item.scrollTo } : undefined}
+          className="footer__link"
+        >
+          {item.label}
+        </Link>
+      );
+    }
+    if (isHome) {
+      return <ScrollToLink to={item.to} className="footer__link">{item.label}</ScrollToLink>;
+    }
+    return <Link to="/" state={{ scrollTo: item.to }} className="footer__link">{item.label}</Link>;
+  };
+
+  return (
+    <footer className="footer" id="footer">
+      <div className="footer__container">
+        <div className="footer__grid">
+          <div className="footer__col footer__col--brand">
+            <a href="/" className="footer__logo">
+              <img src="/logoarmalytech.png" alt="ArmalyTech" className="h-10 rounded-full" />
+            </a>
+            <p className="footer__desc">
+              Reparación de celulares y equipos tecnológicos en Lima. Calidad y garantía en cada servicio.
+            </p>
+            <div className="footer__socials">
+              {SOCIAL_LINKS.map(({ name, img, href }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer__social-link"
+                  aria-label={name}
+                >
+                  <img src={img} alt="" className="footer__social-icon" />
+                </a>
+              ))}
+            </div>
+          </div>
+          <div className="footer__col">
+            <h3 className="footer__title">Enlaces útiles</h3>
+            <ul className="footer__list">
+              {FOOTER_LINKS.useful.map((item) => (
+                <li key={item.label}>{renderLink(item)}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="footer__col">
+            <h3 className="footer__title">Servicios</h3>
+            <ul className="footer__list">
+              {FOOTER_LINKS.services.map((item) => (
+                <li key={item.label}>{renderLink(item)}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="footer__col">
+            <h3 className="footer__title">Soporte</h3>
+            <ul className="footer__list">
+              {FOOTER_LINKS.support.map((item) => (
+                <li key={item.label}>{renderLink(item)}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="footer__bottom">
+          <p className="footer__copy">
+            &copy; {new Date().getFullYear()} ArmalyTech. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

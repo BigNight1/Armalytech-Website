@@ -1,0 +1,85 @@
+
+.pricing-hero-section {
+  position: relative;
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  padding: 0.5rem 0;
+  overflow: hidden;
+}
+
+
+
+@media (min-width: 768px) {
+  .pricing-hero-section {
+    padding: 2rem 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pricing-hero-section {
+    padding: 2rem 0;
+  }
+}
+
+.pricing-hero {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 0;
+}
+
+.pricing-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  width: 100%;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: center;
+}
+
+.pricing-hero__title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .pricing-hero__title {
+    font-size: 2.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pricing-hero__title {
+    font-size: 3rem;
+  }
+}
+
+.pricing-hero__title-accent {
+  color: #ff5a2a;
+}
+
+.pricing-hero__breadcrumb {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+}
+
+.pricing-hero__breadcrumb a {
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.pricing-hero__breadcrumb a:hover {
+  color: #fff;
+}
+
+.pricing-hero__breadcrumb .pricing-hero__breadcrumb-sep {
+  margin: 0 0.5rem;
+}
+
+.pricing-hero__breadcrumb .pricing-hero__breadcrumb-current {
+  color: #ff5a2a;
+  font-weight: 500;
+}

@@ -1,0 +1,167 @@
+/* StepsSection: panel oscuro izquierda + imagen derecha */
+
+.steps-section {
+  min-height: clamp(520px, 55vw, 640px);
+  overflow: hidden;
+}
+
+.steps-section__container {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: inherit;
+}
+
+@media (min-width: 768px) {
+  .steps-section__container {
+    grid-template-columns: 50% 50%;
+  }
+}
+
+/* Columna izquierda: panel oscuro */
+.steps-section__left {
+  background: linear-gradient(160deg, #0b0f14 0%, #0f1620 50%, #0b0f14 100%);
+  display: flex;
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 2rem);
+}
+
+@media (min-width: 768px) {
+  .steps-section__left {
+    padding: 64px 72px 64px 64px;
+    justify-content: flex-end;
+  }
+}
+
+.steps-section__content {
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .steps-section__content {
+    margin: 0;
+    max-width: 500px;
+    width: 100%;
+  }
+}
+
+.steps-section__kicker {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(0.65rem, 1.1vw, 0.75rem);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ff5a2a;
+  margin: 0 0 clamp(0.75rem, 1.5vw, 1rem);
+}
+
+.steps-section__title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(34px, 3.2vw, 48px);
+  font-weight: 600;
+  line-height: 1.05;
+  color: #fff;
+  margin: 0 0 20px;
+}
+
+.steps-section__title-dot {
+  color: #ff5a2a;
+}
+
+.steps-section__subtitle {
+  font-size: clamp(0.95rem, 1.15vw, 1.05rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 1);
+  font-weight: 700;
+  margin: 0 0 26px;
+}
+
+/* Lista de pasos */
+.steps-section__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.steps-section__item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.steps-section__icon-box {
+  flex-shrink: 0;
+  width: 65px;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.steps-section__step-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.steps-section__item-body {
+  min-width: 0;
+}
+
+.steps-section__item-title {
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.steps-section__item-number {
+  color: #ff5a2a;
+}
+
+.steps-section__item-desc {
+  font-size: clamp(14px, 1rem, 15px);
+  font-weight: 400;
+  max-width: 55ch;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 8px 0 0;
+}
+
+/* Columna derecha: imagen */
+.steps-section__right {
+  position: relative;
+  min-height: clamp(280px, 50vw, 400px);
+}
+
+@media (min-width: 768px) {
+  .steps-section__right {
+    min-height: auto;
+  }
+}
+
+.steps-section__image-wrap {
+  position: absolute;
+  inset: 0;
+  background: #0b0f14;
+}
+
+.steps-section__image-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 15, 20, 0.15) 0%, rgba(11, 15, 20, 0.35) 100%);
+  pointer-events: none;
+}
+
+.steps-section__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

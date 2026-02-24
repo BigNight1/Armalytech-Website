@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.footer {
+  background: #080b0f;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2rem) clamp(1.5rem, 3vw, 2rem);
+}
+
+.footer__container {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 4vw, 3rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 640px) {
+  .footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: clamp(2rem, 3vw, 2.5rem);
+  }
+}
+
+.footer__col--brand {
+  max-width: 20rem;
+}
+
+@media (max-width: 639px) {
+  .footer__grid {
+    text-align: center;
+  }
+
+  .footer__col--brand {
+    margin: 0 auto;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer__socials {
+    justify-content: center;
+  }
+
+  .footer__title {
+    display: block;
+    text-align: center;
+  }
+
+  .footer__list {
+    text-align: center;
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.footer__logo {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.footer__desc {
+  font-size: clamp(0.85rem, 1vw, 0.9rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 1.25rem;
+}
+
+.footer__socials {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #ff5a2a;
+  border-radius: 8px;
+  color: #fff;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.footer__social-link:hover {
+  background: #e54e1f;
+}
+
+.footer__social-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.footer__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ff5a2a;
+  display: inline-block;
+}
+
+.footer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer__list li {
+  margin-bottom: 0.5rem;
+}
+
+.footer__link {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer__link:hover {
+  color: #ff5a2a;
+}
+
+.footer__bottom {
+  padding-top: clamp(1rem, 2vw, 1.5rem);
+  text-align: center;
+}
+
+.footer__copy {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}

@@ -1,29 +1,46 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Hero from "../Hero.jsx";
-import RepairSection from "../RepairSection.jsx";
-import WhyUs from "../WhyUs/WhyUs.jsx";
-import Services from "../Services/Services.jsx";
-import SuccessStories from "../SuccessStories/SuccessStories.jsx";
-import CustomerReviews from "../CustomerReview/CustomerReviews.jsx";
-import FAQ from "../FAQ/FAQ.jsx";
+import RepairsSection from "../RepairsSection.jsx";
+import AboutSection from "../AboutSection.jsx";
+import StepsSection from "../StepsSection.jsx";
+import ServicesPreviewSection from "../ServicesPreviewSection.jsx";
+import FaqSection from "../FaqSection.jsx";
+import CtaSection from "../CtaSection.jsx";
+import ContactSection from "../ContactSection.jsx";
 import Footer from "../Footer.jsx";
 import { WhatsAppWidget } from "react-whatsapp-widget";
 import "react-whatsapp-widget/dist/index.css";
-import Location from "../Location.jsx";
 import Navbar from "../Navbar/NavBar.jsx";
 
 const Home = () => {
+  const { state } = useLocation();
+
+  useEffect(() => {
+    const scrollTo = state?.scrollTo;
+    if (scrollTo) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(scrollTo);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+  }, [state?.scrollTo]);
+
   return (
     <div>
-      <Navbar />
-      <Hero />
-      <RepairSection />
-      <WhyUs />
-      <Services />
-      <SuccessStories />
-      <Location />
-      <CustomerReviews />
-      <FAQ />
+      <div className="hero-container relative">
+        <Navbar />
+        <Hero />
+      </div>
+      <RepairsSection />
+      <AboutSection />
+      <StepsSection />
+      <ServicesPreviewSection />
+      <CtaSection />
+      <FaqSection />
+      <ContactSection />
       <Footer />
       <WhatsAppWidget
         phoneNumber="+51924548268"

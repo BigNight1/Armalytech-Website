@@ -1,0 +1,103 @@
+import React, { useState } from "react";
+import "./faq-section.css";
+
+const FAQ_ITEMS = [
+  {
+    id: 1,
+    question: "¿Cuánto demora una reparación típica?",
+    answer: "Depende del equipo y la falla, pero la mayoría se resuelve el mismo día o en 24–48 horas.",
+  },
+  {
+    id: 2,
+    question: "¿Ofrecen garantía por sus servicios?",
+    answer: "Sí, brindamos garantía según el tipo de reparación y los repuestos utilizados.",
+  },
+  {
+    id: 3,
+    question: "¿El diagnóstico tiene costo?",
+    answer: "En muchos casos es gratuito. Si requiere revisión avanzada, te informamos antes de proceder.",
+  },
+  {
+    id: 4,
+    question: "¿Reparan todas las marcas y modelos?",
+    answer: "Trabajamos con la mayoría de marcas. Si tu equipo es poco común, lo evaluamos y te confirmamos.",
+  },
+  {
+    id: 5,
+    question: "¿Qué métodos de pago aceptan?",
+    answer: "Aceptamos efectivo, transferencias y Yape/Plin. También otras opciones según disponibilidad.",
+  },
+];
+
+const FaqSection = () => {
+  const [openId, setOpenId] = useState(FAQ_ITEMS[0].id);
+
+  const toggle = (id) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
+
+  return (
+    <section className="faq-section" id="faq-section">
+      <div className="faq-section__container">
+        <div className="faq-section__left">
+          <p className="faq-section__kicker">FAQ</p>
+          <h2 className="faq-section__title">
+            Resolvemos tus dudas al instante<span className="faq-section__title-dot">.</span>
+          </h2>
+          <p className="faq-section__subtitle">
+            ¿Tienes preguntas? Revisa la sección de abajo.
+          </p>
+
+          <div className="faq-section__accordion">
+            {FAQ_ITEMS.map((item) => {
+              const isOpen = openId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className={`faq-section__item ${isOpen ? "faq-section__item--open" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="faq-section__trigger"
+                    onClick={() => toggle(item.id)}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${item.id}`}
+                    id={`faq-question-${item.id}`}
+                  >
+                    <span className="faq-section__question">{item.question}</span>
+                    <span className="faq-section__chevron" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
+                  </button>
+                  <div
+                    id={`faq-answer-${item.id}`}
+                    className="faq-section__answer-wrap"
+                    role="region"
+                    aria-labelledby={`faq-question-${item.id}`}
+                  >
+                    <p className="faq-section__answer">{item.answer}</p>
+                  </div>
+                  <div className="faq-section__separator" />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="faq-section__right">
+          <div className="faq-section__image-wrap">
+            <img
+              src="/faq.webp"
+              alt="Técnico ArmalyTech realizando reparación"
+              className="faq-section__image"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default FaqSection;
