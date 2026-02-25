@@ -8,8 +8,6 @@ const EMAIL = "armalytech@email.com";
 const ADDRESS = "Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja"; // Placeholder: reemplazar con dirección real
 const HORARIO = "Lun–Sáb 9AM – 7PM";
 
-// En desarrollo: usa proxy de Vite (/api → backend). En producción: define VITE_API_URL.
-const API_URL = import.meta.env.VITE_API_URL || "";
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -32,7 +30,7 @@ const ContactSection = () => {
     setSending(true);
     setStatus({ type: null, message: "" });
     try {
-      const res = await fetch(`${API_URL}/api/contact`, {
+      const res = await fetch(`/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
