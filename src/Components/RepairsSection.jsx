@@ -20,7 +20,7 @@ const SERVICES = [
     id: 3,
     title: "Pantalla rota",
     description: "Cambio de pantalla o cristal con repuestos de calidad.",
-    price: 180,
+    price: 110,
     img: "/reparaciones/pantallarota.svg",
   },
   {

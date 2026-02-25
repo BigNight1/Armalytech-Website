@@ -8,6 +8,9 @@ const EMAIL = "armalytech@email.com";
 const ADDRESS = "Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja"; // Placeholder: reemplazar con dirección real
 const HORARIO = "Lun–Sáb 9AM – 7PM";
 
+// En desarrollo: usa proxy de Vite (/api → backend). En producción: define VITE_API_URL.
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 const ContactSection = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -15,15 +18,37 @@ const ContactSection = () => {
     email: "",
     message: "",
   });
+  const [status, setStatus] = useState({ type: null, message: "" });
+  const [sending, setSending] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setStatus({ type: null, message: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: enviar formulario (ej. endpoint o WhatsApp)
+    setSending(true);
+    setStatus({ type: null, message: "" });
+    try {
+      const res = await fetch(`${API_URL}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus({ type: "error", message: data.message || "Error al enviar." });
+        return;
+      }
+      setStatus({ type: "success", message: "Mensaje enviado. Te responderemos pronto." });
+      setFormData({ name: "", phone: "", email: "", message: "" });
+    } catch {
+      setStatus({ type: "error", message: "No se pudo conectar. Revisa que el servidor esté en marcha." });
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -71,6 +96,14 @@ const ContactSection = () => {
         <div className="contact-section__right">
           <div className="contact-section__card">
             <form className="contact-section__form" onSubmit={handleSubmit}>
+              {status.message && (
+                <div
+                  className={`contact-section__status contact-section__status--${status.type}`}
+                  role="alert"
+                >
+                  {status.message}
+                </div>
+              )}
               <label className="contact-section__label">
                 Nombre <span className="contact-section__required">*</span>
               </label>
@@ -116,8 +149,12 @@ const ContactSection = () => {
                 placeholder="Describe tu consulta o el problema de tu equipo..."
                 rows={5}
               />
-              <button type="submit" className="contact-section__submit">
-                Solicitar cotización
+              <button
+                type="submit"
+                className="contact-section__submit"
+                disabled={sending}
+              >
+                {sending ? "Enviando..." : "Solicitar cotización"}
               </button>
             </form>
           </div>
