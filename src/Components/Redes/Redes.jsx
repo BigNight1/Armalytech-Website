@@ -57,6 +57,28 @@ const Redes = () => {
             Página Web
           </a>
         </div>
+
+        <div className="redes-ubicacion">
+          <h3 className="redes-ubicacion__title">Ubicación</h3>
+          <div className="redes-ubicacion__mapa">
+            <iframe
+              title="Ubicación ArmalyTech"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d289.9719361859796!2d-76.99659845096025!3d-12.085994834346701!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c766de68b979%3A0x2e06fa302ff6b50!2sArmalytech!5e0!3m2!1ses-419!2spe!4v1731759574355!5m2!1ses-419!2spe"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+          <a
+            href="https://maps.app.goo.gl/kQnPY8uYo8E1EsZJ8"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-btn redes-ubicacion__link"
+          >
+            Abrir en Google Maps
+          </a>
+        </div>
+
         <div className="redes-faq-wrapper">
           <FAQ />
         </div>
