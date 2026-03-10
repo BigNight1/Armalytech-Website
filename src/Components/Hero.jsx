@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Element } from "react-scroll";
 import ScrollToLink from "./ScrollToLink.jsx";
 
@@ -26,17 +27,17 @@ const Hero = () => {
                 No dejes que los problemas técnicos te frenen. En Armalytech estamos para darle nueva vida a tus equipos, de forma rápida y sin complicaciones.
               </p>
               <div className="flex flex-wrap items-center justify-start gap-x-2 gap-y-1 text-xs md:text-sm uppercase text-gray-400 mb-8">
-                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <Link to="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Política de garantía
-                </a>
+                </Link>
                 <span className="text-gray-600">·</span>
-                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <Link to="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Términos de servicio
-                </a>
+                </Link>
                 <span className="text-gray-600">·</span>
-                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <Link to="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Soporte
-                </a>
+                </Link>
               </div>
               {/* <div className="flex items-center gap-3 justify-start">
                 <button
