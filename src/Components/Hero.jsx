@@ -26,17 +26,17 @@ const Hero = () => {
                 No dejes que los problemas técnicos te frenen. En Armalytech estamos para darle nueva vida a tus equipos, de forma rápida y sin complicaciones.
               </p>
               <div className="flex flex-wrap items-center justify-start gap-x-2 gap-y-1 text-xs md:text-sm uppercase text-gray-400 mb-8">
-                <a href="/terminos-y-condiciones" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Política de garantía
                 </a>
                 <span className="text-gray-600">·</span>
-                <a href="/terminos-y-condiciones" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Términos de servicio
                 </a>
                 <span className="text-gray-600">·</span>
-                <ScrollToLink to="faq-section" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
+                <a href="/contactanos" className="underline underline-offset-2 hover:text-gray-300 opacity-90">
                   Soporte
-                </ScrollToLink>
+                </a>
               </div>
               {/* <div className="flex items-center gap-3 justify-start">
                 <button
