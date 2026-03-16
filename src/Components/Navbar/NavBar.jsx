@@ -58,7 +58,7 @@ const Navbar = () => {
       <nav className="bg-gray-900 border-b border-gray-700/50 w-full">
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
           <a href="/" className="flex items-center shrink-0">
-            <img src="/logoarmalytech.png" className="h-10 rounded-full" alt="ArmalyTech" />
+            <img src="/logoarmalytech.webp" className="h-10 rounded-full" alt="ArmalyTech" />
           </a>
           <button
             type="button"
@@ -138,7 +138,7 @@ const Navbar = () => {
         <div className="navbar-overlay__panel" onClick={(e) => e.stopPropagation()}>
           <div className="navbar-overlay__header">
             <a href="/" onClick={closeMenu} className="flex items-center shrink-0">
-              <img src="/logoarmalytech.png" className="h-10 rounded-full" alt="ArmalyTech" />
+              <img src="/logoarmalytech.webp" className="h-10 rounded-full" alt="ArmalyTech" />
             </a>
             <button
               type="button"

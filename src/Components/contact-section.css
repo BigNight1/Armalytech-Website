@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 .contact-section {
   position: relative;
   background: linear-gradient(180deg, #0a0d12 0%, #0f1419 50%, #0a0d12 100%);
@@ -73,7 +71,7 @@
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #ff5a2a;
+  color: #b8380a;
   margin: 0 0 clamp(0.75rem, 1.5vw, 1rem);
 }
 
@@ -87,7 +85,7 @@
 }
 
 .contact-section__title-dot {
-  color: #ff5a2a;
+  color: #b8380a;
 }
 
 .contact-section__subtitle {
@@ -119,7 +117,7 @@
 .contact-section__block-title {
   font-size: clamp(0.8rem, 1vw, 0.9rem);
   font-weight: 600;
-  color: #ff5a2a;
+  color: #b8380a;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 0 0 clamp(0.5rem, 1vw, 0.65rem);
@@ -136,7 +134,7 @@
 }
 
 .contact-section__block-link:hover {
-  color: #ff5a2a;
+  color: #b8380a;
 }
 
 /* Mini CTA */

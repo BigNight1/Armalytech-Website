@@ -56,6 +56,9 @@ const Hero = () => {
               <img
                 src="/iphone.webp"
                 alt="iPhone"
+                width={280}
+                height={420}
+                fetchpriority="high"
                 className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-2xl"
               />
             </div>
@@ -77,7 +80,7 @@ const Hero = () => {
                   style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.35)" }}
                 >
                   <img
-                    src="/Tecnico.jpeg"
+                    src="/Tecnico.webp"
                     alt="Técnico experto"
                     className="w-full h-full object-cover"
                   />

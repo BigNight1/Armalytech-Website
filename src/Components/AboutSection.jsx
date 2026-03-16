@@ -12,6 +12,8 @@ const AboutSection = () => {
               <img
                 src="/aboutus.webp"
                 alt="Celular reparado por ArmalyTech"
+                width={632}
+                height={421}
                 className="about-section__image"
               />
             </div>

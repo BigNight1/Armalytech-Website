@@ -59,7 +59,7 @@ const Footer = () => {
         <div className="footer__grid">
           <div className="footer__col footer__col--brand">
             <a href="/" className="footer__logo">
-              <img src="/logoarmalytech.png" alt="ArmalyTech" className="h-10 rounded-full" />
+              <img src="/logoarmalytech.webp" alt="ArmalyTech" className="h-10 rounded-full" />
             </a>
             <p className="footer__desc">
               Reparación de celulares y equipos tecnológicos en Lima. Calidad y garantía en cada servicio.

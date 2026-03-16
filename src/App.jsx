@@ -11,14 +11,16 @@ function App() {
   return (
     <div>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/precios" element={<PricingPage />} />
-        <Route path="/sobre-nosotros" element={<SobreNosotrosPage />} />
-        <Route path="/contactanos" element={<ContactPage />} />
-        <Route path="/redes" element={<Redes />} />
-        <Route path="*" element={<PageError />} />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/precios" element={<PricingPage />} />
+          <Route path="/sobre-nosotros" element={<SobreNosotrosPage />} />
+          <Route path="/contactanos" element={<ContactPage />} />
+          <Route path="/redes" element={<Redes />} />
+          <Route path="*" element={<PageError />} />
+        </Routes>
+      </main>
     </div>
   );
 }

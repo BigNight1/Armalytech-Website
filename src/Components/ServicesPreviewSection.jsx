@@ -137,14 +137,14 @@ const ServicesPreviewSection = () => {
             ))}
           </div>
 
-          <div className="flex justify-center gap-1.5 mt-6">
+          <div className="flex justify-center gap-2 mt-6">
             {SERVICIOS.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setInicio(Math.min(i, maxInicio))}
                 aria-label={`Ir a servicio ${i + 1}`}
-                className={`w-2 h-2 rounded-full transition-colors ${i >= inicio && i < inicio + visible ? "bg-[#ff5a2a]" : "bg-gray-300"}`}
+                className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-full transition-colors ${i >= inicio && i < inicio + visible ? "bg-[#ff5a2a]" : "bg-gray-300"}`}
               />
             ))}
           </div>

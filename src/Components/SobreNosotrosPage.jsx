@@ -27,7 +27,7 @@ const TEAM_MEMBERS = [
   {
     name: "Martin Armas",
     role: "Técnicos especializados en reparación de celulares y equipos tecnológicos.",
-    avatar: "/Tecnico.jpeg",
+    avatar: "/Tecnico.webp",
   },
 ];
 

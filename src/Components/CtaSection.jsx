@@ -41,6 +41,8 @@ const CtaSection = () => {
           <img
             src="/cta.webp"
             alt=""
+            width={1920}
+            height={440}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/60 z-[1]" />

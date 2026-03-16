@@ -136,6 +136,8 @@ const FaqSection = () => {
             <img
               src="/faq.webp"
               alt="Técnico ArmalyTech realizando reparación"
+              width={735}
+              height={490}
               className="faq-section__image"
             />
           </div>

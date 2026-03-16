@@ -58,6 +58,8 @@ const StepsSection = () => {
             <img
               src="/howwework.webp"
               alt="Como trabajamos"
+              width={735}
+              height={490}
               className="steps-section__image"
             />
           </div>

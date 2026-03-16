@@ -83,7 +83,13 @@ const ContactSection = () => {
           </div>
 
           <div className="contact-section__cta-mini">
-            <img src="/contacto/celrevive.svg" alt="Celular revivido" className="w-10" />
+            <img
+              src="/contacto/celrevive.svg"
+              alt="Celular revivido"
+              width={40}
+              height={40}
+              className="w-10"
+            />
             <div>
               <p className="contact-section__cta-mini-title">¿Quieres revivir tu equipo?</p>
               <p className="contact-section__cta-mini-desc">Completa el formulario de la derecha.</p>
