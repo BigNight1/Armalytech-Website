@@ -12,6 +12,8 @@ const Redes = () => {
               <img
                 src="/logoarmaly.webp"
                 alt="Logo de armalytech"
+                width={120}
+                height={40}
                 className="redes-logo"
               />
             </a>

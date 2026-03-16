@@ -10,6 +10,8 @@ const PageError = () => {
       <img
         src="/error 404.webp"
         alt="Error 404"
+        width={384}
+        height={384}
         className="w-64 md:w-80 lg:w-96 mb-6"
       />
       {/* Error Message */}

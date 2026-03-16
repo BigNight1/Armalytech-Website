@@ -117,7 +117,7 @@
   align-items: center;
   margin-top: clamp(0.5rem, 1vw, 0.75rem);
   padding: clamp(0.75rem, 1.2vw, 0.9rem) clamp(1.5rem, 2vw, 1.75rem);
-  background: #ff5a2a;
+  background: #b8380a;
   color: #fff;
   font-size: clamp(0.95rem, 1.1vw, 1rem);
   font-weight: 600;
@@ -127,7 +127,7 @@
 }
 
 .about-section__cta:hover {
-  background: #e54e1f;
+  background: #9a2f09;
 }
 
 .about-section__cta-arrow {

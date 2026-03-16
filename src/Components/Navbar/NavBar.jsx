@@ -8,8 +8,8 @@ import "./navbar.css";
 
 const PHONE_NUMBER = "+51 924548268";
 const PHONE_LINK = "tel:+51924548268";
-const EMAIL = "contacto@armalytech.com";
-const EMAIL_LINK = "mailto:contacto@armalytech.com";
+const EMAIL = "armalycell@gmail.com";
+const EMAIL_LINK = "mailto:armalycell@gmail.com";
 
 const SOCIAL_LINKS = [
   { name: "Instagram", img: "/redes_sociales/instagram.svg", href: "https://instagram.com/armalytech" },

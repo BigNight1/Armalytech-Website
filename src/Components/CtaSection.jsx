@@ -69,7 +69,7 @@ const CtaSection = () => {
               </p>
               <ScrollToLink
                 to="contacto"
-                className="inline-block shrink-0 px-6 md:px-8 py-3 md:py-3.5 bg-[#ff5a2a] text-white font-semibold rounded-lg hover:bg-[#e54e1f] transition-colors cursor-pointer text-sm md:text-base text-center"
+                className="inline-block shrink-0 px-6 md:px-8 py-3 md:py-3.5 bg-[#b8380a] text-white font-semibold rounded-lg hover:bg-[#9a2f09] transition-colors cursor-pointer text-sm md:text-base text-center"
               >
                 Contáctanos
               </ScrollToLink>
@@ -91,7 +91,7 @@ const CtaSection = () => {
                 <h3 className="text-gray-900 font-bold text-sm md:text-lg mb-1 pb-1">
                   {card.title}
                 </h3>
-                <div className="w-1/4 h-0.5 bg-[#ff5a2a] rounded mb-3 " aria-hidden="true" />
+                <div className="w-1/4 h-0.5 bg-[#b8380a] rounded mb-3 " aria-hidden="true" />
                 <p className="text-gray-600 text-xs md:text-sm leading-relaxed ">
                   {card.description}
                 </p>
@@ -104,7 +104,7 @@ const CtaSection = () => {
       {/* Barra CTA inferior (blanco): padding-top generoso para dejar espacio a las tarjetas flotantes */}
       <section className="bg-white pt-10 md:pt-36 pb-10 md:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-[#ff5a2a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3">
+          <p className="text-[#b8380a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3">
             LLÁMANOS
           </p>
           <h2 className="text-gray-900 text-2xl md:text-3xl font-semibold mb-4">
@@ -114,7 +114,7 @@ const CtaSection = () => {
             Agenda tu reparación hoy:{" "}
             <a
               href={PHONE_LINK}
-              className="text-[#ff5a2a] font-semibold underline underline-offset-2 hover:text-[#e54e1f] transition-colors"
+              className="text-[#b8380a] font-semibold underline underline-offset-2 hover:text-[#9a2f09] transition-colors"
             >
               {PHONE}
             </a>

@@ -25,7 +25,7 @@ const RepairSection = () => {
           </a>
         </div>
         <div className="lg:w-[400px] mt-8 lg:mt-0">
-          <img src="/iphone-xRoto.webp" alt="iPhone roto" className="w-full h-auto rounded-lg shadow-md" />
+          <img src="/iphone-xRoto.webp" alt="iPhone roto" width={400} height={300} className="w-full h-auto rounded-lg shadow-md" />
         </div>
       </div>
     </section>

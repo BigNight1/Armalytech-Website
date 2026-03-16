@@ -254,7 +254,7 @@
   font-weight: 600;
   font-family: inherit;
   color: #fff;
-  background: #ff5a2a;
+  background: #b8380a;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -263,7 +263,7 @@
 }
 
 .contact-section__submit:hover {
-  background: #e54e1f;
+  background: #9a2f09;
 }
 
 .contact-section__submit:disabled {

@@ -82,6 +82,8 @@ const Hero = () => {
                   <img
                     src="/Tecnico.webp"
                     alt="Técnico experto"
+                    width={88}
+                    height={88}
                     className="w-full h-full object-cover"
                   />
                 </div>

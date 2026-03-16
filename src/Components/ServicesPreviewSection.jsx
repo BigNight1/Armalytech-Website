@@ -28,7 +28,7 @@ const SERVICIOS = [
   },
   {
     id: 4,
-    slug: "danio-agua",
+    slug: "daño-agua",
     title: "Daño por agua",
     description: "Rescatamos tu equipo de la humedad con limpieza y reparación profesional.",
     image: "/precio/Restauracióndañoagua.webp",
@@ -67,11 +67,11 @@ const ServicesPreviewSection = () => {
   return (
     <section className="bg-white py-16 md:py-24 px-4" id="services">
       <div className="max-w-[1160px] mx-auto">
-        <p className="text-[#ff5a2a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3">
+        <p className="text-[#b8380a] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-3">
           Servicios
         </p>
         <h2 className="text-gray-900 text-2xl md:text-4xl lg:text-[2.5rem] font-semibold leading-tight mb-3">
-          Reparamos celulares, eso es todo<span className="text-[#ff5a2a]">.</span>
+          Reparamos celulares, eso es todo<span className="text-[#b8380a]">.</span>
         </h2>
         <p className="text-gray-600 text-lg mb-14 md:mb-12">
           Conoce más sobre nuestros servicios.
@@ -84,7 +84,7 @@ const ServicesPreviewSection = () => {
             onClick={irIzquierda}
             disabled={!puedeIrIzquierda}
             aria-label="Ver servicios anteriores"
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 md:-translate-x-8 z-10 w-9 h-9 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-[#ff5a2a] hover:text-[#ff5a2a] disabled:opacity-40 disabled:pointer-events-none transition-all"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 md:-translate-x-8 z-10 w-9 h-9 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-[#b8380a] hover:text-[#b8380a] disabled:opacity-40 disabled:pointer-events-none transition-all"
           >
             <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -97,7 +97,7 @@ const ServicesPreviewSection = () => {
             onClick={irDerecha}
             disabled={!puedeIrDerecha}
             aria-label="Ver más servicios"
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 md:translate-x-8 z-10 w-9 h-9 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-[#ff5a2a] hover:text-[#ff5a2a] disabled:opacity-40 disabled:pointer-events-none transition-all"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 md:translate-x-8 z-10 w-9 h-9 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-[#b8380a] hover:text-[#b8380a] disabled:opacity-40 disabled:pointer-events-none transition-all"
           >
             <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -111,6 +111,8 @@ const ServicesPreviewSection = () => {
                   <img
                     src={card.image}
                     alt=""
+                    width={400}
+                    height={225}
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.src = "https://placehold.co/400x225/f3f4f6/9ca3af?text=Servicio"; }}
                   />
@@ -123,12 +125,12 @@ const ServicesPreviewSection = () => {
                     {card.description}
                   </p>
                   <p className="text-gray-700 text-sm font-medium mb-4">
-                    Precio promedio: <span className="text-[#ff5a2a] font-semibold">S/ {card.precioPromedio}</span>
+                    Precio promedio: <span className="text-[#b8380a] font-semibold">S/ {card.precioPromedio}</span>
                   </p>
                   <Link
                     to="/precios"
                     state={{ scrollTo: card.slug }}
-                    className="inline-block w-full text-center px-5 py-3 bg-[#ff5a2a] text-white font-semibold rounded-lg hover:bg-[#e54e1f] transition-colors"
+                    className="inline-block w-full text-center px-5 py-3 bg-[#b8380a] text-white font-semibold rounded-lg hover:bg-[#9a2f09] transition-colors"
                   >
                     Ver precios
                   </Link>
@@ -144,7 +146,7 @@ const ServicesPreviewSection = () => {
                 type="button"
                 onClick={() => setInicio(Math.min(i, maxInicio))}
                 aria-label={`Ir a servicio ${i + 1}`}
-                className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-full transition-colors ${i >= inicio && i < inicio + visible ? "bg-[#ff5a2a]" : "bg-gray-300"}`}
+                className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-full transition-colors ${i >= inicio && i < inicio + visible ? "bg-[#b8380a]" : "bg-gray-300"}`}
               />
             ))}
           </div>

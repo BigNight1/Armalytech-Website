@@ -125,6 +125,8 @@ const SobreNosotrosPage = () => {
               <img
                 src="/aboutus.webp"
                 alt="ArmalyTech reparación"
+                width={632}
+                height={421}
                 className="sn-about__img-small"
               />
               
@@ -138,6 +140,8 @@ const SobreNosotrosPage = () => {
               <img
                 src="/howwework.webp"
                 alt="Técnico ArmalyTech"
+                width={735}
+                height={490}
                 className="sn-about__right-img"
               />
             </div>
@@ -192,6 +196,8 @@ const SobreNosotrosPage = () => {
                   <img
                     src={member.avatar}
                     alt={member.name}
+                    width={80}
+                    height={80}
                     className="sn-team__avatar"
                   />
                   <p className="sn-team__name">{member.name}</p>
@@ -238,7 +244,7 @@ const SobreNosotrosPage = () => {
       {/* 4) MISSION & VISION — split 50/50 */}
       <section className="sn-mission py-0">
         <div className="sn-mission__img-wrap">
-          <img src="/cta.webp" alt="ArmalyTech" className="sn-mission__img" />
+          <img src="/cta.webp" alt="ArmalyTech" width={1920} height={440} className="sn-mission__img" />
         </div>
         <div className="sn-mission__content">
           <div className="sn-mission__content-inner">

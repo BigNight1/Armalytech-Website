@@ -6,7 +6,7 @@ const PricingBlock = ({ id, title, image, items, imageLeft }) => {
     <section id={id} className="pricing-block">
       <div className={`pricing-block__inner ${imageLeft ? "pricing-block__inner--img-left" : "pricing-block__inner--img-right"}`}>
         <div className="pricing-block__img-wrap">
-          <img src={image} alt={title} className="pricing-block__img" />
+          <img src={image} alt={title} width={400} height={300} className="pricing-block__img" />
         </div>
         <div className="pricing-block__content">
           <h2 className="pricing-block__title">{title}</h2>
