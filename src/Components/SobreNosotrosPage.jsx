@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from 'react-helmet-async';
 import { Link } from "react-router-dom";
 import Navbar from "./Navbar/NavBar.jsx";
 import Footer from "./Footer.jsx";
@@ -83,6 +84,85 @@ const SobreNosotrosPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Sobre Nosotros | ArmalyTech — Técnicos en Reparación de Celulares Lima</title>
+        <meta name="description" content="Conoce al equipo de ArmalyTech. Técnicos especializados en reparación de celulares en Lima con años de experiencia, diagnóstico gratis y garantía en todos los servicios." />
+        <link rel="canonical" href="https://www.armalytech.com/sobre-nosotros" />
+        <meta property="og:title" content="Sobre Nosotros | ArmalyTech Lima" />
+        <meta property="og:description" content="Técnicos especializados en reparación de celulares en Lima. Conoce nuestra misión, proceso y garantía de calidad." />
+        <meta property="og:url" content="https://www.armalytech.com/sobre-nosotros" />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Ofrecen servicio de reparación por envío para clientes fuera de Lima?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Podemos coordinar reparaciones por envío para clientes fuera de Lima. Escríbenos para indicarte el proceso y las recomendaciones necesarias."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Cuánto cuesta una reparación de celular?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "El costo depende del tipo de falla y del modelo del equipo. Siempre brindamos una cotización clara antes de comenzar."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Puedo hacer seguimiento del estado de mi reparación?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Te mantenemos informado durante el proceso y puedes escribirnos para recibir actualizaciones."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Ofrecen soporte después de la reparación?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sí. Contamos con garantía y soporte post-servicio en caso de cualquier inconveniente."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Qué hago si no quedo satisfecho con la reparación?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Tu satisfacción es nuestra prioridad. Contáctanos y revisaremos tu caso para ofrecerte una solución adecuada."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Es seguro dejar mis datos en el equipo?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Protegemos la privacidad de tu información, aunque recomendamos hacer un respaldo antes de la reparación."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Qué métodos de pago aceptan?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Aceptamos efectivo, transferencias y otros métodos digitales disponibles."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Realizan reparaciones el mismo día?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Dependiendo del tipo de falla y disponibilidad, podemos ofrecer reparaciones el mismo día."
+              }
+            }
+          ]
+        })}</script>
+      </Helmet>
       <Navbar />
 
       {/* Hero */}

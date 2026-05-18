@@ -20,5 +20,30 @@
     <loc>https://www.armalytech.com/redes</loc>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://www.armalytech.com/servicios/reparacion-de-pantalla</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.armalytech.com/servicios/cambio-de-bateria</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.armalytech.com/servicios/reparacion-puerto-de-carga</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.armalytech.com/servicios/restauracion-dano-de-agua</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.armalytech.com/servicios/problemas-de-software</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>
 

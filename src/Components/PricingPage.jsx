@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Helmet } from 'react-helmet-async';
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import PricingBlock from "./PricingBlock.jsx";
@@ -26,6 +27,15 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Precios de Reparación de Celulares en Lima | ArmalyTech</title>
+        <meta name="description" content="Consulta nuestros precios de reparación de celulares en Lima: cambio de pantalla desde S/ 69, batería desde S/ 97, puerto de carga desde S/ 38. Cotización gratuita." />
+        <link rel="canonical" href="https://www.armalytech.com/precios" />
+        <meta property="og:title" content="Precios de Reparación de Celulares | ArmalyTech Lima" />
+        <meta property="og:description" content="Precios claros y sin sorpresas. Cambio de pantalla, batería, puerto de carga y más. Diagnóstico gratis en San Borja, Lima." />
+        <meta property="og:url" content="https://www.armalytech.com/precios" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
       {/* Bloque separado del header: hero de precios con fondo oscuro (estilo TechPro) */}
       <div className="pricing-hero-section">
@@ -52,16 +62,26 @@ const PricingPage = () => {
 
       {/* Listado de categorías — zig-zag: par imagen izq, impar contenido izq */}
       <main>
-        {pricingCategories.map((category, index) => (
-          <PricingBlock
-            key={category.id}
-            id={category.id}
-            title={category.title}
-            image={category.image}
-            items={category.items}
-            imageLeft={index % 2 === 0}
-          />
-        ))}
+        {pricingCategories.map((category, index) => {
+          const serviceLinks = {
+            "reparacion-pantalla": "/servicios/reparacion-de-pantalla",
+            "cambio-bateria": "/servicios/cambio-de-bateria",
+            "puerto-carga": "/servicios/reparacion-puerto-de-carga",
+            "danio-agua": "/servicios/restauracion-dano-de-agua",
+            "software": "/servicios/problemas-de-software"
+          };
+          return (
+            <PricingBlock
+              key={category.id}
+              id={category.id}
+              title={category.title}
+              image={category.image}
+              items={category.items}
+              imageLeft={index % 2 === 0}
+              link={serviceLinks[category.id]}
+            />
+          );
+        })}
 
         <AdditionalServicesSection />
       </main>

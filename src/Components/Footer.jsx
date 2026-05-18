@@ -18,10 +18,10 @@ const FOOTER_LINKS = {
     { label: "Redes", href: "/redes" },
   ],
   services: [
-    { label: "Cambio de pantalla", href: "/precios", scrollTo: "reparacion-pantalla" },
-    { label: "Cambio de batería", href: "/precios", scrollTo: "cambio-bateria" },
-    { label: "Puerto de carga", href: "/precios", scrollTo: "puerto-carga" },
-    { label: "Daño por agua", href: "/precios", scrollTo: "danio-agua" },
+    { label: "Cambio de pantalla", href: "/servicios/reparacion-de-pantalla" },
+    { label: "Cambio de batería", href: "/servicios/cambio-de-bateria" },
+    { label: "Puerto de carga", href: "/servicios/reparacion-puerto-de-carga" },
+    { label: "Daño por agua", href: "/servicios/restauracion-dano-de-agua" },
   ],
   support: [
     { label: "Garantía", href: "/contactanos" },

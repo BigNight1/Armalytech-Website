@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from 'react-helmet-async';
 import { Link } from "react-router-dom";
 import Navbar from "../Navbar/NavBar.jsx";
 import Footer from "../Footer.jsx";
@@ -33,6 +34,15 @@ const CUSTOMER_ITEMS = [
 const ContactPage = () => {
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>Contáctanos | ArmalyTech — Reparación de Celulares en San Borja, Lima</title>
+        <meta name="description" content="Contáctanos para reparar tu celular en Lima. Estamos en Av. San Luis 1859, San Borja. Atención Lun–Sáb 10AM–8PM. Llama al +51 924 548 268 o escríbenos por WhatsApp." />
+        <link rel="canonical" href="https://www.armalytech.com/contactanos" />
+        <meta property="og:title" content="Contacto | ArmalyTech San Borja Lima" />
+        <meta property="og:description" content="Visítanos en Av. San Luis 1859, San Borja. Atención Lun–Sáb 10AM–8PM. Llama o escríbenos por WhatsApp." />
+        <meta property="og:url" content="https://www.armalytech.com/contactanos" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
 
       {/* Hero — mismo estilo que /precios */}
