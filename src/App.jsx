@@ -11,6 +11,16 @@ import CambioBateriaPage from "./Components/ServicePage/CambioBateriaPage.jsx";
 import ReparacionPuertoCargaPage from "./Components/ServicePage/ReparacionPuertoCargaPage.jsx";
 import RestauracionDanoAguaPage from "./Components/ServicePage/RestauracionDanoAguaPage.jsx";
 import ProblemasoftwarePage from "./Components/ServicePage/ProblemasoftwarePage.jsx";
+import { WhatsAppWidget } from 'react-whatsapp-widget';
+import 'react-whatsapp-widget/dist/index.css';
+
+const CompanyIcon = () => (
+  <img 
+    src="/ArmalyTechlogopeq.webp" 
+    alt="ArmalyTech Logo" 
+    className="w-full h-full object-contain"
+  />
+);
 
 function App() {
   return (
@@ -31,6 +41,18 @@ function App() {
           <Route path="*" element={<PageError />} />
         </Routes>
       </main>
+
+      <div className="whatsapp-widget-wrapper fixed bottom-0 right-0 z-[99999]">
+        <WhatsAppWidget 
+          phoneNumber="51924548268" 
+          companyName="ArmalyTech"
+          message="¡Hola! ¿En qué podemos ayudarte?"
+          replyTimeText="Normalmente responde en unos minutos"
+          inputPlaceHolder="Escribe un mensaje"
+          sendButtonText="Enviar"
+          CompanyIcon={CompanyIcon}
+        />
+      </div>
     </div>
   );
 }

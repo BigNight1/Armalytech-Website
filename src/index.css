@@ -85,3 +85,12 @@ section.hero-section {
   background-color: #ffffff !important;
 }
 
+/* Hacer que el logo ocupe todo el espacio del círculo de la cabecera */
+.whatsapp-widget-wrapper ._3jDIS {
+  padding: 0 !important;
+  overflow: hidden;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0;
+}
+
+
