@@ -6,6 +6,40 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
 
+async function sendTelegramMessage(data) {
+  const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+  if (!TELEGRAM_TOKEN || !CHAT_ID) {
+    console.error("Faltan variables de entorno para Telegram");
+    return;
+  }
+
+  const { name, phone, email, message } = data;
+  
+  const text = 
+    `🔔 <b>NUEVO CONTACTO WEB</b> 🔔\n\n` +
+    `👤 <b>Nombre:</b> ${escapeHtml(name)}\n` +
+    `📱 <b>Teléfono:</b> ${escapeHtml(phone)}\n` +
+    `📧 <b>Email:</b> ${escapeHtml(email)}\n\n` +
+    `💬 <b>Mensaje:</b>\n${message ? escapeHtml(message) : "<i>(Sin mensaje)</i>"}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: "HTML"
+      })
+    });
+  } catch (error) {
+    console.error("Error enviando mensaje a Telegram:", error);
+  }
+}
+
+
 export default async function handler(req, res) {
   // CORS: mismo dominio en Vercel, pero por si acaso
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -53,13 +87,16 @@ export default async function handler(req, res) {
       <p><small>Enviado desde ArmalyTech - Formulario de contacto</small></p>
     `;
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || `"ArmalyTech Contacto" <${process.env.SMTP_USER}>`,
-      to: toEmail,
-      subject: `[Contacto] ${escapeHtml(name)} - ${escapeHtml(email)}`,
-      html,
-      replyTo: email,
-    });
+    await Promise.allSettled([
+      transporter.sendMail({
+        from: process.env.SMTP_FROM || `"ArmalyTech Contacto" <${process.env.SMTP_USER}>`,
+        to: toEmail,
+        subject: `[Contacto] ${escapeHtml(name)} - ${escapeHtml(email)}`,
+        html,
+        replyTo: email,
+      }),
+      sendTelegramMessage({ name, phone, email, message })
+    ]);
 
     return res.status(200).json({ ok: true, message: "Mensaje enviado correctamente." });
   } catch (err) {
