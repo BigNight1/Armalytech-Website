@@ -57,8 +57,8 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - [x] T4 — Cash-closings module per contract + summary + e2e tests. Route: delegated. Commit `08c22d4`.
 - [x] T5 — SQLite → Mongo migration script (idempotent, `--dry-run` counts). Route: delegated. Commit `9e8d359`.
 - [x] T6 — Frontend panel shell: brand tokens, `/admin/login`, protected layout, left sidebar (Inventario, Historial), Lima clock header, API client, dev proxy + Vercel rewrites. Route: delegated. Commit `9dedd7a`.
-- [ ] T7 — Frontend Inventario section (port of the desktop screens). Route: delegated.
-- [ ] T8 — Frontend Historial spreadsheet grid + summary (port of CierreDeDia*). Route: delegated.
+- [x] T7 — Frontend Inventario section (port of the desktop screens). Route: delegated (parallel worktree). Commit `a1f287a`, merged `5ab6c40`.
+- [x] T8 — Frontend Historial spreadsheet grid + summary (port of CierreDeDia*). Route: delegated (parallel worktree). Commit `40179d4`, merged `8ff30ea`.
 - [ ] T9 — Docs: ADR 0019, TECH-DESIGN touch-up, backend README with env vars. Route: delegated.
 
 ## Acceptance criteria
@@ -80,6 +80,11 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - T6: `9dedd7a` — brand tokens (`tailwind.config.js`: `brand.orange/navy/ink`); `src/admin/shared/api/httpClient.js` (`credentials: 'include'`, JSON envelope unwrap, `ApiError`, `onUnauthorized`); `src/admin/shared/lib/{time,money}.js`; `src/admin/shared/ui/*` presentational kit + `ToastProvider`/`useToast`; `src/admin/shared/layout/{AdminLayout,Sidebar,LimaClock}.jsx` (collapsible mobile sidebar, live Lima clock); `src/admin/auth/*` (`AuthContext`/`useAuth`, `RequireAuth` guard, `LoginPage`/`LoginForm`); placeholder `src/admin/{inventory/InventoryPage,cash-closings/CashClosingsPage}.jsx`; `src/admin/AdminRoutes.jsx` registering `/admin/login` and the protected `/admin` layout (children `inventario`/`historial`, index redirects to `inventario`), lazy-loaded from `App.jsx` (own bundle chunk, confirmed via `pnpm build`); `App.jsx` hides the public WhatsApp widget on `/admin/*`; `vite.config.js` dev proxy scoped to `^/api/(health|auth|inventory|cash-closings)` → `localhost:3000` (existing `/api/contact` untouched); `frontend/vercel.json` rewrites for the same prefixes to a `REPLACE_WITH_BACKEND_URL` placeholder host (documented in `frontend/README.md`, since JSON can't hold comments/env interpolation); `frontend/src/admin/README.md` with conventions for the T7/T8 feature agents.
 - Verification (`frontend/`): `pnpm install` ok; `pnpm build` ok (admin bundle splits into its own lazy chunk, ~9.7 kB gzip 3.6 kB, separate from the public bundle); `pnpm lint` — pre-existing failure on the base commit (`eslint.config.js` uses `pluginReact.configs.flat.recommended`, which is `undefined` for the installed `eslint-plugin-react@7.34.1` + `eslint@8.57.0` combo — reproduced identically via `git stash` before any of my changes), unrelated to T6; no lint tool could run to check my files against project rules because of this pre-existing breakage.
 - Backend not started for this task (not required by the Verification section); not verified end-to-end against a live backend.
+
+- Fix: `06fc7b4` — optional `DNS_SERVERS` override; the local Node resolver (127.0.0.1) refused SRV lookups (`querySrv ECONNREFUSED`). Verified `/api/health` → db connected against Atlas.
+- T7: Excel import skipped (needs a backend bulk endpoint). Search results lack brandId (resolved by name).
+- T8: deleting a row clears that rowIndex (no shifting). Paste-matrix/undo from the desktop app not ported.
+- Integration: `pnpm build` ok after merging T7+T8 (admin chunk 49.7 kB).
 
 ## Next step
 T7 (Inventario UI) and T8 (Historial spreadsheet UI) can now build on `src/admin/inventory/` and `src/admin/cash-closings/` respectively, importing only from `src/admin/shared/*` and `src/admin/auth/useAuth.js` per `src/admin/README.md`. T9 (docs: ADR 0019, TECH-DESIGN, backend README env vars) still pending. Open issue: the repo-wide ESLint config is broken (see above) — worth a separate fix so `pnpm lint` becomes usable again.
