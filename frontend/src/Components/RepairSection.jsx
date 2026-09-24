@@ -1,4 +1,3 @@
-import React from 'react';
 
 const RepairSection = () => {
     const whatsappNumber = "+51924548268";

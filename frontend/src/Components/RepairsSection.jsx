@@ -1,4 +1,3 @@
-import React from "react";
 import "./repairs-section.css";
 
 const SERVICES = [

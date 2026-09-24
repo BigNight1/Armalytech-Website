@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./contact-section.css";
 
 // Placeholders: reemplazar con datos reales

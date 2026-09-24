@@ -1,4 +1,3 @@
-import React from "react";
 import ScrollToLink from "../ScrollToLink.jsx";
 
 const NavBarItem = ({ name, to, current, dark }) => {

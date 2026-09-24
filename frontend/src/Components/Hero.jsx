@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Element } from "react-scroll";
 import ScrollToLink from "./ScrollToLink.jsx";
@@ -58,7 +57,7 @@ const Hero = () => {
                 alt="iPhone"
                 width={280}
                 height={420}
-                fetchpriority="high"
+                fetchPriority="high"
                 className="w-[min(280px,85vw)] h-auto object-contain drop-shadow-2xl"
               />
             </div>

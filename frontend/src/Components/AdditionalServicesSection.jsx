@@ -1,4 +1,3 @@
-import React from "react";
 import { additionalServices } from "../data/pricingData.js";
 import "./additional-services-section.css";
 

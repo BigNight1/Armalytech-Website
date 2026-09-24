@@ -1,4 +1,3 @@
-import React from "react";
 import ScrollToLink from "./ScrollToLink.jsx";
 
 const PHONE = "+51 924 548 268";

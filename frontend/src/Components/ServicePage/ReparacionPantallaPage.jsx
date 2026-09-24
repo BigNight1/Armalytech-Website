@@ -1,4 +1,3 @@
-import React from 'react'
 import ServicePage from './ServicePage.jsx'
 
 const seo = {
