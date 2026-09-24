@@ -1,21 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cashClosingsApi } from '../api/cashClosingsApi.js';
+import { cashClosingsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
 import { appendRows, buildGridRows, emptyRow, toApiPayload } from '../lib/grid.js';
 
 /**
- * Owns the editable rows for one date: loads them, tracks per-row
- * save status, and upserts/deletes through `cashClosingsApi`.
+ * Owns the editable rows for one date (T14: TanStack Query for the fetch;
+ * local state for in-progress edits, since a spreadsheet cell mid-edit isn't
+ * cache data). Tracks per-row save status and upserts/deletes through
+ * `cashClosingsApi`.
  *
  * Save happens on cell blur (ADR 0010: non-blocking, per-row). On failure the
- * row reverts to its last known-good value and a toast reports the error.
+ * row reverts to its last known-good value and a toast reports the error. A
+ * successful save/delete invalidates this date's rows plus every cached
+ * summary range, so the resumen panel (T14: only the visible tab fetches)
+ * stays in sync without a full page reload.
  */
 export function useCashClosingsGrid(selectedDate) {
   const { notify } = useToast();
-  const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const rowsKey = cashClosingsKeys.rows(selectedDate);
+
+  const rowsQuery = useQuery({
+    queryKey: rowsKey,
+    queryFn: () => cashClosingsApi.listRows(selectedDate, selectedDate),
+  });
+
+  const [rows, setRows] = useState(() => buildGridRows([]));
   const [rowStatus, setRowStatus] = useState({});
-  const [savedVersion, setSavedVersion] = useState(0);
 
   const rowsRef = useRef(rows);
   const lastSavedRef = useRef(new Map());
@@ -25,31 +38,30 @@ export function useCashClosingsGrid(selectedDate) {
   }, [rows]);
 
   useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
+    if (rowsQuery.isError) {
+      notify(`No se pudo cargar el historial del día: ${rowsQuery.error.message}`, { type: 'error' });
+    }
+    const gridRows = buildGridRows(rowsQuery.data ?? (rowsQuery.isError ? [] : undefined));
+    if (rowsQuery.data !== undefined || rowsQuery.isError) {
+      setRows(gridRows);
+      lastSavedRef.current = new Map(gridRows.map((row) => [row.rowIndex, row]));
+      setRowStatus({});
+    }
+    // Only re-seed when the query for this date settles (success or error).
+  }, [rowsQuery.data, rowsQuery.isError, selectedDate]);
 
-    cashClosingsApi
-      .listRows(selectedDate, selectedDate)
-      .then((apiRows) => {
-        if (cancelled) return;
-        const gridRows = buildGridRows(apiRows);
-        setRows(gridRows);
-        lastSavedRef.current = new Map(gridRows.map((row) => [row.rowIndex, row]));
-        setRowStatus({});
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        notify(`No se pudo cargar el historial del día: ${error.message}`, { type: 'error' });
-        setRows(buildGridRows([]));
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
+  const invalidateAfterWrite = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: rowsKey });
+    queryClient.invalidateQueries({ queryKey: cashClosingsKeys.summaryAll() });
+  }, [queryClient, rowsKey]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDate, notify]);
+  const upsertMutation = useMutation({
+    mutationFn: ({ rowIndex, payload }) => cashClosingsApi.upsertRow(selectedDate, rowIndex, payload),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (rowIndex) => cashClosingsApi.deleteRow(selectedDate, rowIndex),
+  });
 
   const updateCell = useCallback((rowIndex, field, value) => {
     setRows((current) => current.map((row) => (row.rowIndex === rowIndex ? { ...row, [field]: value } : row)));
@@ -62,24 +74,29 @@ export function useCashClosingsGrid(selectedDate) {
 
       setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
 
-      cashClosingsApi
-        .upsertRow(selectedDate, rowIndex, toApiPayload(row))
-        .then(() => {
-          lastSavedRef.current.set(rowIndex, row);
-          setSavedVersion((v) => v + 1);
-          setRowStatus((current) => ({ ...current, [rowIndex]: 'saved' }));
-          setTimeout(() => {
-            setRowStatus((current) => (current[rowIndex] === 'saved' ? { ...current, [rowIndex]: 'idle' } : current));
-          }, 1500);
-        })
-        .catch((error) => {
-          const lastGood = lastSavedRef.current.get(rowIndex) ?? emptyRow(rowIndex);
-          setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? lastGood : r)));
-          setRowStatus((current) => ({ ...current, [rowIndex]: 'error' }));
-          notify(`No se pudo guardar la fila ${rowIndex + 1}: ${error.message}`, { type: 'error' });
-        });
+      upsertMutation.mutate(
+        { rowIndex, payload: toApiPayload(row) },
+        {
+          onSuccess: () => {
+            lastSavedRef.current.set(rowIndex, row);
+            invalidateAfterWrite();
+            setRowStatus((current) => ({ ...current, [rowIndex]: 'saved' }));
+            setTimeout(() => {
+              setRowStatus((current) =>
+                current[rowIndex] === 'saved' ? { ...current, [rowIndex]: 'idle' } : current,
+              );
+            }, 1500);
+          },
+          onError: (error) => {
+            const lastGood = lastSavedRef.current.get(rowIndex) ?? emptyRow(rowIndex);
+            setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? lastGood : r)));
+            setRowStatus((current) => ({ ...current, [rowIndex]: 'error' }));
+            notify(`No se pudo guardar la fila ${rowIndex + 1}: ${error.message}`, { type: 'error' });
+          },
+        },
+      );
     },
-    [selectedDate, notify],
+    [upsertMutation, invalidateAfterWrite, notify],
   );
 
   const addRows = useCallback(() => {
@@ -90,22 +107,30 @@ export function useCashClosingsGrid(selectedDate) {
     (rowIndex) => {
       setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
 
-      cashClosingsApi
-        .deleteRow(selectedDate, rowIndex)
-        .then(() => {
+      deleteMutation.mutate(rowIndex, {
+        onSuccess: () => {
           const cleared = emptyRow(rowIndex);
           lastSavedRef.current.set(rowIndex, cleared);
           setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
           setRowStatus((current) => ({ ...current, [rowIndex]: 'idle' }));
-          setSavedVersion((v) => v + 1);
-        })
-        .catch((error) => {
+          invalidateAfterWrite();
+        },
+        onError: (error) => {
           setRowStatus((current) => ({ ...current, [rowIndex]: 'error' }));
           notify(`No se pudo eliminar la fila ${rowIndex + 1}: ${error.message}`, { type: 'error' });
-        });
+        },
+      });
     },
-    [selectedDate, notify],
+    [deleteMutation, invalidateAfterWrite, notify],
   );
 
-  return { rows, isLoading, rowStatus, savedVersion, updateCell, saveRow, addRows, deleteRow };
+  return {
+    rows,
+    isLoading: rowsQuery.isLoading,
+    rowStatus,
+    updateCell,
+    saveRow,
+    addRows,
+    deleteRow,
+  };
 }

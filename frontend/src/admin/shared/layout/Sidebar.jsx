@@ -1,10 +1,31 @@
 import { NavLink } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../auth/useAuth.js';
+import { prefetchInventory } from '../../inventory/api/prefetch.js';
+import { prefetchCashClosings } from '../../cash-closings/api/prefetch.js';
+import { prefetchClients } from '../../clients/api/prefetch.js';
 
+// T14: on hover/focus, warm both the route's lazy chunk and its first query
+// so the click itself feels instant instead of showing a loading skeleton.
 const NAV_ITEMS = [
-  { to: '/admin/inventario', label: 'Inventario' },
-  { to: '/admin/historial', label: 'Historial' },
-  { to: '/admin/clientes', label: 'Clientes' },
+  {
+    to: '/admin/inventario',
+    label: 'Inventario',
+    prefetchData: prefetchInventory,
+    prefetchChunk: () => import('../../inventory/InventoryPage.jsx'),
+  },
+  {
+    to: '/admin/historial',
+    label: 'Historial',
+    prefetchData: prefetchCashClosings,
+    prefetchChunk: () => import('../../cash-closings/CashClosingsPage.jsx'),
+  },
+  {
+    to: '/admin/clientes',
+    label: 'Clientes',
+    prefetchData: prefetchClients,
+    prefetchChunk: () => import('../../clients/ClientsPage.jsx'),
+  },
 ];
 
 const linkClasses = ({ isActive }) =>
@@ -15,6 +36,12 @@ const linkClasses = ({ isActive }) =>
 /** Left sidebar: logo, section nav, and logout. `onNavigate` closes the mobile drawer. */
 export default function Sidebar({ onNavigate }) {
   const { logout } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = (item) => () => {
+    item.prefetchData(queryClient);
+    item.prefetchChunk();
+  };
 
   return (
     <div className="flex h-full w-full flex-col border-r border-slate-800 bg-brand-navy-dark px-4 py-6">
@@ -25,7 +52,14 @@ export default function Sidebar({ onNavigate }) {
 
       <nav className="flex flex-1 flex-col gap-1">
         {NAV_ITEMS.map((item) => (
-          <NavLink key={item.to} to={item.to} className={linkClasses} onClick={onNavigate}>
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={linkClasses}
+            onClick={onNavigate}
+            onMouseEnter={handlePrefetch(item)}
+            onFocus={handlePrefetch(item)}
+          >
             {item.label}
           </NavLink>
         ))}

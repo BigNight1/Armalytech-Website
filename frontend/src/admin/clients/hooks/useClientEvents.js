@@ -1,32 +1,21 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { clientsApi } from '../api/clientsApi.js';
+import { clientsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
 
-/** A single client's registro/visita/registro_rechazado history. */
+/** A single client's registro/visita/registro_rechazado history (T14: TanStack Query). */
 export function useClientEvents(clientId) {
-  const [events, setEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const { notify } = useToast();
 
-  const refetch = useCallback(async () => {
-    if (!clientId) {
-      setEvents([]);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const data = await clientsApi.getClientEvents(clientId);
-      setEvents(data);
-    } catch (err) {
-      notify(err.message ?? 'No se pudo cargar el historial', { type: 'error' });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clientId, notify]);
+  const query = useQuery({
+    queryKey: clientsKeys.events(clientId),
+    queryFn: () => clientsApi.getClientEvents(clientId),
+    enabled: Boolean(clientId),
+  });
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  if (query.error) {
+    notify(query.error.message ?? 'No se pudo cargar el historial', { type: 'error' });
+  }
 
-  return { events, isLoading, refetch };
+  return { events: query.data ?? [], isLoading: query.isLoading, refetch: query.refetch };
 }

@@ -1,4 +1,4 @@
-import { Button, EmptyState, Spinner } from '../../shared/ui/index.js';
+import { Button, EmptyState, Skeleton } from '../../shared/ui/index.js';
 
 /** Grid of model cards for the selected brand (desktop app's "models-grid"). */
 export default function ModelGrid({
@@ -23,8 +23,10 @@ export default function ModelGrid({
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-6">
-          <Spinner size="sm" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }, (_, i) => (
+            <Skeleton key={i} className="h-16" />
+          ))}
         </div>
       ) : models.length === 0 ? (
         <EmptyState title="Sin modelos" description="Agrega un modelo para esta marca." />

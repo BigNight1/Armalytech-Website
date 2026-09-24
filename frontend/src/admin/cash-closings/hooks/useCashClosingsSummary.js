@@ -1,53 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { cashClosingsApi } from '../api/cashClosingsApi.js';
+import { cashClosingsKeys } from '../api/queryKeys.js';
 import { getMonthRange, getWeekRange, formatMonthLabel, formatWeekLabel } from '../lib/dateRange.js';
 import { emptyTotals, summaryGroupToTotals } from '../lib/totals.js';
 
 /**
- * Fetches the week/month resumen totals via `GET /cash-closings/summary`
- * for the range containing `selectedDate`. Refetches when `refreshToken`
- * changes (bumped by the grid hook after a successful save/delete) so the
- * resumen stays in sync with edits without a full page reload.
+ * Fetches the resumen totals for exactly the tab currently visible in
+ * `SummaryPanel` (T14: previously this always fetched week AND month
+ * together, even while showing "Día"). `activeTab` is `'day' | 'week' |
+ * 'month'`; the "day" tab needs no request — its totals are computed live
+ * from the grid rows by the caller — so this hook simply returns the cached
+ * `emptyTotals()` shape and `isLoading: false` for it.
  */
-export function useCashClosingsSummary(selectedDate, refreshToken) {
-  const [weekTotals, setWeekTotals] = useState(emptyTotals());
-  const [monthTotals, setMonthTotals] = useState(emptyTotals());
-  const [isLoading, setIsLoading] = useState(true);
+export function useCashClosingsSummary(selectedDate, activeTab) {
+  const { start: weekStart, end: weekEnd } = useMemo(() => getWeekRange(selectedDate), [selectedDate]);
+  const { start: monthStart, end: monthEnd } = useMemo(() => getMonthRange(selectedDate), [selectedDate]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const { start: weekStart, end: weekEnd } = getWeekRange(selectedDate);
-    const { start: monthStart, end: monthEnd } = getMonthRange(selectedDate);
-    setIsLoading(true);
+  const range = activeTab === 'week' ? { from: weekStart, to: weekEnd } : { from: monthStart, to: monthEnd };
 
-    Promise.all([
-      cashClosingsApi.getSummary(weekStart, weekEnd, 'week'),
-      cashClosingsApi.getSummary(monthStart, monthEnd, 'month'),
-    ])
-      .then(([weekGroups, monthGroups]) => {
-        if (cancelled) return;
-        setWeekTotals(summaryGroupToTotals(weekGroups?.[0]));
-        setMonthTotals(summaryGroupToTotals(monthGroups?.[0]));
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setWeekTotals(emptyTotals());
-        setMonthTotals(emptyTotals());
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
+  const query = useQuery({
+    queryKey: cashClosingsKeys.summary(activeTab, range.from, range.to),
+    queryFn: () => cashClosingsApi.getSummary(range.from, range.to, activeTab),
+    enabled: activeTab === 'week' || activeTab === 'month',
+    placeholderData: (previous) => previous,
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDate, refreshToken]);
+  const totals = activeTab === 'day' ? emptyTotals() : summaryGroupToTotals(query.data?.[0]);
+  const label = activeTab === 'week' ? formatWeekLabel(selectedDate) : formatMonthLabel(selectedDate);
 
   return {
-    weekTotals,
-    monthTotals,
-    isLoading,
-    weekLabel: formatWeekLabel(selectedDate),
-    monthLabel: formatMonthLabel(selectedDate),
+    totals,
+    label,
+    isLoading: activeTab === 'day' ? false : query.isLoading,
   };
 }

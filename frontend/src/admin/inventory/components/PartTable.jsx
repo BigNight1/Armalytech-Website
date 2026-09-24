@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { EmptyState, Spinner } from '../../shared/ui/index.js';
+import { EmptyState, SkeletonRows } from '../../shared/ui/index.js';
 import { formatPEN } from '../../shared/lib/money.js';
 
 function EditableCell({ value, onCommit, type = 'text', align = 'left' }) {
@@ -58,9 +58,7 @@ export default function PartTable({
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-6">
-          <Spinner size="sm" />
-        </div>
+        <SkeletonRows rows={4} columns={5} />
       ) : parts.length === 0 ? (
         <EmptyState title="Sin repuestos" description='Haz clic en "+ Repuesto" para agregar uno.' />
       ) : (

@@ -1,60 +1,44 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { clientsApi } from '../api/clientsApi.js';
+import { clientsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
 
 const PAGE_SIZE = 20;
 
-/** Searchable, paginated, consent-filterable client list. */
+/** Searchable, paginated, consent-filterable client list (T14: TanStack Query). */
 export function useClients() {
   const [query, setQuery] = useState('');
   const [consent, setConsent] = useState('all'); // 'all' | 'approved' | 'declined'
   const [page, setPage] = useState(1);
-  const [items, setItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const { notify } = useToast();
+  const queryClient = useQueryClient();
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await clientsApi.listClients({
-        q: query,
-        page,
-        limit: PAGE_SIZE,
-        consent: consent === 'all' ? undefined : consent,
-      });
-      setItems(data.items);
-      setTotal(data.total);
-    } catch (err) {
-      notify(err.message ?? 'No se pudieron cargar los clientes', { type: 'error' });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [query, page, consent, notify]);
+  const params = { q: query, page, limit: PAGE_SIZE, consent: consent === 'all' ? undefined : consent };
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  const listQuery = useQuery({
+    queryKey: clientsKeys.list(params),
+    queryFn: () => clientsApi.listClients(params),
+    placeholderData: keepPreviousData,
+  });
 
-  const updateClient = useCallback(
-    async (id, changes) => {
-      try {
-        const updated = await clientsApi.updateClient(id, changes);
-        await refetch();
-        notify('Cliente actualizado', { type: 'success' });
-        return updated;
-      } catch (err) {
-        notify(err.message ?? 'No se pudo actualizar el cliente', { type: 'error' });
-        throw err;
-      }
+  if (listQuery.error) {
+    notify(listQuery.error.message ?? 'No se pudieron cargar los clientes', { type: 'error' });
+  }
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, changes }) => clientsApi.updateClient(id, changes),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: clientsKeys.all });
+      notify('Cliente actualizado', { type: 'success' });
     },
-    [refetch, notify],
-  );
+    onError: (err) => notify(err.message ?? 'No se pudo actualizar el cliente', { type: 'error' }),
+  });
 
   return {
-    items,
-    total,
-    isLoading,
+    items: listQuery.data?.items ?? [],
+    total: listQuery.data?.total ?? 0,
+    isLoading: listQuery.isLoading,
     query,
     setQuery: (value) => {
       setPage(1);
@@ -68,7 +52,7 @@ export function useClients() {
     page,
     setPage,
     pageSize: PAGE_SIZE,
-    refetch,
-    updateClient,
+    refetch: listQuery.refetch,
+    updateClient: (id, changes) => updateMutation.mutateAsync({ id, changes }),
   };
 }

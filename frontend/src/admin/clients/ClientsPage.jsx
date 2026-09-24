@@ -8,7 +8,8 @@ import ClientsEmptyState from './components/ClientsEmptyState.jsx';
 import ClientDetailModal from './components/ClientDetailModal.jsx';
 import ActivityTab from './components/ActivityTab.jsx';
 import StatCards from './components/StatCards.jsx';
-import { Input, Select, Spinner } from '../shared/ui/index.js';
+import { Input, Select, SkeletonTable } from '../shared/ui/index.js';
+import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
 
 const CONSENT_OPTIONS = [
   { value: 'all', label: 'Todos' },
@@ -27,6 +28,8 @@ export default function ClientsPage() {
   const stats = useClientStats();
 
   const hasClients = clientsState.items.length > 0;
+  const showClientsLoading = useDelayedFlag(clientsState.isLoading);
+  const showActivityLoading = useDelayedFlag(communityEvents.isLoading);
   const totalPages = Math.max(1, Math.ceil(clientsState.total / clientsState.pageSize));
 
   async function handleSaveClient(id, changes) {
@@ -88,8 +91,8 @@ export default function ClientsPage() {
             />
           </div>
 
-          {clientsState.isLoading ? (
-            <Spinner />
+          {showClientsLoading ? (
+            <SkeletonTable rows={6} columns={4} />
           ) : hasClients ? (
             <>
               <ClientsTable clients={clientsState.items} onSelectClient={setSelectedClient} />
@@ -124,7 +127,7 @@ export default function ClientsPage() {
       ) : (
         <ActivityTab
           events={communityEvents.events}
-          isLoading={communityEvents.isLoading}
+          isLoading={showActivityLoading}
           range={communityEvents.range}
           onRangeChange={communityEvents.setRange}
           type={communityEvents.type}

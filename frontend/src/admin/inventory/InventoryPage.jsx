@@ -3,6 +3,7 @@ import { useBrands } from './hooks/useBrands.js';
 import { useModels } from './hooks/useModels.js';
 import { useParts } from './hooks/useParts.js';
 import { useInventorySearch } from './hooks/useInventorySearch.js';
+import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
 import BrandSidebar from './components/BrandSidebar.jsx';
 import ModelGrid from './components/ModelGrid.jsx';
 import PartTable from './components/PartTable.jsx';
@@ -42,6 +43,13 @@ export default function InventoryPage() {
     adjustQuantity,
   } = useParts(selectedModelId);
   const { results: searchResults, isLoading: searchLoading } = useInventorySearch(searchQuery);
+
+  // T14: only show loading placeholders once a fetch has been pending a
+  // noticeable while, so fast cache-hit navigation never flashes a skeleton.
+  const showBrandsLoading = useDelayedFlag(brandsLoading);
+  const showModelsLoading = useDelayedFlag(modelsLoading);
+  const showPartsLoading = useDelayedFlag(partsLoading);
+  const showSearchLoading = useDelayedFlag(searchLoading);
 
   const confirmDelete = useConfirmDelete();
 
@@ -113,14 +121,14 @@ export default function InventoryPage() {
         <SearchResults
           query={searchQuery}
           results={searchResults}
-          isLoading={searchLoading}
+          isLoading={showSearchLoading}
           onSelectResult={handleSelectSearchResult}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
           <BrandSidebar
             brands={brands}
-            isLoading={brandsLoading}
+            isLoading={showBrandsLoading}
             selectedBrandId={selectedBrandId}
             onSelectBrand={handleSelectBrand}
             onAddBrand={() => setBrandModal({ mode: 'create' })}
@@ -134,7 +142,7 @@ export default function InventoryPage() {
                 <ModelGrid
                   brandName={selectedBrand?.name}
                   models={models}
-                  isLoading={modelsLoading}
+                  isLoading={showModelsLoading}
                   selectedModelId={selectedModelId}
                   onSelectModel={setSelectedModelId}
                   onAddModel={() => setModelModal({ mode: 'create' })}
@@ -146,7 +154,7 @@ export default function InventoryPage() {
                   <PartTable
                     modelName={selectedModel?.name}
                     parts={parts}
-                    isLoading={partsLoading}
+                    isLoading={showPartsLoading}
                     onUpdatePart={updatePart}
                     onAdjustQuantity={adjustQuantity}
                     onDeletePart={(part) => confirmDelete.ask('part', part)}

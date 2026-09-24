@@ -1,4 +1,4 @@
-import { Button, EmptyState, Spinner } from '../../shared/ui/index.js';
+import { Button, EmptyState, SkeletonRows } from '../../shared/ui/index.js';
 
 /**
  * Brand navigation column (desktop app's left "MARCAS" list). Presentational
@@ -23,9 +23,7 @@ export default function BrandSidebar({
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-6">
-          <Spinner size="sm" />
-        </div>
+        <SkeletonRows rows={5} columns={1} />
       ) : brands.length === 0 ? (
         <EmptyState title="Sin marcas" description="Crea tu primera marca para empezar." />
       ) : (

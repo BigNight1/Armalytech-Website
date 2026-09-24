@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { clientsApi } from '../api/clientsApi.js';
+import { clientsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
 import { todayInLima } from '../../shared/lib/time.js';
 import { limaDayRangeUtc } from '../lib/format.js';
@@ -11,35 +13,33 @@ function defaultRange() {
   return { from: from.toISOString().slice(0, 10), to: today };
 }
 
-/** Cross-client "Actividad" event log with a date range + type filter. */
+/** Cross-client "Actividad" event log with a date range + type filter (T14: TanStack Query). */
 export function useCommunityEvents() {
   const [range, setRange] = useState(defaultRange);
   const [type, setType] = useState('all'); // 'all' | 'registro' | 'visita' | 'registro_rechazado'
-  const [events, setEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { notify } = useToast();
 
-  const refetch = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { from } = limaDayRangeUtc(range.from);
-      const { to } = limaDayRangeUtc(range.to);
-      const data = await clientsApi.listEvents({
-        from,
-        to,
-        type: type === 'all' ? undefined : type,
-      });
-      setEvents(data);
-    } catch (err) {
-      notify(err.message ?? 'No se pudo cargar la actividad', { type: 'error' });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [range, type, notify]);
+  const { from } = limaDayRangeUtc(range.from);
+  const { to } = limaDayRangeUtc(range.to);
+  const params = { from, to, type: type === 'all' ? undefined : type };
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  const query = useQuery({
+    queryKey: clientsKeys.communityEvents(params),
+    queryFn: () => clientsApi.listEvents(params),
+    placeholderData: keepPreviousData,
+  });
 
-  return { events, isLoading, range, setRange, type, setType, refetch };
+  if (query.error) {
+    notify(query.error.message ?? 'No se pudo cargar la actividad', { type: 'error' });
+  }
+
+  return {
+    events: query.data ?? [],
+    isLoading: query.isLoading,
+    range,
+    setRange,
+    type,
+    setType,
+    refetch: query.refetch,
+  };
 }

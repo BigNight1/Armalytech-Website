@@ -6,4 +6,5 @@ export { default as Modal } from './Modal.jsx';
 export { default as ConfirmDialog } from './ConfirmDialog.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
 export { default as Spinner } from './Spinner.jsx';
+export { default as Skeleton, SkeletonTable, SkeletonRows } from './Skeleton.jsx';
 export { ToastProvider, useToast } from './ToastProvider.jsx';

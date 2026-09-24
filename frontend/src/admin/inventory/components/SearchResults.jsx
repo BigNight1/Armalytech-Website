@@ -1,14 +1,10 @@
-import { EmptyState, Spinner } from '../../shared/ui/index.js';
+import { EmptyState, SkeletonRows } from '../../shared/ui/index.js';
 import { formatPEN } from '../../shared/lib/money.js';
 
 /** Cross-collection search results (`GET /inventory/search`); click jumps to that part's model. */
 export default function SearchResults({ query, results, isLoading, onSelectResult }) {
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-6">
-        <Spinner size="sm" />
-      </div>
-    );
+    return <SkeletonRows rows={4} columns={2} />;
   }
 
   if (results.length === 0) {

@@ -1,39 +1,28 @@
 import { useEffect, useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { inventoryApi } from '../api/inventoryApi.js';
+import { inventoryKeys } from '../api/queryKeys.js';
 
 const DEBOUNCE_MS = 300;
 
-/** Debounced cross-collection search (`GET /inventory/search?q=`). */
+/** Debounced cross-collection search (`GET /inventory/search?q=`), T14: TanStack Query. */
 export function useInventorySearch(query) {
-  const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [debounced, setDebounced] = useState(query.trim());
 
   useEffect(() => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setResults([]);
-      setIsLoading(false);
-      return undefined;
-    }
-
-    let cancelled = false;
-    setIsLoading(true);
-    const timer = setTimeout(async () => {
-      try {
-        const data = await inventoryApi.search(trimmed);
-        if (!cancelled) setResults(data);
-      } catch {
-        if (!cancelled) setResults([]);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }, DEBOUNCE_MS);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
+    const timer = setTimeout(() => setDebounced(query.trim()), DEBOUNCE_MS);
+    return () => clearTimeout(timer);
   }, [query]);
 
-  return { results, isLoading };
+  const search = useQuery({
+    queryKey: inventoryKeys.search(debounced),
+    queryFn: () => inventoryApi.search(debounced),
+    enabled: debounced.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+  return {
+    results: debounced.length > 0 ? (search.data ?? []) : [],
+    isLoading: debounced.length > 0 && search.isFetching,
+  };
 }

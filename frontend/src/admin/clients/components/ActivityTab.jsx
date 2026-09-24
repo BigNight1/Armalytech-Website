@@ -1,4 +1,4 @@
-import { EmptyState, Select, Spinner } from '../../shared/ui/index.js';
+import { EmptyState, Select, SkeletonTable } from '../../shared/ui/index.js';
 import { EVENT_TYPE_LABELS, REJECT_REASON_LABELS, formatLimaShort } from '../lib/format.js';
 
 const TYPE_OPTIONS = [
@@ -40,7 +40,7 @@ export default function ActivityTab({ events, isLoading, range, onRangeChange, t
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <SkeletonTable rows={5} columns={5} />
       ) : events.length === 0 ? (
         <EmptyState
           title="Sin actividad en este rango"
