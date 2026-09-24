@@ -31,12 +31,13 @@ export interface ClientRepository {
   findById(id: string): Promise<Client | null>;
   findByPhone(phoneE164: string): Promise<Client | null>;
   /**
-   * Atomically creates the client on first registration or increments its
-   * visit count on a repeat one, via a single upsert (`$setOnInsert` +
-   * `$inc`) so two concurrent submits of the same number never race.
+   * Atomically creates the client on first registration with 0 visits,
+   * or updates info on duplicate registration.
    */
   upsertVisit(input: UpsertVisitInput): Promise<UpsertVisitResult>;
   update(id: string, input: UpdateClientInput): Promise<Client | null>;
+  incrementVisit(id: string, occurredAt: Date): Promise<Client | null>;
+  claimReward(id: string, occurredAt: Date): Promise<Client | null>;
   search(
     query: string,
     page: number,
@@ -44,3 +45,4 @@ export interface ClientRepository {
     marketingConsent?: boolean,
   ): Promise<ClientSearchResult>;
 }
+

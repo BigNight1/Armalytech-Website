@@ -32,8 +32,9 @@ export class FakeClientRepository implements ClientRepository {
   async upsertVisit(input: UpsertVisitInput): Promise<UpsertVisitResult> {
     const existing = this.clients.find((c) => c.phoneE164 === input.phoneE164);
     if (existing) {
-      existing.visitCount += 1;
-      existing.lastVisitAt = input.occurredAt;
+      existing.firstName = input.firstName;
+      existing.lastName = input.lastName;
+      existing.marketingConsent = input.marketingConsent;
       return { client: existing, wasNew: false };
     }
 
@@ -45,12 +46,36 @@ export class FakeClientRepository implements ClientRepository {
       marketingConsent: input.marketingConsent,
       consentAt: input.occurredAt,
       channel: input.channel,
-      visitCount: 1,
-      firstVisitAt: input.occurredAt,
-      lastVisitAt: input.occurredAt,
+      visitCount: 0,
+      stamps: 0,
+      loyaltyCycle: 1,
+      rewardsClaimed: 0,
+      lastRewardClaimedAt: null,
+      firstVisitAt: null,
+      lastVisitAt: null,
     };
     this.clients.push(client);
     return { client, wasNew: true };
+  }
+
+  async incrementVisit(id: string, occurredAt: Date): Promise<Client | null> {
+    const client = this.clients.find((c) => c.id === id);
+    if (!client) return null;
+    client.visitCount += 1;
+    client.stamps = client.stamps < 5 ? client.stamps + 1 : 5;
+    client.lastVisitAt = occurredAt;
+    if (!client.firstVisitAt) client.firstVisitAt = occurredAt;
+    return client;
+  }
+
+  async claimReward(id: string, occurredAt: Date): Promise<Client | null> {
+    const client = this.clients.find((c) => c.id === id);
+    if (!client) return null;
+    client.stamps = 0;
+    client.loyaltyCycle += 1;
+    client.rewardsClaimed += 1;
+    client.lastRewardClaimedAt = occurredAt;
+    return client;
   }
 
   async update(id: string, input: UpdateClientInput): Promise<Client | null> {
@@ -83,7 +108,8 @@ export class FakeClientRepository implements ClientRepository {
           c.marketingConsent === marketingConsent,
       );
     const sorted = [...filtered].sort(
-      (a, b) => b.lastVisitAt.getTime() - a.lastVisitAt.getTime(),
+      (a, b) =>
+        (b.lastVisitAt?.getTime() ?? 0) - (a.lastVisitAt?.getTime() ?? 0),
     );
     const start = (page - 1) * limit;
     return { items: sorted.slice(start, start + limit), total: sorted.length };
@@ -100,8 +126,6 @@ export class FakeCommunityEventRepository implements CommunityEventRepository {
   }
 
   async findByClient(clientId: string): Promise<CommunityEvent[]> {
-    // Most recent first; ties (same millisecond) break by insertion order,
-    // newest insertion first, matching natural Mongo insertion order.
     return [...this.events]
       .filter((e) => e.clientId === clientId)
       .reverse()
@@ -124,8 +148,22 @@ export class FakeCommunityEventRepository implements CommunityEventRepository {
 
 export class FakeCommunityNotifier implements CommunityNotifier {
   calls: { client: Client; isNewClient: boolean }[] = [];
+  thresholdCalls: { client: Client; threshold: number }[] = [];
+  messageCalls: { client: Client; template: string }[] = [];
 
   async notifyRegistered(client: Client, isNewClient: boolean): Promise<void> {
     this.calls.push({ client, isNewClient });
+  }
+
+  async notifyVisitThreshold(client: Client, threshold: number): Promise<void> {
+    this.thresholdCalls.push({ client, threshold });
+  }
+
+  async notifyDirectMessage(
+    client: Client,
+    template: 'promo_20' | 'google_review' | 'reconnect',
+  ): Promise<{ sent: boolean; message?: string }> {
+    this.messageCalls.push({ client, template });
+    return { sent: true, message: `Sample message for ${template}` };
   }
 }

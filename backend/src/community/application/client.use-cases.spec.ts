@@ -104,12 +104,13 @@ describe('Client query/admin use cases', () => {
       marketingConsent: true,
       channel: 'qr',
     });
-    await register.execute({
-      firstName: 'Ana',
-      lastName: 'Lopez',
-      phone: '965728013',
-      marketingConsent: true,
-      channel: 'qr',
+    await events.create({
+      clientId: client.id,
+      phoneE164: client.phoneE164,
+      type: 'visita',
+      rejectReason: null,
+      channel: 'manual',
+      occurredAt: new Date(Date.now() + 1000),
     });
 
     const history = new GetClientHistoryUseCase(clients, events);

@@ -6,9 +6,10 @@ import { useClientStats } from './hooks/useClientStats.js';
 import ClientsTable from './components/ClientsTable.jsx';
 import ClientsEmptyState from './components/ClientsEmptyState.jsx';
 import ClientDetailModal from './components/ClientDetailModal.jsx';
+import RegisterVisitModal from './components/RegisterVisitModal.jsx';
 import ActivityTab from './components/ActivityTab.jsx';
 import StatCards from './components/StatCards.jsx';
-import { Input, Select, SkeletonTable } from '../shared/ui/index.js';
+import { Button, Input, Select, SkeletonTable } from '../shared/ui/index.js';
 import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
 
 const CONSENT_OPTIONS = [
@@ -17,10 +18,12 @@ const CONSENT_OPTIONS = [
   { value: 'declined', label: 'Descartó' },
 ];
 
-/** Container for the Clientes section: client list/search + "Actividad" tab. */
+/** Container for the Clientes section: client list/search + loyalty & "Actividad" tab. */
 export default function ClientsPage() {
   const [tab, setTab] = useState('clientes'); // 'clientes' | 'actividad'
   const [selectedClient, setSelectedClient] = useState(null);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
+  const [visitModalClient, setVisitModalClient] = useState(null);
 
   const clientsState = useClients();
   const clientEvents = useClientEvents(selectedClient?.id);
@@ -39,10 +42,33 @@ export default function ClientsPage() {
     return updated;
   }
 
+  function handleClientUpdated(updated) {
+    setSelectedClient(updated);
+    clientsState.refetch();
+    stats.refetch();
+    clientEvents.refetch();
+  }
+
+  function handleOpenVisitModal(client = null) {
+    setVisitModalClient(client);
+    setIsVisitModalOpen(true);
+  }
+
+  function handleVisitRegistered() {
+    clientsState.refetch();
+    stats.refetch();
+    if (selectedClient) {
+      clientEvents.refetch();
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-brand-ink">Clientes</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold text-brand-ink">Clientes & Fidelización</h1>
+        <Button onClick={() => handleOpenVisitModal(null)} className="flex items-center gap-1.5 shadow-md shadow-orange-500/20">
+          <span>+ Registrar Visita</span>
+        </Button>
       </div>
 
       <StatCards
@@ -53,7 +79,7 @@ export default function ClientsPage() {
 
       <div className="flex gap-2 border-b border-slate-700">
         {[
-          { key: 'clientes', label: 'Clientes' },
+          { key: 'clientes', label: 'Clientes & Sellos' },
           { key: 'actividad', label: 'Actividad' },
         ].map((item) => (
           <button
@@ -92,10 +118,14 @@ export default function ClientsPage() {
           </div>
 
           {showClientsLoading ? (
-            <SkeletonTable rows={6} columns={4} />
+            <SkeletonTable rows={6} columns={5} />
           ) : hasClients ? (
             <>
-              <ClientsTable clients={clientsState.items} onSelectClient={setSelectedClient} />
+              <ClientsTable
+                clients={clientsState.items}
+                onSelectClient={setSelectedClient}
+                onRegisterVisit={(client) => handleOpenVisitModal(client)}
+              />
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
                   <button
@@ -140,7 +170,18 @@ export default function ClientsPage() {
         events={clientEvents.events}
         isLoadingEvents={clientEvents.isLoading}
         onSave={handleSaveClient}
+        onClientUpdated={handleClientUpdated}
         onClose={() => setSelectedClient(null)}
+      />
+
+      <RegisterVisitModal
+        open={isVisitModalOpen}
+        initialClient={visitModalClient}
+        onVisitRegistered={handleVisitRegistered}
+        onClose={() => {
+          setIsVisitModalOpen(false);
+          setVisitModalClient(null);
+        }}
       />
     </div>
   );

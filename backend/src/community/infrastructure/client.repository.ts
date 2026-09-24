@@ -32,34 +32,72 @@ export class MongooseClientRepository implements ClientRepository {
   }
 
   async upsertVisit(input: UpsertVisitInput): Promise<UpsertVisitResult> {
-    const result = await this.clientModel
-      .findOneAndUpdate(
-        { phoneE164: input.phoneE164 },
-        {
-          $setOnInsert: {
-            firstName: input.firstName,
-            lastName: input.lastName,
-            phoneE164: input.phoneE164,
-            marketingConsent: input.marketingConsent,
-            consentAt: input.occurredAt,
-            channel: input.channel,
-            firstVisitAt: input.occurredAt,
-          },
-          $set: { lastVisitAt: input.occurredAt },
-          $inc: { visitCount: 1 },
-        },
-        {
-          new: true,
-          upsert: true,
-          includeResultMetadata: true,
-          setDefaultsOnInsert: true,
-        },
-      )
-      .exec();
+    const existing = await this.clientModel.findOne({ phoneE164: input.phoneE164 }).exec();
+    if (existing) {
+      existing.firstName = input.firstName;
+      existing.lastName = input.lastName;
+      existing.marketingConsent = input.marketingConsent;
+      const saved = await existing.save();
+      return { client: this.toEntity(saved), wasNew: false };
+    }
 
-    const doc = result.value as ClientDocument;
-    const wasNew = !result.lastErrorObject?.updatedExisting;
-    return { client: this.toEntity(doc), wasNew };
+    const doc = await this.clientModel.create({
+      firstName: input.firstName,
+      lastName: input.lastName,
+      phoneE164: input.phoneE164,
+      marketingConsent: input.marketingConsent,
+      consentAt: input.occurredAt,
+      channel: input.channel,
+      visitCount: 0,
+      stamps: 0,
+      loyaltyCycle: 1,
+      rewardsClaimed: 0,
+      firstVisitAt: null,
+      lastVisitAt: null,
+    });
+
+    return { client: this.toEntity(doc), wasNew: true };
+  }
+
+  async incrementVisit(id: string, occurredAt: Date): Promise<Client | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      return null;
+    }
+    const current = await this.clientModel.findById(id).exec();
+    if (!current) {
+      return null;
+    }
+
+    const currentStamps = current.stamps ?? 0;
+    const newStamps = currentStamps < 5 ? currentStamps + 1 : 5;
+
+    current.visitCount = (current.visitCount ?? 0) + 1;
+    current.stamps = newStamps;
+    current.lastVisitAt = occurredAt;
+    if (!current.firstVisitAt) {
+      current.firstVisitAt = occurredAt;
+    }
+
+    const saved = await current.save();
+    return this.toEntity(saved);
+  }
+
+  async claimReward(id: string, occurredAt: Date): Promise<Client | null> {
+    if (!Types.ObjectId.isValid(id)) {
+      return null;
+    }
+    const current = await this.clientModel.findById(id).exec();
+    if (!current) {
+      return null;
+    }
+
+    current.stamps = 0;
+    current.loyaltyCycle = (current.loyaltyCycle ?? 1) + 1;
+    current.rewardsClaimed = (current.rewardsClaimed ?? 0) + 1;
+    current.lastRewardClaimedAt = occurredAt;
+
+    const saved = await current.save();
+    return this.toEntity(saved);
   }
 
   async update(id: string, input: UpdateClientInput): Promise<Client | null> {
@@ -101,7 +139,7 @@ export class MongooseClientRepository implements ClientRepository {
     const [docs, total] = await Promise.all([
       this.clientModel
         .find(filter)
-        .sort({ lastVisitAt: -1 })
+        .sort({ createdAt: -1, lastVisitAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .exec(),
@@ -120,9 +158,14 @@ export class MongooseClientRepository implements ClientRepository {
       marketingConsent: doc.marketingConsent,
       consentAt: doc.consentAt,
       channel: doc.channel,
-      visitCount: doc.visitCount,
-      firstVisitAt: doc.firstVisitAt,
-      lastVisitAt: doc.lastVisitAt,
+      visitCount: doc.visitCount ?? 0,
+      stamps: doc.stamps ?? 0,
+      loyaltyCycle: doc.loyaltyCycle ?? 1,
+      rewardsClaimed: doc.rewardsClaimed ?? 0,
+      lastRewardClaimedAt: doc.lastRewardClaimedAt ?? null,
+      firstVisitAt: doc.firstVisitAt ?? null,
+      lastVisitAt: doc.lastVisitAt ?? null,
     };
   }
 }
+

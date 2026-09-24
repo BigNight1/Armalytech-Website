@@ -4,7 +4,13 @@ import { CommunityChannel } from './client.entity';
  * Event taxonomy per ADR 0018. Kept as the exact Spanish literals the ADR
  * defines (they are stored business vocabulary, not UI copy or identifiers).
  */
-export type CommunityEventType = 'registro' | 'visita' | 'registro_rechazado';
+export type CommunityEventType =
+  | 'registro'
+  | 'visita'
+  | 'registro_rechazado'
+  | 'premio_canjeado'
+  | 'mensaje_enviado';
+
 
 export interface CommunityEvent {
   id: string;

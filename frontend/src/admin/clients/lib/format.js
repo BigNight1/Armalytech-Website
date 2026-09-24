@@ -42,9 +42,14 @@ export const EVENT_TYPE_LABELS = {
   registro: 'Registro',
   visita: 'Visita',
   registro_rechazado: 'Rechazado',
+  premio_canjeado: '★ Premio 20% Canjeado',
+  mensaje_enviado: '💬 Mensaje Enviado',
 };
 
 export const REJECT_REASON_LABELS = {
   numero_invalido: 'Número inválido',
   sin_consentimiento: 'Sin consentimiento',
+  promo_20: 'Recordatorio Promo 20%',
+  google_review: 'Solicitud Reseña Google Maps',
+  reconnect: 'Invitación a volver / Mantenimiento',
 };

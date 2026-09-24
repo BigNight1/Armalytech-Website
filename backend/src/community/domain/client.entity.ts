@@ -1,4 +1,4 @@
-export type CommunityChannel = 'qr' | 'nfc';
+export type CommunityChannel = 'qr' | 'nfc' | 'manual';
 
 export interface Client {
   id: string;
@@ -10,6 +10,14 @@ export interface Client {
   /** Channel of the client's first registration; never changes afterwards. */
   channel: CommunityChannel;
   visitCount: number;
-  firstVisitAt: Date;
-  lastVisitAt: Date;
+  /** Loyalty stamps in the current 5-visit cycle (0 to 5) */
+  stamps: number;
+  /** Number of loyalty cycles completed or active */
+  loyaltyCycle: number;
+  /** Total rewards claimed */
+  rewardsClaimed: number;
+  lastRewardClaimedAt?: Date | null;
+  firstVisitAt?: Date | null;
+  lastVisitAt?: Date | null;
 }
+

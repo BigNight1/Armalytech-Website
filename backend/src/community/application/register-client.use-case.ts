@@ -90,7 +90,7 @@ export class RegisterClientUseCase {
     await this.events.create({
       clientId: client.id,
       phoneE164: client.phoneE164,
-      type: wasNew ? 'registro' : 'visita',
+      type: 'registro',
       rejectReason: null,
       channel: input.channel,
       occurredAt,

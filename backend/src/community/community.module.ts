@@ -10,7 +10,7 @@ import {
 } from './infrastructure/schemas/community-event.schema';
 import { MongooseClientRepository } from './infrastructure/client.repository';
 import { MongooseCommunityEventRepository } from './infrastructure/community-event.repository';
-import { NoopCommunityNotifier } from './infrastructure/noop-community-notifier';
+import { WebhookCommunityNotifier } from './infrastructure/webhook-community-notifier';
 import { CommunityController } from './infrastructure/community.controller';
 import { CLIENT_REPOSITORY } from './domain/client-repository.port';
 import { COMMUNITY_EVENT_REPOSITORY } from './domain/community-event-repository.port';
@@ -21,6 +21,9 @@ import { GetClientUseCase } from './application/get-client.use-case';
 import { GetClientHistoryUseCase } from './application/get-client-history.use-case';
 import { ListCommunityEventsUseCase } from './application/list-community-events.use-case';
 import { UpdateClientUseCase } from './application/update-client.use-case';
+import { RegisterVisitUseCase } from './application/register-visit.use-case';
+import { ClaimRewardUseCase } from './application/claim-reward.use-case';
+import { SendCommunityMessageUseCase } from './application/send-community-message.use-case';
 
 @Module({
   imports: [
@@ -36,13 +39,16 @@ import { UpdateClientUseCase } from './application/update-client.use-case';
       provide: COMMUNITY_EVENT_REPOSITORY,
       useClass: MongooseCommunityEventRepository,
     },
-    { provide: COMMUNITY_NOTIFIER, useClass: NoopCommunityNotifier },
+    { provide: COMMUNITY_NOTIFIER, useClass: WebhookCommunityNotifier },
     RegisterClientUseCase,
     ListClientsUseCase,
     GetClientUseCase,
     GetClientHistoryUseCase,
     ListCommunityEventsUseCase,
     UpdateClientUseCase,
+    RegisterVisitUseCase,
+    ClaimRewardUseCase,
+    SendCommunityMessageUseCase,
   ],
 })
 export class CommunityModule {}

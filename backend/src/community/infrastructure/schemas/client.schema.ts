@@ -21,17 +21,29 @@ export class ClientModel {
   @Prop({ required: true })
   consentAt!: Date;
 
-  @Prop({ required: true, enum: ['qr', 'nfc'] })
+  @Prop({ required: true, enum: ['qr', 'nfc', 'manual'] })
   channel!: CommunityChannel;
 
-  @Prop({ required: true, default: 1 })
+  @Prop({ required: true, default: 0 })
   visitCount!: number;
 
-  @Prop({ required: true })
-  firstVisitAt!: Date;
+  @Prop({ required: true, default: 0 })
+  stamps!: number;
 
-  @Prop({ required: true })
-  lastVisitAt!: Date;
+  @Prop({ required: true, default: 1 })
+  loyaltyCycle!: number;
+
+  @Prop({ required: true, default: 0 })
+  rewardsClaimed!: number;
+
+  @Prop({ type: Date, default: null })
+  lastRewardClaimedAt?: Date | null;
+
+  @Prop({ type: Date, default: null })
+  firstVisitAt?: Date | null;
+
+  @Prop({ type: Date, default: null })
+  lastVisitAt?: Date | null;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(ClientModel);

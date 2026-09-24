@@ -31,13 +31,14 @@ describe('RegisterClientUseCase', () => {
 
     expect(result.isNewClient).toBe(true);
     expect(result.client.phoneE164).toBe('51965728013');
-    expect(result.client.visitCount).toBe(1);
+    expect(result.client.visitCount).toBe(0);
+    expect(result.client.stamps).toBe(0);
     expect(events.events).toHaveLength(1);
     expect(events.events[0].type).toBe('registro');
     expect(notifier.calls).toHaveLength(1);
   });
 
-  it('counts a repeat submission as a visit, not a new client', async () => {
+  it('keeps visit count at 0 on repeat submission (only technician registers visits)', async () => {
     await useCase.execute({
       firstName: 'Juana',
       lastName: 'Perez',
@@ -55,9 +56,9 @@ describe('RegisterClientUseCase', () => {
     });
 
     expect(second.isNewClient).toBe(false);
-    expect(second.client.visitCount).toBe(2);
+    expect(second.client.visitCount).toBe(0);
     expect(clients.clients).toHaveLength(1);
-    expect(events.events.map((e) => e.type)).toEqual(['registro', 'visita']);
+    expect(events.events.map((e) => e.type)).toEqual(['registro', 'registro']);
   });
 
   it('rejects and logs an invalid phone number', async () => {

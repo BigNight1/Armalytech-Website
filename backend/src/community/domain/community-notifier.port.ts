@@ -12,4 +12,10 @@ export const COMMUNITY_NOTIFIER = Symbol('COMMUNITY_NOTIFIER');
  */
 export interface CommunityNotifier {
   notifyRegistered(client: Client, isNewClient: boolean): Promise<void>;
+  notifyVisitThreshold(client: Client, threshold: number): Promise<void>;
+  notifyDirectMessage(
+    client: Client,
+    template: 'promo_20' | 'google_review' | 'reconnect',
+  ): Promise<{ sent: boolean; message?: string }>;
 }
+

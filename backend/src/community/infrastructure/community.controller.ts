@@ -17,6 +17,9 @@ import { GetClientUseCase } from '../application/get-client.use-case';
 import { GetClientHistoryUseCase } from '../application/get-client-history.use-case';
 import { ListCommunityEventsUseCase } from '../application/list-community-events.use-case';
 import { UpdateClientUseCase } from '../application/update-client.use-case';
+import { RegisterVisitUseCase } from '../application/register-visit.use-case';
+import { ClaimRewardUseCase } from '../application/claim-reward.use-case';
+import { SendCommunityMessageUseCase } from '../application/send-community-message.use-case';
 import {
   RegisterChannelQueryDto,
   RegisterClientDto,
@@ -24,6 +27,8 @@ import {
 import { UpdateClientDto } from './dto/update-client.dto';
 import { ListClientsQueryDto } from './dto/list-clients-query.dto';
 import { ListEventsQueryDto } from './dto/list-events-query.dto';
+import { RegisterVisitDto } from './dto/register-visit.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('community')
 export class CommunityController {
@@ -34,6 +39,9 @@ export class CommunityController {
     private readonly getClientHistory: GetClientHistoryUseCase,
     private readonly listCommunityEvents: ListCommunityEventsUseCase,
     private readonly updateClient: UpdateClientUseCase,
+    private readonly registerVisit: RegisterVisitUseCase,
+    private readonly claimReward: ClaimRewardUseCase,
+    private readonly sendMessage: SendCommunityMessageUseCase,
   ) {}
 
   @Public()
@@ -107,4 +115,35 @@ export class CommunityController {
       ),
     };
   }
+
+  @Post('clients/:id/visits')
+  async registerClientVisit(@Param('id') id: string) {
+    const result = await this.registerVisit.execute({ clientId: id });
+    return { ok: true, data: result };
+  }
+
+  @Post('visits')
+  async registerVisitByPhone(@Body() dto: RegisterVisitDto) {
+    const result = await this.registerVisit.execute({ phone: dto.phone });
+    return { ok: true, data: result };
+  }
+
+  @Post('clients/:id/claim-reward')
+  async claimRewardEndpoint(@Param('id') id: string) {
+    const client = await this.claimReward.execute(id);
+    return { ok: true, data: client };
+  }
+
+  @Post('clients/:id/messages')
+  async sendClientMessage(
+    @Param('id') id: string,
+    @Body() dto: SendMessageDto,
+  ) {
+    const result = await this.sendMessage.execute({
+      clientId: id,
+      template: dto.template,
+    });
+    return { ok: true, data: result };
+  }
 }
+

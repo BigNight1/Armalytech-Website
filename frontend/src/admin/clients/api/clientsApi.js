@@ -28,4 +28,12 @@ export const clientsApi = {
 
   listEvents: ({ from, to, type } = {}) =>
     httpClient.get(`/community/events${buildQuery({ from, to, type })}`),
+
+  registerClientVisit: (id) => httpClient.post(`/community/clients/${id}/visits`),
+
+  registerVisitByPhone: (phone) => httpClient.post('/community/visits', { phone }),
+
+  claimReward: (id) => httpClient.post(`/community/clients/${id}/claim-reward`),
+
+  sendMessage: (id, template) => httpClient.post(`/community/clients/${id}/messages`, { template }),
 };

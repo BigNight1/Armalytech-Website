@@ -15,14 +15,20 @@ export class CommunityEventModel {
 
   @Prop({
     required: true,
-    enum: ['registro', 'visita', 'registro_rechazado'],
+    enum: [
+      'registro',
+      'visita',
+      'registro_rechazado',
+      'premio_canjeado',
+      'mensaje_enviado',
+    ],
   })
   type!: CommunityEventType;
 
   @Prop({ type: String, default: null })
   rejectReason!: string | null;
 
-  @Prop({ required: true, enum: ['qr', 'nfc'] })
+  @Prop({ required: true, enum: ['qr', 'nfc', 'manual'] })
   channel!: CommunityChannel;
 
   @Prop({ required: true })
