@@ -48,6 +48,7 @@ See `.env.example`. Never commit `.env` (gitignored at the repo root and in
 | `SESSION_SECRET` | Signs the session cookie (`cookie-parser`, ADR 0004). Use a long random value in production. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Used once, at bootstrap, to create the single admin account when the `admins` collection is empty. |
 | `SESSION_MAX_AGE_SECONDS` | Session cookie lifetime in seconds (default 12h). |
+| `DNS_SERVERS` | Optional, local dev only. Comma-separated DNS servers (e.g. `8.8.8.8,1.1.1.1`) when the machine resolver refuses SRV lookups (`querySrv ECONNREFUSED` with `mongodb+srv://`). |
 
 ## Scripts
 

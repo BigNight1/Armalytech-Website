@@ -36,6 +36,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsNumberString()
   SESSION_MAX_AGE_SECONDS?: string;
+
+  @IsOptional()
+  @IsString()
+  DNS_SERVERS?: string;
 }
 
 /**

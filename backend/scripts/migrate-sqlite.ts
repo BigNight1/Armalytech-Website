@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import mongoose from 'mongoose';
+import { applyDnsServersOverride } from '../src/shared/config/dns';
 import { BrandSchema, BrandModel } from '../src/inventory/infrastructure/schemas/brand.schema';
 import {
   InventoryModelSchema,
@@ -129,6 +130,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  applyDnsServersOverride();
   await mongoose.connect(mongoUri);
 
   const BrandMongoModel = mongoose.model(BrandModel.name, BrandSchema);

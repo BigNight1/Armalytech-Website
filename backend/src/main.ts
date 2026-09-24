@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './shared/infrastructure/http-exception.filter';
+import { applyDnsServersOverride } from './shared/config/dns';
 
 /**
  * Local dev entry point (`pnpm start:dev`). Vercel uses `api/index.ts`
@@ -11,6 +12,7 @@ import { HttpExceptionFilter } from './shared/infrastructure/http-exception.filt
  * (ADR 0002 / ADR 0011).
  */
 async function bootstrap() {
+  applyDnsServersOverride();
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
