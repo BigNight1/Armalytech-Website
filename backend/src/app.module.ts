@@ -9,6 +9,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { CashClosingsModule } from './cash-closings/cash-closings.module';
 import { CommunityModule } from './community/community.module';
 import { StaffModule } from './staff/staff.module';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { StaffModule } from './staff/staff.module';
     CashClosingsModule,
     CommunityModule,
     StaffModule,
+    AccountModule,
   ],
 })
 export class AppModule {}

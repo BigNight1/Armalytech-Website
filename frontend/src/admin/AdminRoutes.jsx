@@ -16,6 +16,7 @@ const InventoryPage = lazy(() => import('./inventory/InventoryPage.jsx'));
 const CashClosingsPage = lazy(() => import('./cash-closings/CashClosingsPage.jsx'));
 const ClientsPage = lazy(() => import('./clients/ClientsPage.jsx'));
 const StaffPage = lazy(() => import('./staff/StaffPage.jsx'));
+const AccountPage = lazy(() => import('./account/AccountPage.jsx'));
 
 function SectionSkeleton() {
   return (
@@ -72,6 +73,14 @@ export default function AdminRoutes() {
                   element={
                     <Suspense fallback={<SectionSkeleton />}>
                       <StaffPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="cuenta"
+                  element={
+                    <Suspense fallback={<SectionSkeleton />}>
+                      <AccountPage />
                     </Suspense>
                   }
                 />

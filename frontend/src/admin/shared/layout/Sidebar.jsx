@@ -53,6 +53,11 @@ export default function Sidebar({ onNavigate }) {
           },
         ]
       : []),
+    {
+      to: '/admin/cuenta',
+      label: 'Cuenta',
+      prefetchChunk: () => import('../../account/AccountPage.jsx'),
+    },
   ];
 
   return (
