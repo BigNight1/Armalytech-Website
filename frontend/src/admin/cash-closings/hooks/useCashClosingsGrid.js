@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cashClosingsApi } from '../api/cashClosingsApi.js';
 import { cashClosingsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
-import { appendRow, appendRows, buildGridRows, emptyRow, isBlankRow, toApiPayload } from '../lib/grid.js';
+import { appendRow, appendRows, buildGridRows, emptyRow, isBlankRow, toApiPayload, removeGridRow } from '../lib/grid.js';
 
 /**
  * Owns the editable rows for one date (T14: TanStack Query for the fetch;
@@ -75,10 +75,14 @@ export function useCashClosingsGrid(selectedDate) {
   const deleteRow = useCallback(
     (rowIndex) => {
       const cleared = emptyRow(rowIndex);
-      // Nothing in the database for this row: just clear it locally.
+      // Nothing in the database for this row: just clear/remove it locally.
       if (!persistedRef.current.has(rowIndex)) {
-        lastSavedRef.current.set(rowIndex, cleared);
-        setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
+        lastSavedRef.current.delete(rowIndex);
+        setRows((current) => {
+          const next = removeGridRow(current, rowIndex);
+          lastSavedRef.current = new Map(next.map((r) => [r.rowIndex, r]));
+          return next;
+        });
         return;
       }
 
@@ -87,8 +91,12 @@ export function useCashClosingsGrid(selectedDate) {
       deleteMutation.mutate(rowIndex, {
         onSuccess: () => {
           persistedRef.current.delete(rowIndex);
-          lastSavedRef.current.set(rowIndex, cleared);
-          setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
+          lastSavedRef.current.delete(rowIndex);
+          setRows((current) => {
+            const next = removeGridRow(current, rowIndex);
+            lastSavedRef.current = new Map(next.map((r) => [r.rowIndex, r]));
+            return next;
+          });
           setRowStatus((current) => ({ ...current, [rowIndex]: 'idle' }));
           invalidateAfterWrite();
         },

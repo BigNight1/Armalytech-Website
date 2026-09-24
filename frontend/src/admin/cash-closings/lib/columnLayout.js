@@ -21,7 +21,6 @@ export const BASE_COLUMNS = [
 ];
 
 export const FIXED_TRAILING_COLUMNS = [
-  { id: 'status', title: '', width: 36, kind: 'status' },
   { id: 'actions', title: '', width: 44, kind: 'actions' },
 ];
 

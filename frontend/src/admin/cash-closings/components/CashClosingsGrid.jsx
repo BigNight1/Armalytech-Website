@@ -106,6 +106,41 @@ export default function CashClosingsGrid({
       }
 
       if (column.kind === "actions") {
+        const status = rowStatus[dataRow.rowIndex];
+        if (status === "saving") {
+          return {
+            kind: GridCellKind.Text,
+            data: STATUS_SYMBOL.saving,
+            displayData: STATUS_SYMBOL.saving,
+            allowOverlay: false,
+            readonly: true,
+            contentAlign: "center",
+            themeOverride: { textDark: STATUS_COLOR.saving },
+          };
+        }
+        if (status === "saved") {
+          return {
+            kind: GridCellKind.Text,
+            data: STATUS_SYMBOL.saved,
+            displayData: STATUS_SYMBOL.saved,
+            allowOverlay: false,
+            readonly: true,
+            contentAlign: "center",
+            themeOverride: { textDark: STATUS_COLOR.saved },
+          };
+        }
+        if (status === "error") {
+          return {
+            kind: GridCellKind.Text,
+            data: STATUS_SYMBOL.error,
+            displayData: STATUS_SYMBOL.error,
+            allowOverlay: false,
+            readonly: true,
+            contentAlign: "center",
+            cursor: "pointer",
+            themeOverride: { textDark: STATUS_COLOR.error },
+          };
+        }
         return {
           kind: GridCellKind.Text,
           data: "",
@@ -115,23 +150,6 @@ export default function CashClosingsGrid({
           contentAlign: "center",
           cursor: "pointer",
           themeOverride: { textDark: "#94a3b8" },
-        };
-      }
-
-      if (column.kind === "status") {
-        const status = rowStatus[dataRow.rowIndex];
-        const symbol = STATUS_SYMBOL[status] ?? "";
-        return {
-          kind: GridCellKind.Text,
-          data: symbol,
-          displayData: symbol,
-          allowOverlay: false,
-          readonly: true,
-          contentAlign: "center",
-          themeOverride:
-            status && STATUS_COLOR[status]
-              ? { textDark: STATUS_COLOR[status] }
-              : undefined,
         };
       }
 
@@ -164,7 +182,6 @@ export default function CashClosingsGrid({
       if (
         !column ||
         !dataRow ||
-        column.kind === "status" ||
         column.kind === "actions"
       )
         return;
@@ -253,10 +270,12 @@ export default function CashClosingsGrid({
 
   const onCellClicked = useCallback(
     ([col, row]) => {
-      if (columns[col]?.kind === "actions" && rows[row])
+      if (columns[col]?.kind === "actions" && rows[row]) {
+        if (rowStatus[rows[row].rowIndex] === "saving") return;
         setPendingDeleteRow(rows[row].rowIndex);
+      }
     },
-    [columns, rows],
+    [columns, rows, rowStatus],
   );
 
   const confirmDelete = useCallback(() => {

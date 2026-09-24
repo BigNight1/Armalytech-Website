@@ -88,6 +88,21 @@ export function appendRow(rows) {
   return appendRows(rows, 1);
 }
 
+/**
+ * Deletes a single row from the grid:
+ * - If the total number of rows is greater than `minRows` (default 15),
+ *   it removes ONLY that specific row and re-indexes the remaining rows.
+ * - If the grid is at or below `minRows`, it simply resets the row to empty
+ *   so the table maintains its default 15 rows.
+ */
+export function removeGridRow(rows, rowIndexToDelete, minRows = DEFAULT_ROW_COUNT) {
+  if (rows.length <= minRows) {
+    return rows.map((r) => (r.rowIndex === rowIndexToDelete ? emptyRow(rowIndexToDelete) : r));
+  }
+  const filtered = rows.filter((r) => r.rowIndex !== rowIndexToDelete);
+  return filtered.map((r, idx) => ({ ...r, rowIndex: idx }));
+}
+
 /** The next cell in reading order (left-to-right, wraps to the next row). */
 export function getNextCell(rowIndex, field, rowCount) {
   const idx = FIELDS.indexOf(field);
