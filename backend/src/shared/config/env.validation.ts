@@ -27,6 +27,14 @@ class EnvironmentVariables {
 
   @IsOptional()
   @IsString()
+  JWT_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  ADMIN_EMAIL?: string;
+
+  @IsOptional()
+  @IsString()
   ADMIN_USERNAME?: string;
 
   @IsOptional()

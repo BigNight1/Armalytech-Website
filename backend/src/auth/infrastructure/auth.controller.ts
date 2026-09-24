@@ -34,22 +34,39 @@ export class AuthController {
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{ ok: true; data: { username: string } }> {
-    const admin = await this.loginUseCase.execute(dto);
-    const payload = this.sessionTokenService.buildPayload(admin);
-    const value = this.sessionTokenService.encode(payload);
+  ): Promise<{
+    ok: true;
+    data: {
+      id: string;
+      email: string;
+      username: string;
+      role: string;
+      mustChangePassword: boolean;
+    };
+  }> {
+    const user = await this.loginUseCase.execute(dto);
+    const token = await this.sessionTokenService.buildToken(user);
     const isProduction = this.configService.get('NODE_ENV') === 'production';
 
-    res.cookie(SESSION_COOKIE_NAME, value, {
+    res.cookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: isProduction,
-      signed: true,
+      signed: false, // Standard JWT verification
       maxAge: this.sessionTokenService.getSessionMaxAgeSeconds() * 1000,
       path: '/',
     });
 
-    return { ok: true, data: { username: admin.username } };
+    return {
+      ok: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        username: user.email,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      },
+    };
   }
 
   @Post('logout')
@@ -62,8 +79,26 @@ export class AuthController {
   @Get('me')
   async me(
     @CurrentAdmin() session: SessionPayload,
-  ): Promise<{ ok: true; data: { username: string } }> {
-    const admin = await this.getCurrentAdminUseCase.execute(session.sub);
-    return { ok: true, data: { username: admin.username } };
+  ): Promise<{
+    ok: true;
+    data: {
+      id: string;
+      email: string;
+      username: string;
+      role: string;
+      mustChangePassword: boolean;
+    };
+  }> {
+    const user = await this.getCurrentAdminUseCase.execute(session.sub);
+    return {
+      ok: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        username: user.email,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      },
+    };
   }
 }

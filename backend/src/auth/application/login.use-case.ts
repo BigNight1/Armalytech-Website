@@ -1,41 +1,51 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Admin } from '../domain/admin.entity';
+import { User } from '../domain/user.entity';
 import {
-  AdminRepository,
-  ADMIN_REPOSITORY,
-} from '../domain/admin-repository.port';
+  UserRepository,
+  USER_REPOSITORY,
+} from '../domain/user-repository.port';
 import {
   PasswordHasher,
   PASSWORD_HASHER,
 } from '../domain/password-hasher.port';
-import { InvalidCredentialsError } from '../domain/auth.errors';
+import { InvalidCredentialsError, InactiveUserError } from '../domain/auth.errors';
 
 export interface LoginInput {
-  username: string;
+  email?: string;
+  username?: string;
   password: string;
 }
 
 @Injectable()
 export class LoginUseCase {
   constructor(
-    @Inject(ADMIN_REPOSITORY) private readonly adminRepository: AdminRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly passwordHasher: PasswordHasher,
   ) {}
 
-  async execute(input: LoginInput): Promise<Admin> {
-    const admin = await this.adminRepository.findByUsername(input.username);
-    if (!admin) {
+  async execute(input: LoginInput): Promise<User> {
+    const identifier = input.email || input.username;
+    if (!identifier) {
       throw new InvalidCredentialsError();
+    }
+
+    const user = await this.userRepository.findByEmail(identifier);
+    if (!user) {
+      throw new InvalidCredentialsError();
+    }
+
+    if (!user.active) {
+      throw new InactiveUserError();
     }
 
     const matches = await this.passwordHasher.compare(
       input.password,
-      admin.passwordHash,
+      user.passwordHash,
     );
     if (!matches) {
       throw new InvalidCredentialsError();
     }
 
-    return admin;
+    return user;
   }
 }

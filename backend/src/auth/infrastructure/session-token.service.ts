@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Admin } from '../domain/admin.entity';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '../domain/user.entity';
 import { SessionPayload } from './session.types';
 
 /**
- * Encodes/decodes the (already cookie-signed, see AuthController) session
- * payload. Signing against tampering is delegated to `cookie-parser`'s
- * `signed: true` cookies using `SESSION_SECRET`; this service only handles
- * the payload shape and expiry.
+ * ADR 0021: Issues and verifies JWT tokens traveling in an httpOnly cookie.
+ * Signed with JWT_SECRET (or SESSION_SECRET as fallback).
  */
 @Injectable()
 export class SessionTokenService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   getSessionMaxAgeSeconds(): number {
     const raw = this.configService.get<string>('SESSION_MAX_AGE_SECONDS');
@@ -19,34 +21,49 @@ export class SessionTokenService {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 12 * 60 * 60;
   }
 
-  buildPayload(admin: Admin): SessionPayload {
-    const now = Math.floor(Date.now() / 1000);
-    return {
-      sub: admin.id,
-      username: admin.username,
-      iat: now,
-      exp: now + this.getSessionMaxAgeSeconds(),
+  private getSecret(): string {
+    return (
+      this.configService.get<string>('JWT_SECRET') ||
+      this.configService.get<string>('SESSION_SECRET') ||
+      'default-jwt-secret-armalytech'
+    );
+  }
+
+  async buildToken(user: User): Promise<string> {
+    const payload: SessionPayload = {
+      sub: user.id,
+      email: user.email,
+      username: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+      mustChangePassword: user.mustChangePassword,
     };
+    return this.jwtService.signAsync(payload, {
+      secret: this.getSecret(),
+      expiresIn: `${this.getSessionMaxAgeSeconds()}s`,
+    });
   }
 
-  encode(payload: SessionPayload): string {
-    return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
-  }
-
-  decode(raw: string): SessionPayload | null {
+  async decode(token: string): Promise<SessionPayload | null> {
     try {
-      const json = Buffer.from(raw, 'base64url').toString('utf8');
-      const payload = JSON.parse(json) as SessionPayload;
-      if (
-        typeof payload.sub !== 'string' ||
-        typeof payload.exp !== 'number' ||
-        payload.exp * 1000 < Date.now()
-      ) {
-        return null;
-      }
-      return payload;
+      return await this.jwtService.verifyAsync<SessionPayload>(token, {
+        secret: this.getSecret(),
+      });
     } catch {
       return null;
     }
+  }
+
+  // Backward compatibility with Admin entity
+  async buildPayload(admin: { id: string; username: string }): Promise<string> {
+    return this.buildToken({
+      id: admin.id,
+      email: admin.username,
+      passwordHash: '',
+      role: 'owner',
+      active: true,
+      tokenVersion: 0,
+      mustChangePassword: false,
+    });
   }
 }

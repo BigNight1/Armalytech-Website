@@ -15,9 +15,10 @@ export default function LoginForm({ onSubmit, submitting, error }) {
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
       <Input
-        label="Usuario"
-        name="username"
-        autoComplete="username"
+        label="Correo electrónico"
+        name="email"
+        placeholder="ejemplo@armalytech.com"
+        autoComplete="email"
         value={username}
         onChange={(event) => setUsername(event.target.value)}
         required

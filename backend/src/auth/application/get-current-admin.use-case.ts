@@ -1,22 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Admin } from '../domain/admin.entity';
+import { User } from '../domain/user.entity';
 import {
-  AdminRepository,
-  ADMIN_REPOSITORY,
-} from '../domain/admin-repository.port';
+  UserRepository,
+  USER_REPOSITORY,
+} from '../domain/user-repository.port';
 import { AdminNotFoundError } from '../domain/auth.errors';
 
 @Injectable()
 export class GetCurrentAdminUseCase {
   constructor(
-    @Inject(ADMIN_REPOSITORY) private readonly adminRepository: AdminRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(id: string): Promise<Admin> {
-    const admin = await this.adminRepository.findById(id);
-    if (!admin) {
+  async execute(id: string): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
       throw new AdminNotFoundError(id);
     }
-    return admin;
+    return user;
   }
 }

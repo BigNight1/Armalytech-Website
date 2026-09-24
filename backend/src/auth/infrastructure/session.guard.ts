@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,21 +10,28 @@ import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../../shared/infrastructure/public.decorator';
 import { SessionTokenService } from './session-token.service';
 import { SESSION_COOKIE_NAME } from './session.types';
+import {
+  UserRepository,
+  USER_REPOSITORY,
+} from '../domain/user-repository.port';
 
 /**
- * Global guard (ADR 0004/0010): every route is protected unless marked
- * `@Public()`. Reads the signed session cookie set by cookie-parser
- * (configured with SESSION_SECRET) and rejects with 401 when missing,
- * tampered with, or expired.
+ * Global guard (ADR 0021): every route is protected unless marked `@Public()`.
+ * Validates the JWT cookie and verifies in MongoDB that:
+ * 1) The user still exists
+ * 2) The user is active (not deactivated)
+ * 3) The tokenVersion matches (sessions revoked on password/email change or logout)
  */
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly sessionTokenService: SessionTokenService,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: UserRepository,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -36,18 +44,42 @@ export class SessionGuard implements CanActivate {
     const signedCookies = (
       request as Request & { signedCookies?: Record<string, string | false> }
     ).signedCookies;
-    const raw = signedCookies?.[SESSION_COOKIE_NAME];
+    const cookies = request.cookies as Record<string, string> | undefined;
 
-    if (!raw) {
+    const raw =
+      signedCookies?.[SESSION_COOKIE_NAME] || cookies?.[SESSION_COOKIE_NAME];
+
+    if (!raw || typeof raw !== 'string') {
       throw new UnauthorizedException('Authentication required');
     }
 
-    const payload = this.sessionTokenService.decode(raw);
+    const payload = await this.sessionTokenService.decode(raw);
     if (!payload) {
       throw new UnauthorizedException('Session expired or invalid');
     }
 
-    (request as Request & { admin?: unknown }).admin = payload;
+    const user = await this.userRepository.findById(payload.sub);
+    if (!user || !user.active) {
+      throw new UnauthorizedException('Usuario inactivo o no encontrado');
+    }
+
+    if (user.tokenVersion !== payload.tokenVersion) {
+      throw new UnauthorizedException(
+        'La sesión ha expirado por cambio de credenciales',
+      );
+    }
+
+    // Attach user to request
+    (request as Request & { user?: unknown; admin?: unknown }).user = user;
+    (request as Request & { admin?: unknown }).admin = {
+      sub: user.id,
+      email: user.email,
+      username: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+      mustChangePassword: user.mustChangePassword,
+    };
+
     return true;
   }
 }
