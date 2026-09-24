@@ -15,7 +15,7 @@ const TABS = [
  */
 export default function SummaryPanel({ activeTab, onTabChange, totals, title, isLoading }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-slate-700 bg-brand-navy-light/60 p-4">
+    <div className="flex flex-col gap-3 self-start rounded-lg border border-slate-700 bg-brand-navy-light/60 p-4">
       <div className="flex gap-1 rounded-lg bg-slate-900 p-1">
         {TABS.map((tab) => (
           <button

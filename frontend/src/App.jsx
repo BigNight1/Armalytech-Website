@@ -54,7 +54,13 @@ function App() {
           <Route
             path="/admin/*"
             element={
-              <Suspense fallback={<div className="min-h-screen bg-brand-navy" />}>
+              <Suspense
+                fallback={
+                  <div className="flex min-h-screen items-center justify-center bg-brand-navy">
+                    <img src="/Armalytech_logo.png" alt="ArmalyTech" className="h-14 w-14 animate-pulse object-contain" />
+                  </div>
+                }
+              >
                 <AdminRoutes />
               </Suspense>
             }

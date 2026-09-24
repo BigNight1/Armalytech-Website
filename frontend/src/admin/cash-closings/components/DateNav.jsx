@@ -3,7 +3,7 @@ import { DatePicker } from '../../shared/ui/index.js';
 import { formatDateLabel, formatDayOfWeek } from '../lib/dateRange.js';
 
 /**
- * Day picker for the Historial grid: prev/next arrows, a native date input,
+ * Day picker for the Historial grid: prev/next arrows, a popover date picker,
  * and a "Hoy" badge — mirrors the desktop `CierreDeDia` header without MUI.
  */
 export default function DateNav({ selectedDate, isToday, maxDate, onPrevDay, onNextDay, onPickDate }) {
@@ -36,6 +36,7 @@ export default function DateNav({ selectedDate, isToday, maxDate, onPrevDay, onN
 
       <DatePicker
         className="ml-auto"
+        align="end"
         value={selectedDate}
         maxDate={maxDate}
         onChange={onPickDate}

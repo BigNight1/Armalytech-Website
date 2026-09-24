@@ -35,7 +35,7 @@ export default function RegisterPage() {
     if (!form.firstName.trim()) nextErrors.firstName = 'Ingresa tu nombre';
     if (!form.lastName.trim()) nextErrors.lastName = 'Ingresa tu apellido';
     if (!isValidPeruvianPhone(form.phone)) {
-      nextErrors.phone = 'Ingresa un número de WhatsApp peruano válido (ej. 965 728 013)';
+      nextErrors.phone = 'Ingresa un número de WhatsApp peruano válido (9 dígitos, empieza con 9)';
     }
     if (!form.marketingConsent) {
       nextErrors.marketingConsent = 'Debes aceptar para poder registrarte';
@@ -118,7 +118,7 @@ export default function RegisterPage() {
                 value={form.phone}
                 onChange={(v) => updateField('phone', v)}
                 error={errors.phone}
-                placeholder="965 728 013"
+                placeholder="9XX XXX XXX"
                 inputMode="tel"
                 autoComplete="tel"
                 hint={!phoneIsValid && form.phone.trim() !== '' ? 'Formato no reconocido' : undefined}

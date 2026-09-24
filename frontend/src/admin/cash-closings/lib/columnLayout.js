@@ -5,17 +5,24 @@
  * throw or be unavailable (private browsing, blocked storage).
  */
 
-const STORAGE_KEY = 'admin.historial.gridColumns.v1';
+const STORAGE_KEY = 'admin.historial.gridColumns.v2';
 
 /** Base column order/widths — matches the backend row shape + a trailing save-status column. */
+// `grow` makes the detail columns absorb the leftover width so the grid fills
+// its container instead of leaving an empty band on the right. The status and
+// actions columns are fixed and always stay last (not user-movable).
 export const BASE_COLUMNS = [
-  { id: 'cashIncome', title: 'Ingreso efectivo', width: 150, kind: 'money' },
-  { id: 'yapeIncome', title: 'Ingreso Yape', width: 150, kind: 'money' },
-  { id: 'incomeDetail', title: 'Detalle ingreso', width: 220, kind: 'text' },
-  { id: 'cashExpense', title: 'Gasto efectivo', width: 150, kind: 'money' },
-  { id: 'yapeExpense', title: 'Gasto Yape', width: 150, kind: 'money' },
-  { id: 'expenseDetail', title: 'Detalle gasto', width: 220, kind: 'text' },
-  { id: 'status', title: 'Estado', width: 90, kind: 'status' },
+  { id: 'cashIncome', title: 'Ingreso efectivo', width: 140, kind: 'money' },
+  { id: 'yapeIncome', title: 'Ingreso Yape', width: 130, kind: 'money' },
+  { id: 'incomeDetail', title: 'Detalle ingreso', width: 200, kind: 'text', grow: 1 },
+  { id: 'cashExpense', title: 'Gasto efectivo', width: 140, kind: 'money' },
+  { id: 'yapeExpense', title: 'Gasto Yape', width: 130, kind: 'money' },
+  { id: 'expenseDetail', title: 'Detalle gasto', width: 200, kind: 'text', grow: 1 },
+];
+
+export const FIXED_TRAILING_COLUMNS = [
+  { id: 'status', title: '', width: 36, kind: 'status' },
+  { id: 'actions', title: '', width: 44, kind: 'actions' },
 ];
 
 const BASE_ORDER = BASE_COLUMNS.map((c) => c.id);

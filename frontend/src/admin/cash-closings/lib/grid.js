@@ -22,6 +22,13 @@ export function emptyRow(rowIndex) {
   };
 }
 
+/** True when every editable field of a grid row is empty. */
+export function isBlankRow(row) {
+  return ['cashIncome', 'yapeIncome', 'incomeDetail', 'cashExpense', 'yapeExpense', 'expenseDetail'].every(
+    (field) => !row[field],
+  );
+}
+
 /** Backend row (numbers) -> editable grid row (strings, `0` shown as blank). */
 export function fromApiRow(apiRow) {
   return {

@@ -28,15 +28,22 @@ export const gridTheme = {
   accentLight: BRAND.orangeLight,
 
   textDark: BRAND.ink,
-  textMedium: BRAND.slate400,
+  textMedium: BRAND.ink,
   textLight: BRAND.slate400,
   textBubble: BRAND.ink,
+  // Glide's defaults for these are dark grays meant for light themes — without
+  // them the headers and row numbers are unreadable on navy.
+  textHeader: BRAND.ink,
+  textHeaderSelected: '#ffffff',
+  textGroupHeader: BRAND.ink,
+  bgIconHeader: BRAND.slate400,
+  fgIconHeader: BRAND.navy,
 
   bgCell: BRAND.navy,
   bgCellMedium: BRAND.navyLight,
-  bgHeader: BRAND.navyDark,
-  bgHeaderHasFocus: BRAND.navyLight,
-  bgHeaderHovered: BRAND.navyLight,
+  bgHeader: BRAND.navyLight,
+  bgHeaderHasFocus: '#334155',
+  bgHeaderHovered: '#334155',
 
   bgBubble: BRAND.navyLight,
   bgBubbleSelected: BRAND.orange,
@@ -51,10 +58,10 @@ export const gridTheme = {
   cellHorizontalPadding: 8,
   cellVerticalPadding: 6,
 
-  headerFontStyle: '600 12px',
-  baseFontStyle: '13px',
+  headerFontStyle: '600 13px',
+  baseFontStyle: '14px',
   fontFamily: FONT_FAMILY,
-  editorFontSize: '13px',
+  editorFontSize: '14px',
 
   lineHeight: 1.4,
   roundingRadius: 6,

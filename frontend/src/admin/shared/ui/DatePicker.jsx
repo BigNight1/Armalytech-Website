@@ -44,7 +44,7 @@ function formatDisplay(iso) {
  * click/Escape, fully keyboard accessible (native `<button>` trigger +
  * `DayPicker`'s own roving focus).
  */
-export default function DatePicker({ value, onChange, maxDate, label, className = '' }) {
+export default function DatePicker({ value, onChange, maxDate, label, className = '', align = 'start' }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const popoverId = useId();
@@ -79,7 +79,7 @@ export default function DatePicker({ value, onChange, maxDate, label, className 
           id={popoverId}
           role="dialog"
           aria-label={label ?? 'Elegir fecha'}
-          className="absolute z-20 mt-2 rounded-lg border border-slate-700 shadow-xl"
+          className={`absolute z-20 mt-2 rounded-lg border border-slate-700 shadow-xl ${align === 'end' ? 'right-0' : 'left-0'}`}
         >
           <DayPicker
             mode="single"

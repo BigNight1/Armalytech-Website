@@ -163,7 +163,7 @@ export default function InventoryPage() {
                 )}
               </>
             ) : (
-              <p className="text-sm text-slate-400">Selecciona una marca de la izquierda para ver sus modelos.</p>
+              <p className="text-sm text-slate-400">Selecciona una marca para ver sus modelos.</p>
             )}
           </div>
         </div>

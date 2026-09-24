@@ -56,7 +56,7 @@ export default function CashClosingsPage() {
         onPickDate={setSelectedDate}
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_18rem]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
         {showGridLoading ? (
           <SkeletonTable rows={8} columns={6} />
         ) : (

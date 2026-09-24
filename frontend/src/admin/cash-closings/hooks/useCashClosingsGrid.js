@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cashClosingsApi } from '../api/cashClosingsApi.js';
 import { cashClosingsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
-import { appendRow, appendRows, buildGridRows, emptyRow, toApiPayload } from '../lib/grid.js';
+import { appendRow, appendRows, buildGridRows, emptyRow, isBlankRow, toApiPayload } from '../lib/grid.js';
 
 /**
  * Owns the editable rows for one date (T14: TanStack Query for the fetch;
@@ -110,6 +110,14 @@ export function useCashClosingsGrid(selectedDate) {
 
   const deleteRow = useCallback(
     (rowIndex) => {
+      // Nothing persisted for this row yet: clear it locally, no request.
+      const saved = lastSavedRef.current.get(rowIndex);
+      if (!saved || isBlankRow(saved)) {
+        const cleared = emptyRow(rowIndex);
+        setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
+        return;
+      }
+
       setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
 
       deleteMutation.mutate(rowIndex, {
