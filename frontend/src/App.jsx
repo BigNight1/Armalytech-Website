@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
 import ScrollToTop from "./Components/ScrollToTop.jsx";
 import Home from "./Components/Home/Home.jsx";
 import PricingPage from "./Components/PricingPage.jsx";
@@ -14,6 +15,9 @@ import ProblemasoftwarePage from "./Components/ServicePage/ProblemasoftwarePage.
 import { WhatsAppWidget } from 'react-whatsapp-widget';
 import 'react-whatsapp-widget/dist/index.css';
 
+// Lazy-loaded so the admin panel bundle never ships to public-site visitors.
+const AdminRoutes = lazy(() => import('./admin/AdminRoutes.jsx'));
+
 const CompanyIcon = () => (
   <img 
     src="/ArmalyTechlogopeq.webp" 
@@ -23,6 +27,9 @@ const CompanyIcon = () => (
 );
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <div>
       <ScrollToTop />
@@ -38,21 +45,32 @@ function App() {
           <Route path="/servicios/reparacion-puerto-de-carga" element={<ReparacionPuertoCargaPage />} />
           <Route path="/servicios/restauracion-dano-de-agua" element={<RestauracionDanoAguaPage />} />
           <Route path="/servicios/problemas-de-software" element={<ProblemasoftwarePage />} />
+          {/* Admin panel: no public NavBar/Footer, own layout, lazy-loaded bundle. */}
+          <Route
+            path="/admin/*"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-brand-navy" />}>
+                <AdminRoutes />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<PageError />} />
         </Routes>
       </main>
 
-      <div className="whatsapp-widget-wrapper fixed bottom-0 right-0 z-[99999]">
-        <WhatsAppWidget 
-          phoneNumber="51924548268" 
-          companyName="ArmalyTech"
-          message="¡Hola! ¿En qué podemos ayudarte?"
-          replyTimeText="Normalmente responde en unos minutos"
-          inputPlaceHolder="Escribe un mensaje"
-          sendButtonText="Enviar"
-          CompanyIcon={CompanyIcon}
-        />
-      </div>
+      {!isAdminRoute && (
+        <div className="whatsapp-widget-wrapper fixed bottom-0 right-0 z-[99999]">
+          <WhatsAppWidget
+            phoneNumber="51924548268"
+            companyName="ArmalyTech"
+            message="¡Hola! ¿En qué podemos ayudarte?"
+            replyTimeText="Normalmente responde en unos minutos"
+            inputPlaceHolder="Escribe un mensaje"
+            sendButtonText="Enviar"
+            CompanyIcon={CompanyIcon}
+          />
+        </div>
+      )}
     </div>
   );
 }

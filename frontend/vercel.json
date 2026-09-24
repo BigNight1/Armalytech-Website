@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/api/health", "destination": "https://REPLACE_WITH_BACKEND_URL/api/health" },
+    { "source": "/api/auth/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/auth/:path*" },
+    { "source": "/api/inventory/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/inventory/:path*" },
+    { "source": "/api/cash-closings/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/cash-closings/:path*" },
     { "source": "/((?!api/).*)", "destination": "/" }
   ]
 }

@@ -5,8 +5,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
+      // Admin panel backend (NestJS, `backend/`, default port 3000). Keeps
+      // the existing `/api/contact` serverless function (see api/) untouched
+      // by scoping the proxy to the admin-panel prefixes only.
+      '^/api/(health|auth|inventory|cash-closings)': {
+        target: 'http://localhost:3000',
         changeOrigin: true,
       },
     },

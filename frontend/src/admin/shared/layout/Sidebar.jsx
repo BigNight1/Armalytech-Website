@@ -1,0 +1,39 @@
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../auth/useAuth.js';
+import Button from '../ui/Button.jsx';
+
+const NAV_ITEMS = [
+  { to: '/admin/inventario', label: 'Inventario' },
+  { to: '/admin/historial', label: 'Historial' },
+];
+
+const linkClasses = ({ isActive }) =>
+  `block rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+    isActive ? 'bg-brand-orange text-white' : 'text-brand-ink hover:bg-slate-800'
+  }`;
+
+/** Left sidebar: logo, section nav, and logout. `onNavigate` closes the mobile drawer. */
+export default function Sidebar({ onNavigate }) {
+  const { logout } = useAuth();
+
+  return (
+    <div className="flex h-full flex-col bg-brand-navy-dark px-4 py-6">
+      <div className="mb-8 flex items-center gap-3 px-2">
+        <img src="/Armalytech_logo.png" alt="ArmalyTech" className="h-10 w-10 object-contain" />
+        <span className="text-lg font-semibold text-brand-ink">ArmalyTech</span>
+      </div>
+
+      <nav className="flex flex-1 flex-col gap-1">
+        {NAV_ITEMS.map((item) => (
+          <NavLink key={item.to} to={item.to} className={linkClasses} onClick={onNavigate}>
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <Button variant="ghost" className="justify-start" onClick={logout}>
+        Cerrar sesión
+      </Button>
+    </div>
+  );
+}
