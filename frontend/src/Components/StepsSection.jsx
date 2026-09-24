@@ -1,4 +1,3 @@
-import React from "react";
 import "./steps-section.css";
 
 const STEPS = [

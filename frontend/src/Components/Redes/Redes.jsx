@@ -1,4 +1,3 @@
-import React from "react";
 import "./redes.css";
 import FAQ from "./FAQ/FAQ";
 

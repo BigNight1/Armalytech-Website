@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ScrollToLink from "../ScrollToLink.jsx";
 import menuItems from "./menuItems.json";

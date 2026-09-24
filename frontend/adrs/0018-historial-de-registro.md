@@ -48,3 +48,10 @@ Nueva colección **`historial`** (event log) en la misma base MongoDB:
   registros por día) está muy lejos de preocupar en el free tier M0.
 - `motivoRechazo` da visibilidad de fricción real del formulario (cuántos intentan registrarse y
   fallan por número inválido o por el checkbox de consentimiento).
+
+## Nota (2026-09-23)
+
+La sección **Historial** del sidebar del panel admin se reservó para el cierre de caja diario
+(ver [ADR-0019](0019-historial-panel-cierre-caja.md)). El `historial` de comunidad descrito en
+este ADR se mostrará más adelante bajo la sección **Clientes**, con otro nombre en la UI. El
+modelo de datos de este ADR no cambia.

@@ -1,4 +1,3 @@
-import React from "react";
 import faqs from "./faqs.json";
 import FaqItem from "./FaqItem";
 
