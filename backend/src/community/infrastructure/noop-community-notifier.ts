@@ -16,4 +16,21 @@ export class NoopCommunityNotifier implements CommunityNotifier {
       `notifyRegistered no-op for client ${client.id} (isNewClient=${isNewClient})`,
     );
   }
+
+  async notifyVisitThreshold(client: Client, threshold: number): Promise<void> {
+    this.logger.debug(
+      `notifyVisitThreshold no-op for client ${client.id} (threshold=${threshold})`,
+    );
+  }
+
+  async notifyDirectMessage(
+    client: Client,
+    template: 'promo_20' | 'google_review' | 'reconnect',
+  ): Promise<{ sent: boolean; message?: string }> {
+    this.logger.debug(
+      `notifyDirectMessage no-op for client ${client.id} (template=${template})`,
+    );
+    return { sent: false, message: '' };
+  }
 }
+
