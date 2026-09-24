@@ -17,6 +17,9 @@ import 'react-whatsapp-widget/dist/index.css';
 
 // Lazy-loaded so the admin panel bundle never ships to public-site visitors.
 const AdminRoutes = lazy(() => import('./admin/AdminRoutes.jsx'));
+// Lazy-loaded QR/NFC landing page (community registration, ADR 0012):
+// its own bundle chunk, kept out of both the public and admin bundles.
+const RegisterPage = lazy(() => import('./community/RegisterPage.jsx'));
 
 const CompanyIcon = () => (
   <img 
@@ -29,6 +32,8 @@ const CompanyIcon = () => (
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isRegisterRoute = location.pathname.startsWith('/registrar');
+  const hideSiteChrome = isAdminRoute || isRegisterRoute;
 
   return (
     <div>
@@ -54,11 +59,21 @@ function App() {
               </Suspense>
             }
           />
+          {/* QR/NFC community registration landing (ADR 0012): no public
+              NavBar/Footer/WhatsApp widget, own lazy-loaded bundle. */}
+          <Route
+            path="/registrar/usuario"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-brand-navy" />}>
+                <RegisterPage />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<PageError />} />
         </Routes>
       </main>
 
-      {!isAdminRoute && (
+      {!hideSiteChrome && (
         <div className="whatsapp-widget-wrapper fixed bottom-0 right-0 z-[99999]">
           <WhatsAppWidget
             phoneNumber="51924548268"
