@@ -26,6 +26,9 @@ Out of scope now: Tickets (Phase 2), messaging n8n/Meta (Phase 5).
 - Stock adjustments use a conditional atomic update (`$inc` with a `quantity >= needed` filter) → 409 when there is not enough stock. Resolves the ADR 0006 pending item.
 - Deleting a brand/model cascades to its children, same as the SQLite FKs in the desktop app.
 
+- Messaging (user, 2026-09-23): NO welcome message; NO "BAJA" opt-out flow; campaigns postponed (to be analyzed later). The only automated message is the pickup + review request when a ticket becomes `listo` (not `entregado` as ADR 0017 said), sent only to clients whose "Acepta promociones" is Aprobó. Template draft: `n8n/templates/equipo-listo-resena.md`.
+- Clientes table: Nombre, Apellido, Número, "Acepta promociones" = Aprobó / Descartó.
+
 ## Architecture (user requirement, 2026-09-23)
 Clean Architecture, screaming structure per feature. Backend: `src/<feature>/{domain,application,infrastructure}`.
 - `domain`: entities/value objects plus repository ports (interfaces). No Nest, Mongoose, or framework imports.
