@@ -80,8 +80,10 @@ etapa de diseño detallado del ticket, a definir con el usuario. -->
   ticket — el cliente debe entrar al enlace cuando quiera revisar.
 - No incluye login o cuenta de usuario para el cliente — el enlace público es
   suficiente, sin contraseña.
-- No incluye múltiples técnicos con permisos diferenciados ni gestión multi-sucursal
-  (es un solo rol admin/técnico en esta versión).
+- No incluye gestión multi-sucursal.
+- **Actualización 2026-09-23 (decisión del usuario):** el panel admite varios usuarios con
+  dos roles fijos, `owner` (admin principal) y `admin`, más las secciones Personal y Cuenta
+  (ADR 0021 a 0024). Siguen fuera de alcance los roles con permisos personalizados.
 - No incluye el sorteo ni otras funciones de marketing para atraer tráfico — quedan
   para una fase posterior, fuera de esta versión.
 

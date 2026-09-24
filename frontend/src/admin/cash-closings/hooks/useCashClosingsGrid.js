@@ -32,6 +32,10 @@ export function useCashClosingsGrid(selectedDate) {
 
   const rowsRef = useRef(rows);
   const lastSavedRef = useRef(new Map());
+  // rowIndexes that exist in the database for this date. Blank-looking rows
+  // can still be persisted (older all-zero saves), so "is it blank?" is not a
+  // reliable proxy for "is there anything to delete?".
+  const persistedRef = useRef(new Set());
 
   useEffect(() => {
     rowsRef.current = rows;
@@ -45,6 +49,7 @@ export function useCashClosingsGrid(selectedDate) {
     if (rowsQuery.data !== undefined || rowsQuery.isError) {
       setRows(gridRows);
       lastSavedRef.current = new Map(gridRows.map((row) => [row.rowIndex, row]));
+      persistedRef.current = new Set((rowsQuery.data ?? []).map((apiRow) => apiRow.rowIndex));
       setRowStatus({});
     }
     // Only re-seed when the query for this date settles (success or error).
@@ -67,10 +72,45 @@ export function useCashClosingsGrid(selectedDate) {
     setRows((current) => current.map((row) => (row.rowIndex === rowIndex ? { ...row, [field]: value } : row)));
   }, []);
 
+  const deleteRow = useCallback(
+    (rowIndex) => {
+      const cleared = emptyRow(rowIndex);
+      // Nothing in the database for this row: just clear it locally.
+      if (!persistedRef.current.has(rowIndex)) {
+        lastSavedRef.current.set(rowIndex, cleared);
+        setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
+        return;
+      }
+
+      setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
+
+      deleteMutation.mutate(rowIndex, {
+        onSuccess: () => {
+          persistedRef.current.delete(rowIndex);
+          lastSavedRef.current.set(rowIndex, cleared);
+          setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
+          setRowStatus((current) => ({ ...current, [rowIndex]: 'idle' }));
+          invalidateAfterWrite();
+        },
+        onError: (error) => {
+          setRowStatus((current) => ({ ...current, [rowIndex]: 'error' }));
+          notify(`No se pudo eliminar la fila ${rowIndex + 1}: ${error.message}`, { type: 'error' });
+        },
+      });
+    },
+    [deleteMutation, invalidateAfterWrite, notify],
+  );
+
   const saveRow = useCallback(
     (rowIndex) => {
       const row = rowsRef.current.find((r) => r.rowIndex === rowIndex);
       if (!row) return;
+
+      // Clearing every cell of a row removes it instead of storing an empty row.
+      if (isBlankRow(row)) {
+        deleteRow(rowIndex);
+        return;
+      }
 
       setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
 
@@ -78,6 +118,7 @@ export function useCashClosingsGrid(selectedDate) {
         { rowIndex, payload: toApiPayload(row) },
         {
           onSuccess: () => {
+            persistedRef.current.add(rowIndex);
             lastSavedRef.current.set(rowIndex, row);
             invalidateAfterWrite();
             setRowStatus((current) => ({ ...current, [rowIndex]: 'saved' }));
@@ -96,7 +137,7 @@ export function useCashClosingsGrid(selectedDate) {
         },
       );
     },
-    [upsertMutation, invalidateAfterWrite, notify],
+    [upsertMutation, invalidateAfterWrite, notify, deleteRow],
   );
 
   const addRows = useCallback(() => {
@@ -108,34 +149,6 @@ export function useCashClosingsGrid(selectedDate) {
     setRows((current) => appendRow(current));
   }, []);
 
-  const deleteRow = useCallback(
-    (rowIndex) => {
-      // Nothing persisted for this row yet: clear it locally, no request.
-      const saved = lastSavedRef.current.get(rowIndex);
-      if (!saved || isBlankRow(saved)) {
-        const cleared = emptyRow(rowIndex);
-        setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
-        return;
-      }
-
-      setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
-
-      deleteMutation.mutate(rowIndex, {
-        onSuccess: () => {
-          const cleared = emptyRow(rowIndex);
-          lastSavedRef.current.set(rowIndex, cleared);
-          setRows((current) => current.map((r) => (r.rowIndex === rowIndex ? cleared : r)));
-          setRowStatus((current) => ({ ...current, [rowIndex]: 'idle' }));
-          invalidateAfterWrite();
-        },
-        onError: (error) => {
-          setRowStatus((current) => ({ ...current, [rowIndex]: 'error' }));
-          notify(`No se pudo eliminar la fila ${rowIndex + 1}: ${error.message}`, { type: 'error' });
-        },
-      });
-    },
-    [deleteMutation, invalidateAfterWrite, notify],
-  );
 
   return {
     rows,

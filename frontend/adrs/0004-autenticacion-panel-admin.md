@@ -2,7 +2,8 @@
 
 ## Estado
 
-Aceptado
+Reemplazado por [ADR 0021](0021-autenticacion-jwt-en-cookie.md) (2026-09-23): el panel pasa a varios
+usuarios con roles; ver también ADR 0022 a 0024.
 
 ## Contexto
 

@@ -74,7 +74,7 @@ comunidad (clientes + historial) e integración n8n + Meta WhatsApp Business API
 | [ADR-0001](adrs/0001-stack-frontend-react-vite.md) | Stack del frontend | Aceptado (heredado) |
 | [ADR-0002](adrs/0002-despliegue-vercel-free-tier.md) | Despliegue Vercel free tier (frontend + backend NestJS serverless) | Aceptado (heredado) |
 | [ADR-0003](adrs/0003-base-de-datos-mongodb-atlas.md) | MongoDB Atlas con Mongoose, sin backups en esta versión | Aceptado |
-| [ADR-0004](adrs/0004-autenticacion-panel-admin.md) | Auth: hash en MongoDB + cookie firmada + Guards | Aceptado |
+| [ADR-0004](adrs/0004-autenticacion-panel-admin.md) | Auth: hash en MongoDB + cookie firmada + Guards | Reemplazado por 0021 |
 | [ADR-0005](adrs/0005-contrato-de-api-rest.md) | Contrato de API REST en JSON (Controllers NestJS) | Aceptado |
 | [ADR-0006](adrs/0006-modelo-de-datos-tickets-e-inventario.md) | Modelo de datos + atomicidad de stock (update condicional, cascada) | Aceptado |
 | [ADR-0007](adrs/0007-estados-del-ticket.md) | 5 estados (incluye abandonado) + ciclo 7/15 días | Aceptado |
@@ -91,6 +91,10 @@ comunidad (clientes + historial) e integración n8n + Meta WhatsApp Business API
 | [ADR-0018](adrs/0018-historial-de-registro.md) | Historial de registro y asistencias | Aceptado |
 | [ADR-0019](adrs/0019-historial-panel-cierre-caja.md) | Historial del panel = cierre de caja diario | Aceptado |
 | [ADR-0020](adrs/0020-arquitectura-limpia-por-feature.md) | Arquitectura limpia por feature (backend y frontend) | Aceptado |
+| [ADR-0021](adrs/0021-autenticacion-jwt-en-cookie.md) | Auth con `@nestjs/jwt` en cookie httpOnly + `tokenVersion` | Aceptado |
+| [ADR-0022](adrs/0022-usuarios-y-roles-fijos.md) | Usuarios del panel con roles fijos (`owner`, `admin`) | Aceptado |
+| [ADR-0023](adrs/0023-seccion-personal.md) | Sección Personal: alta con contraseña temporal, desactivar, resetear | Aceptado |
+| [ADR-0024](adrs/0024-seccion-cuenta.md) | Sección Cuenta: cambiar username/contraseña con contraseña actual | Aceptado |
 
 ## Modelo de datos
 
@@ -125,8 +129,10 @@ para el detalle de tareas y evidencia):
   hora de Lima (`America/Lima`), actualizado cada segundo (`src/admin/shared/layout/LimaClock.jsx`,
   `src/admin/shared/lib/time.js`). Rutas protegidas por `RequireAuth`; sin sesión, redirige a
   `/admin/login`.
-- **Auth**: cookie de sesión firmada httpOnly, bootstrap del admin desde `ADMIN_USERNAME`/
-  `ADMIN_PASSWORD` (ADR 0004).
+- **Auth**: hoy es una cookie de sesión firmada httpOnly, con bootstrap del admin desde
+  `ADMIN_USERNAME`/`ADMIN_PASSWORD` (ADR 0004). **Planificado:** JWT en cookie httpOnly con
+  `tokenVersion` (ADR 0021), usuarios con roles `owner`/`admin` (ADR 0022) y las secciones
+  Personal (ADR 0023) y Cuenta (ADR 0024).
 - **Inventory** (`GET|POST /api/inventory/brands`, `.../:brandId/models`, `.../:modelId/parts`,
   `PATCH|DELETE` por id, `POST /api/inventory/parts/:id/adjust`, `GET /api/inventory/search`):
   CRUD de marcas/modelos/repuestos, ajuste de stock atómico con `409` si no alcanza, cascada al
@@ -151,13 +157,46 @@ para el detalle de tareas y evidencia):
 
 ## Criterios de aceptación por flujo
 
-### Flujo: autenticación del panel
+### Flujo: autenticación del panel (ADR 0021, 0022)
 
-- [ ] Se crea el admin en bootstrap con password hasheado guardado en MongoDB (colección `admin`).
-- [ ] Con credenciales válidas, el admin llega al panel y queda autenticado; con inválidas, `401` y
-      no emite cookie.
-- [ ] Las rutas del panel responden `401` sin sesión válida (Guard de NestJS).
-- [ ] La cookie es `httpOnly`, `secure`, `SameSite=Lax` y expira; `/api/auth/logout` la invalida.
+- [ ] En el bootstrap se crea el usuario `ADMIN_USERNAME` con `role: owner`, con la contraseña
+      hasheada en la colección `users`. El admin existente en `admins` se migra a `users` como
+      `owner`.
+- [ ] Con credenciales válidas y usuario activo, `POST /api/auth/login` emite una cookie
+      `httpOnly` (`secure` en producción, `SameSite=Lax`) con un JWT que contiene `sub`,
+      `username`, `role` y `tokenVersion`. Con credenciales inválidas o un usuario inactivo,
+      responde `401` sin cookie y con un mensaje genérico.
+- [ ] Toda ruta del panel responde `401` sin JWT válido, con el JWT vencido o cuando el
+      `tokenVersion` del JWT no coincide con el guardado.
+- [ ] Una ruta con `@Roles('owner')` responde `403` a un usuario `admin`.
+- [ ] `GET /api/auth/me` devuelve `id`, `username`, `role` y `mustChangePassword`.
+- [ ] `POST /api/auth/logout` borra la cookie.
+- [ ] El login funciona igual desde el navegador del celular.
+
+### Flujo: sección Personal (owner, ADR 0023)
+
+- [ ] Un usuario `admin` no ve "Personal" en el sidebar, y `GET /api/staff` le responde `403`.
+- [ ] El `owner` ve la lista (usuario, rol, estado, creado por, fecha) y el detalle de cada usuario.
+- [ ] Crear un usuario con username y contraseña temporal lo deja con `role: admin` y
+      `mustChangePassword: true`. Un username repetido (sin distinguir mayúsculas) responde `409`.
+- [ ] En su primer ingreso, el usuario nuevo solo ve la pantalla "Crea tu nueva contraseña". Las
+      demás rutas del API le responden `403` hasta que la cambie.
+- [ ] Desactivar un usuario corta sus sesiones abiertas: su próximo request responde `401` y ya no
+      puede iniciar sesión. Reactivarlo le devuelve el acceso.
+- [ ] Resetear la contraseña deja otra temporal, vuelve a poner `mustChangePassword: true` y
+      cierra sus sesiones.
+- [ ] El `owner` no puede desactivarse a sí mismo, y siempre queda al menos un `owner` activo.
+      Si una acción lo impediría, responde `409`.
+
+### Flujo: sección Cuenta (todos, ADR 0024)
+
+- [ ] Cambiar el username o la contraseña con una contraseña actual incorrecta responde `401` y
+      no cambia nada.
+- [ ] La contraseña nueva debe tener al menos 8 caracteres y ser distinta de la actual; si no,
+      responde `400` con el motivo.
+- [ ] Después de un cambio exitoso, el usuario sigue conectado en el dispositivo actual (recibe un
+      JWT nuevo) y sus sesiones en otros dispositivos responden `401`.
+- [ ] Un username nuevo ya tomado responde `409`.
 
 ### Flujo: creación y gestión de tickets (admin)
 
@@ -241,8 +280,10 @@ para el detalle de tareas y evidencia):
   perder datos; mitigación mínima: dry-run + re-import desde SQLite (ADR 0003).
 - **Ciclo de abandono 7/15 días**: falta confirmar si el ticket abandonado se elimina o se conserva,
   y qué pasa si reaparece el cliente (ADR 0007).
-- **Seguridad de la sesión**: la cookie firmada y el hash del admin son la barrera del panel
-  (ADR-0004); un `SESSION_SECRET` débil expondría tickets e inventario; revocación central no existe.
+- **Seguridad de la sesión**: el JWT firmado con `JWT_SECRET` y el hash de cada usuario son la
+  barrera del panel (ADR-0021). Un secreto débil expondría todo el panel. La revocación se hace
+  por `tokenVersion`. No hay recuperación de contraseña por correo: la resetea el `owner` (ADR
+  0023, ADR 0024).
 - **Límites del free tier**: cold starts del backend NestJS y ~512 MB de Atlas bastan hoy, pero se
   deben monitorear al crecer inventario.
 - **Nombre de la ruta comunidad**: provisional (`/registrar/usuario`); cambiarla obliga a regenerar
