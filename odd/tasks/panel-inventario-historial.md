@@ -13,7 +13,8 @@ The desktop app lives on a single PC; the business needs it on the web alongside
 - New: Historial (cash closing) module + spreadsheet UI.
 - SQLite → Mongo migration script (ADR 0008).
 
-Out of scope now: Tickets (Phase 2), Community/Clientes (Phase 4), messaging (Phase 5).
+Added 2026-09-23 (user): Clientes section (Phase 4 community: ADR 0012-0018, without messaging).
+Out of scope now: Tickets (Phase 2), messaging n8n/Meta (Phase 5).
 
 ## Constraints
 - Vercel free tier (ADR 0002), MongoDB Atlas M0 (ADR 0003). Atlas URI not provided yet → local/in-memory Mongo for dev and tests.
@@ -60,6 +61,10 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - [x] T7 — Frontend Inventario section (port of the desktop screens). Route: delegated (parallel worktree). Commit `a1f287a`, merged `5ab6c40`.
 - [x] T8 — Frontend Historial spreadsheet grid + summary (port of CierreDeDia*). Route: delegated (parallel worktree). Commit `40179d4`, merged `8ff30ea`.
 - [x] T9 — Docs: ADR 0019/0020, ADR 0006/0008 resolved, TECH-DESIGN, ESLint config repaired. Route: delegated (parallel worktree). Commits `05f56a2`, `f46f220`, `0ce111a`, merged `bb550dd`.
+- [x] T10 — Layout fix: sidebar gap, clock moved left, greeting removed, Clientes route placeholder. Route: inline. Commit `d0c9145`.
+- [ ] T11 — Backend community feature (clients, E.164 Peru normalization, phone dedup, consent, visits, community history events). Route: delegated.
+- [ ] T12 — Public `/registrar/usuario` form. Route: delegated.
+- [ ] T13 — Panel Clientes section (list/search, visits, consent, per-client history). Route: delegated.
 
 ## Acceptance criteria
 - Backend e2e tests pass; frontend builds and lints.
