@@ -7,4 +7,6 @@ export { default as ConfirmDialog } from './ConfirmDialog.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
 export { default as Spinner } from './Spinner.jsx';
 export { default as Skeleton, SkeletonTable, SkeletonRows } from './Skeleton.jsx';
+export { default as DatePicker } from './DatePicker.jsx';
+export { default as DateRangePicker } from './DateRangePicker.jsx';
 export { ToastProvider, useToast } from './ToastProvider.jsx';

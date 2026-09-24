@@ -1,4 +1,5 @@
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { DatePicker } from '../../shared/ui/index.js';
 import { formatDateLabel, formatDayOfWeek } from '../lib/dateRange.js';
 
 /**
@@ -33,16 +34,12 @@ export default function DateNav({ selectedDate, isToday, maxDate, onPrevDay, onN
         <FiChevronRight size={18} />
       </button>
 
-      <label className="ml-auto flex flex-col gap-1 text-xs text-brand-ink">
-        <span className="sr-only">Elegir fecha</span>
-        <input
-          type="date"
-          value={selectedDate}
-          max={maxDate}
-          onChange={(event) => onPickDate(event.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-orange"
-        />
-      </label>
+      <DatePicker
+        className="ml-auto"
+        value={selectedDate}
+        maxDate={maxDate}
+        onChange={onPickDate}
+      />
     </div>
   );
 }

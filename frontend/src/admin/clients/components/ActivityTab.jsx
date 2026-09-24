@@ -1,4 +1,5 @@
-import { EmptyState, Select, SkeletonTable } from '../../shared/ui/index.js';
+import { DateRangePicker, EmptyState, Select, SkeletonTable } from '../../shared/ui/index.js';
+import { todayInLima } from '../../shared/lib/time.js';
 import { EVENT_TYPE_LABELS, REJECT_REASON_LABELS, formatLimaShort } from '../lib/format.js';
 
 const TYPE_OPTIONS = [
@@ -13,24 +14,7 @@ export default function ActivityTab({ events, isLoading, range, onRangeChange, t
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm text-brand-ink">
-          <span className="font-medium">Desde</span>
-          <input
-            type="date"
-            value={range.from}
-            onChange={(e) => onRangeChange({ ...range, from: e.target.value })}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-orange"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-brand-ink">
-          <span className="font-medium">Hasta</span>
-          <input
-            type="date"
-            value={range.to}
-            onChange={(e) => onRangeChange({ ...range, to: e.target.value })}
-            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-orange"
-          />
-        </label>
+        <DateRangePicker label="Rango de fechas" value={range} onChange={onRangeChange} maxDate={todayInLima()} />
         <Select
           label="Tipo"
           options={TYPE_OPTIONS}
