@@ -13,11 +13,9 @@ la migración es un proceso puntual, no parte del runtime.
 
 ## Decisión
 
-**PRELIMINAR — hay que revisar el proyecto de escritorio Invetario-Armalytech antes de escribir el
-script.** Se necesita ver cómo está guardada la información en la SQLite local (tablas, columnas,
-si existe `cantidad`, duplicados) para definir cómo se guarda y cómo se recibe en el módulo de
-inventario web. Esta revisión es un prerequisito del diseño del import, no un detalle de
-implementación.
+**Resuelto (2026-09-23), ver Actualización más abajo.** Se revisó el proyecto de escritorio
+`Invetario-Armalytech` (Electron + SQLite, tablas `brands`/`models`/`parts`/`cierre_dia`) y se
+construyó el script de migración con ese schema real.
 
 Con eso definido, construir un **script de migración one-off** (Node.js) que:
 
@@ -48,3 +46,18 @@ carga en producción, o el script corre por CLI contra Atlas.
   para la idempotencia; si hay duplicados, el reporte los muestra y el usuario decide.
 - Trade-off: sin backups (ADR 0003) un error en el import puede dañar el inventario; el dry-run
   previo y la posibilidad de re-importar desde la SQLite original son la mitigación mínima.
+
+## Actualización (2026-09-23)
+
+Revisado el proyecto de escritorio (`Invetario-Armalytech`, Electron + better-sqlite3). Schema
+real: tablas `brands` (marcas), `models` (marcaId, modelos), `parts` (modeloId, cantidad,
+repuestos) y `cierre_dia` (planilla de cierre de caja diario, ver ADR 0019 sobre dónde se muestra
+en el panel). Se implementó `backend/scripts/migrate-sqlite.ts`:
+
+- Lee el archivo SQLite pasado por argumento con `better-sqlite3`, reutiliza los mismos esquemas
+  de Mongoose que usa la app en runtime (`inventory` y `cash-closings`) en vez de pasar por HTTP.
+- Idempotente por clave natural: nombre de marca; marca + nombre de modelo; modelo + nombre de
+  repuesto; fecha + índice de fila para `cierre_dia`. Reejecutar el script no duplica datos.
+- Soporta `--dry-run` (solo lee y cuenta, no escribe) y `--help`. Requiere `MONGODB_URI` en el
+  entorno para una corrida real (no dry-run).
+- Verificado contra un fixture SQLite sintético (`backend/README.md`, sección de migración).

@@ -52,3 +52,16 @@ resultado), o riesgo aceptado con reconciliación manual. Se registra también e
   (`marcaId`, `modeloId`, `repuestoId`) deben mantenerse en el código de las API, no en la base.
 - Trade-off: el tamaño del documento de ticket crece con notas e historial; aceptable para volúmenes
   de un negocio chico.
+
+## Actualización (2026-09-23)
+
+Se resuelve el punto pendiente de atomicidad del stock, implementado en el módulo `inventory` del
+backend (`backend/src/inventory/`):
+
+- El ajuste de `repuestos.cantidad` usa un **update condicional atómico** (`findOneAndUpdate` con
+  `$inc` y un filtro `cantidad >= |delta|` cuando `delta` es negativo). Si el filtro no matchea
+  (stock insuficiente), la operación no se aplica y la API devuelve `409 Conflict`. Se descarta la
+  opción de transacción de Mongoose para no depender de su soporte en el free tier M0.
+- Se agrega además: **borrado en cascada** al eliminar una marca o un modelo — elimina también sus
+  modelos/repuestos hijos, replicando el comportamiento de las FKs `ON DELETE CASCADE` de la SQLite
+  de la app de escritorio (`Invetario-Armalytech`), en vez de bloquear el borrado o dejar huérfanos.

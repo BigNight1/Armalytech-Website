@@ -30,24 +30,30 @@ de visitas, panel con secciones **Clientes** e **Historial de registro**, y mens
 ┌────────────────────────────────────────────────────────────┐
 │  Frontend (SPA React + Vite + Tailwind) — frontend/        │
 │  · Sitio público (ya existente)                            │
-│  · Panel admin (/admin: login, tickets, inventario,        │
-│    clientes, historial)                              NUEVO │
+│  · Panel admin (/admin, layout con sidebar + reloj Lima):  │
+│    - Inventario (marcas → modelos → repuestos)  IMPLEMENTADO│
+│    - Historial = cierre de caja diario (ADR 0019) IMPLEMENTADO (backend) │
+│    - Clientes / tickets                              NUEVO │
 │  · Vista pública (/ticket/:publicToken)               NUEVO │
 │  · Ruta comunidad (/registrar/usuario)                NUEVO │
 └───────────────┬────────────────────────────────────────────┘
-                │ fetch JSON (REST)
+                │ fetch JSON (REST), src/admin/<feature>/api/*
 ┌───────────────▼────────────────────────────────────────────┐
-│  Backend NestJS — backend/ (NUEVO)                         │
-│  · Módulos: Auth, Tickets, Inventory, Migration,           │
-│    Community (registro clientes + historial)          NUEVO │
+│  Backend NestJS — backend/ (IMPLEMENTADO: auth, inventory, │
+│  cash-closings; NUEVO: tickets, comunidad)                 │
+│  · Features en Clean Architecture (ADR 0020):              │
+│    domain/application/infrastructure por feature           │
+│  · Módulos: Auth, Inventory, CashClosings, Tickets (NUEVO),│
+│    Community (registro clientes + historial, NUEVO)        │
 │  · Guards de autorización + Pipes de validación            │
 │  · Corriendo como función serverless en Vercel /api/*      │
 └───────────────┬────────────────────────────────────────────┘
                 │ @nestjs/mongoose (conexión cacheada)
 ┌───────────────▼────────────────────────────────────────────┐
-│  MongoDB Atlas (free tier M0) — NUEVO                      │
-│  colecciones: tickets, marcas, modelos, repuestos, admin,  │
-│  clientes, historial                                  NUEVO │
+│  MongoDB Atlas (free tier M0)                              │
+│  colecciones: tickets (NUEVO), brands/models/parts,        │
+│  cashClosingRows (cierre de caja), admin, clientes,        │
+│  historial (comunidad, NUEVO)                              │
 └────────────────────────────────────────────────────────────┘
 
 · n8n (automatización de mensajería) — NUEVO: recibe webhooks del
@@ -70,9 +76,9 @@ comunidad (clientes + historial) e integración n8n + Meta WhatsApp Business API
 | [ADR-0003](adrs/0003-base-de-datos-mongodb-atlas.md) | MongoDB Atlas con Mongoose, sin backups en esta versión | Aceptado |
 | [ADR-0004](adrs/0004-autenticacion-panel-admin.md) | Auth: hash en MongoDB + cookie firmada + Guards | Aceptado |
 | [ADR-0005](adrs/0005-contrato-de-api-rest.md) | Contrato de API REST en JSON (Controllers NestJS) | Aceptado |
-| [ADR-0006](adrs/0006-modelo-de-datos-tickets-e-inventario.md) | Modelo de datos + atomicidad de stock PENDIENTE | Aceptado |
+| [ADR-0006](adrs/0006-modelo-de-datos-tickets-e-inventario.md) | Modelo de datos + atomicidad de stock (update condicional, cascada) | Aceptado |
 | [ADR-0007](adrs/0007-estados-del-ticket.md) | 5 estados (incluye abandonado) + ciclo 7/15 días | Aceptado |
-| [ADR-0008](adrs/0008-migracion-de-inventario-desde-sqlite.md) | Migración SQLite: PENDIENTE revisar proyecto desktop | Aceptado (preliminar) |
+| [ADR-0008](adrs/0008-migracion-de-inventario-desde-sqlite.md) | Migración SQLite (schema desktop revisado, script implementado) | Aceptado |
 | [ADR-0009](adrs/0009-manejo-de-estado-en-el-frontend.md) | Manejo de estado en el frontend | Aceptado |
 | [ADR-0010](adrs/0010-resiliencia-y-manejo-de-errores.md) | Resiliencia y manejo de errores | Aceptado |
 | [ADR-0011](adrs/0011-backend-nestjs.md) | Backend con NestJS | Aceptado |
@@ -83,6 +89,8 @@ comunidad (clientes + historial) e integración n8n + Meta WhatsApp Business API
 | [ADR-0016](adrs/0016-integracion-n8n-meta-whatsapp.md) | Integración n8n + Meta WhatsApp Business API | Aceptado |
 | [ADR-0017](adrs/0017-resenas-google-maps.md) | Pedido de reseña en Google Maps post-entrega | Aceptado |
 | [ADR-0018](adrs/0018-historial-de-registro.md) | Historial de registro y asistencias | Aceptado |
+| [ADR-0019](adrs/0019-historial-panel-cierre-caja.md) | Historial del panel = cierre de caja diario | Aceptado |
+| [ADR-0020](adrs/0020-arquitectura-limpia-por-feature.md) | Arquitectura limpia por feature (backend y frontend) | Aceptado |
 
 ## Modelo de datos
 
@@ -91,16 +99,45 @@ Colecciones MongoDB (detalle en ADR-0006):
 - **tickets**: cliente (nombre, apellido, teléfono), equipo (tipo, marca, modelo, descripción),
   estado (pendiente | trabajando | listo | entregado | abandonado), notas[], publicToken (aleatorio,
   índice único), repuestosUsados[], historialEstados[], fechas. Contador de 7 días sin cambio →
-  `abandonado`; 15 días en abandonado → eliminar o conservar (por definir).
-- **marcas** → **modelos** (marcaId) → **repuestos** (modeloId, cantidad): jerarquía existente
-  migrada desde SQLite, referencia garantizada a nivel de aplicación.
-- **admin**: username + passwordHash (bcrypt/argon2), creado en bootstrap; el hash vive en la base,
-  no en variables de entorno.
+  `abandonado`; 15 días en abandonado → eliminar o conservar (por definir). **NUEVO, pendiente.**
+- **brands** → **models** (brandId) → **parts** (modelId, quantity): jerarquía del inventario
+  migrada desde SQLite (`backend/scripts/migrate-sqlite.ts`, ADR 0008), referencia garantizada a
+  nivel de aplicación; ajuste de `quantity` por update condicional atómico (ADR 0006 actualizado).
+  **Implementado.**
+- **cashClosingRows**: fila de la planilla de cierre de caja diario — `date`, `rowIndex`,
+  `cashIncome`, `yapeIncome`, `incomeDetail`, `cashExpense`, `yapeExpense`, `expenseDetail`. Es el
+  "Historial" del sidebar del panel (ADR 0019), no el `historial` de comunidad del ADR 0018.
+  **Implementado.**
+- **admin**: username + passwordHash (bcrypt), creado en bootstrap; el hash vive en la base,
+  no en variables de entorno. **Implementado.**
 - **clientes** (ADR-0013): nombre, apellido, telefono (E.164 peruano, índice único), visitas,
   consentimiento {aceptado, fecha}, creadoEn, ultimaVisitaEn. El registro usa upsert: número
   existente → incrementa visitas, no duplica.
 - **historial** (ADR-0018): clienteId, telefono, tipoEvento (registro | visita |
   registro_rechazado), motivoRechazo, fecha, canal (qr | nfc). Índices por fecha y teléfono.
+
+## Panel admin — estado actual (Inventario + Historial)
+
+Implementado sobre `backend/` y `frontend/src/admin/` (ver `odd/tasks/panel-inventario-historial.md`
+para el detalle de tareas y evidencia):
+
+- **Layout del panel**: `AdminLayout` con sidebar (Inventario, Historial) y reloj de cabecera en
+  hora de Lima (`America/Lima`), actualizado cada segundo (`src/admin/shared/layout/LimaClock.jsx`,
+  `src/admin/shared/lib/time.js`). Rutas protegidas por `RequireAuth`; sin sesión, redirige a
+  `/admin/login`.
+- **Auth**: cookie de sesión firmada httpOnly, bootstrap del admin desde `ADMIN_USERNAME`/
+  `ADMIN_PASSWORD` (ADR 0004).
+- **Inventory** (`GET|POST /api/inventory/brands`, `.../:brandId/models`, `.../:modelId/parts`,
+  `PATCH|DELETE` por id, `POST /api/inventory/parts/:id/adjust`, `GET /api/inventory/search`):
+  CRUD de marcas/modelos/repuestos, ajuste de stock atómico con `409` si no alcanza, cascada al
+  eliminar, búsqueda cruzada.
+- **Cash closings** — "Historial" del sidebar (ADR 0019): `GET /api/cash-closings?from&to`,
+  `PUT /api/cash-closings/:date/rows/:rowIndex` (upsert de fila), `DELETE .../:rowIndex`,
+  `GET /api/cash-closings/summary?from&to&groupBy=day|week|month`. UI: planilla editable en línea
+  con totales por día/semana/mes.
+- **Arquitectura**: ambos módulos siguen Clean Architecture por feature (ADR 0020) —
+  `domain/application/infrastructure` en el backend, container/presentational + `api/` service
+  layer en el frontend (`src/admin/<feature>/{api,hooks,components}` + `<Feature>Page.jsx`).
 
 ## Integración externa de mensajería
 
@@ -189,12 +226,15 @@ Colecciones MongoDB (detalle en ADR-0006):
 
 ## Riesgos técnicos abiertos
 
-- **Definición del inventario bloqueada**: el mapping del módulo de inventario depende de revisar el
-  proyecto desktop Invetario-Armalytech (ADR 0008); sin eso no se puede construir el import ni
-  validar la estructura de marcas/modelos/repuestos.
-- **Atomicidad del stock sin decidir**: el decremento en dos escrituras puede perder actualizaciones
-  en concurrencia (ADR 0006); se debe elegir entre transacción Mongoose (verificar soporte en M0) o
-  update condicional antes de codificar.
+- ~~**Definición del inventario bloqueada**~~ — **Resuelto (2026-09-23)**: se revisó el proyecto
+  desktop `Invetario-Armalytech` (schema `brands`/`models`/`parts`/`cierre_dia`) y se implementó
+  `backend/scripts/migrate-sqlite.ts` idempotente (ADR 0008).
+- ~~**Atomicidad del stock sin decidir**~~ — **Resuelto (2026-09-23)**: update condicional atómico
+  (`$inc` con filtro `cantidad >= n`, `409` si no alcanza) en vez de transacción Mongoose (ADR 0006
+  actualizado).
+- ~~**Consistencia jerárquica sin FKs**~~ — **Resuelto (2026-09-23)**: borrado en cascada al
+  eliminar marca/modelo, replicando las FKs `ON DELETE CASCADE` de la SQLite desktop (ADR 0006
+  actualizado).
 - **Recuperación de enlace por teléfono sin definir**: el PRD exige el caso borde, pero el contrato,
   la información expuesta y la protección contra acceso cruzado están pendientes (ADR 0005).
 - **Sin backups (decisión explícita)**: un error en la migración o un borrado accidental puede
@@ -205,9 +245,6 @@ Colecciones MongoDB (detalle en ADR-0006):
   (ADR-0004); un `SESSION_SECRET` débil expondría tickets e inventario; revocación central no existe.
 - **Límites del free tier**: cold starts del backend NestJS y ~512 MB de Atlas bastan hoy, pero se
   deben monitorear al crecer inventario.
-- **Consistencia jerárquica sin FKs**: eliminar una marca con modelos/repuestos asociados puede
-  dejar referencias huérfanas; hay que decidir el comportamiento (bloquear o cascada) en
-  implementación.
 - **Nombre de la ruta comunidad**: provisional (`/registrar/usuario`); cambiarla obliga a regenerar
   QR/NFC físicos (ADR-0012).
 - **Consentimiento**: falta definir el mecanismo de revocación (p. ej. respuesta "BAJA" por
