@@ -1,0 +1,25 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './shared/infrastructure/http-exception.filter';
+
+/**
+ * Shared Nest bootstrap used by both `main.ts` (local dev, calls `listen()`)
+ * and `api/index.ts` (Vercel serverless, wraps the underlying Express
+ * instance with `serverless-http` and never calls `listen()`).
+ */
+export async function createNestApp(): Promise<NestExpressApplication> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
+
+  app.setGlobalPrefix('api');
+  app.use(cookieParser(process.env.SESSION_SECRET));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalFilters(new HttpExceptionFilter());
+  await app.init();
+
+  return app;
+}
