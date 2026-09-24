@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth.js';
-import Button from '../ui/Button.jsx';
 
 const NAV_ITEMS = [
   { to: '/admin/inventario', label: 'Inventario' },
@@ -32,9 +31,13 @@ export default function Sidebar({ onNavigate }) {
         ))}
       </nav>
 
-      <Button variant="ghost" className="w-full justify-start" onClick={logout}>
+      <button
+        type="button"
+        onClick={logout}
+        className="block w-full rounded-lg px-4 py-2 text-left text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-brand-ink"
+      >
         Cerrar sesión
-      </Button>
+      </button>
     </div>
   );
 }
