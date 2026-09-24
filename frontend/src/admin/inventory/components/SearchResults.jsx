@@ -18,7 +18,7 @@ export default function SearchResults({ query, results, isLoading, onSelectResul
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-        {results.length} {results.length === 1 ? 'resultado' : 'resultados'} para "{query}"
+        {results.length} {results.length === 1 ? 'resultado' : 'resultados'} para &ldquo;{query}&rdquo;
       </h2>
       <ul className="divide-y divide-slate-800 overflow-hidden rounded-xl border border-slate-800">
         {results.map((result) => (

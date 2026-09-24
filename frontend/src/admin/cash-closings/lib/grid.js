@@ -89,7 +89,7 @@ export function getNextCell(rowIndex, field, rowCount) {
 }
 
 /** The previous cell in reading order (mirror of `getNextCell`). */
-export function getPrevCell(rowIndex, field, rowCount) {
+export function getPrevCell(rowIndex, field) {
   const idx = FIELDS.indexOf(field);
   if (idx > 0) {
     return { rowIndex, field: FIELDS[idx - 1] };

@@ -59,7 +59,7 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - [x] T6 — Frontend panel shell: brand tokens, `/admin/login`, protected layout, left sidebar (Inventario, Historial), Lima clock header, API client, dev proxy + Vercel rewrites. Route: delegated. Commit `9dedd7a`.
 - [x] T7 — Frontend Inventario section (port of the desktop screens). Route: delegated (parallel worktree). Commit `a1f287a`, merged `5ab6c40`.
 - [x] T8 — Frontend Historial spreadsheet grid + summary (port of CierreDeDia*). Route: delegated (parallel worktree). Commit `40179d4`, merged `8ff30ea`.
-- [ ] T9 — Docs: ADR 0019, TECH-DESIGN touch-up, backend README with env vars. Route: delegated.
+- [x] T9 — Docs: ADR 0019/0020, ADR 0006/0008 resolved, TECH-DESIGN, ESLint config repaired. Route: delegated (parallel worktree). Commits `05f56a2`, `f46f220`, `0ce111a`, merged `bb550dd`.
 
 ## Acceptance criteria
 - Backend e2e tests pass; frontend builds and lints.

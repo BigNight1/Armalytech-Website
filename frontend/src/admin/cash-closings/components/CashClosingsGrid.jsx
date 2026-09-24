@@ -28,7 +28,7 @@ export default function CashClosingsGrid({ rows, rowStatus, onCellChange, onCell
   const handleKeyDown = (event, rowIndex, field) => {
     if (event.key === 'Tab') {
       event.preventDefault();
-      const next = event.shiftKey ? getPrevCell(rowIndex, field, rows.length) : getNextCell(rowIndex, field, rows.length);
+      const next = event.shiftKey ? getPrevCell(rowIndex, field) : getNextCell(rowIndex, field, rows.length);
       commitAndMove(rowIndex, next);
       return;
     }
