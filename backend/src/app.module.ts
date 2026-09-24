@@ -7,12 +7,16 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { CashClosingsModule } from './cash-closings/cash-closings.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validate,
+      // Tests must never read the developer's real `.env` (admin credentials,
+      // Atlas URI): its values would win over the per-spec overrides.
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
     }),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     MongooseModule.forRootAsync({
@@ -24,6 +28,7 @@ import { CashClosingsModule } from './cash-closings/cash-closings.module';
     AuthModule,
     InventoryModule,
     CashClosingsModule,
+    CommunityModule,
   ],
 })
 export class AppModule {}

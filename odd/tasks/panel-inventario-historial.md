@@ -45,6 +45,13 @@ Frontend: `src/admin/<feature>/` with container/presentational split and an api/
 - Inventory: `GET|POST /inventory/brands`, `PATCH|DELETE /inventory/brands/:id`, `GET|POST /inventory/brands/:brandId/models`, `PATCH|DELETE /inventory/models/:id`, `GET|POST /inventory/models/:modelId/parts`, `PATCH|DELETE /inventory/parts/:id`, `POST /inventory/parts/:id/adjust {delta}`, `GET /inventory/search?q=`
 - Cash closings: `GET /cash-closings?from&to` (YYYY-MM-DD), `PUT /cash-closings/:date/rows/:rowIndex` (upsert), `DELETE /cash-closings/:date/rows/:rowIndex`, `GET /cash-closings/summary?from&to&groupBy=day|week|month`
 - Row shape: `{ id, date, rowIndex, cashIncome, yapeIncome, incomeDetail, cashExpense, yapeExpense, expenseDetail }`
+- Community (T11, ADR 0012-0019, no messaging adapter):
+  - `POST /community/register?canal=qr|nfc` (public, throttled 10/min) `{ firstName, lastName, phone, marketingConsent }` → `{ client, isNewClient, visitCount }`. Invalid phone → 422 + `registro_rechazado` event (`numero_invalido`); no consent → 422 + event (`sin_consentimiento`); repeat phone → visit increment, not a new client.
+  - `GET /community/clients?q&page&limit&consent=approved|declined` (admin) — paginated, sorted by `lastVisitAt` desc, optional name/phone search and marketing-consent filter.
+  - `GET /community/clients/:id`, `PATCH /community/clients/:id` `{ firstName?, lastName?, marketingConsent? }` (admin edit; does not affect visit count/channel).
+  - `GET /community/clients/:id/events` (admin) — that client's history, most recent first.
+  - `GET /community/events?from&to&type=registro|visita|registro_rechazado` (admin) — cross-client event log.
+  - Client shape: `{ id, firstName, lastName, phoneE164, marketingConsent, consentAt, channel, visitCount, firstVisitAt, lastVisitAt }`. Event shape: `{ id, clientId, phoneE164, type, rejectReason, channel, occurredAt }`.
 
 ## TDD
 Mode: off (no project/session config, no explicit user choice). Ordinary functional checks apply.
@@ -65,7 +72,7 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - [x] T8 — Frontend Historial spreadsheet grid + summary (port of CierreDeDia*). Route: delegated (parallel worktree). Commit `40179d4`, merged `8ff30ea`.
 - [x] T9 — Docs: ADR 0019/0020, ADR 0006/0008 resolved, TECH-DESIGN, ESLint config repaired. Route: delegated (parallel worktree). Commits `05f56a2`, `f46f220`, `0ce111a`, merged `bb550dd`.
 - [x] T10 — Layout fix: sidebar gap, clock moved left, greeting removed, Clientes route placeholder. Route: inline. Commit `d0c9145`.
-- [ ] T11 — Backend community feature (clients, E.164 Peru normalization, phone dedup, consent, visits, community history events). Route: delegated.
+- [x] T11 — Backend community feature (clients, E.164 Peru normalization, phone dedup, consent, visits, community history events). Route: delegated. Commit `<T11_HASH>`.
 - [ ] T12 — Public `/registrar/usuario` form. Route: delegated.
 - [ ] T13 — Panel Clientes section (list/search, visits, consent, per-client history). Route: delegated.
 
@@ -94,5 +101,9 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - T8: deleting a row clears that rowIndex (no shifting). Paste-matrix/undo from the desktop app not ported.
 - Integration: `pnpm build` ok after merging T7+T8 (admin chunk 49.7 kB).
 
+- T11: `<T11_HASH>` — `backend/src/community/{domain,application,infrastructure}` (Clean Architecture, mirrors `inventory`/`cash-closings`): `PhoneNumber` VO (E.164 Peru normalization/validation, ADR 0014, unit-tested against many input formats), `Client`/`CommunityEvent` entities, `RegisterClientUseCase` (public; new phone → `registro`, repeat phone → `visita` + atomic `$setOnInsert`+`$inc` upsert so concurrent double-submits can't race, invalid phone/no consent → `registro_rechazado` event + domain error), `ListClientsUseCase`/`GetClientUseCase`/`GetClientHistoryUseCase`/`ListCommunityEventsUseCase`/`UpdateClientUseCase`. Unique index on `phoneE164`. `CommunityNotifier` port + `NoopCommunityNotifier` adapter left as the only messaging hook (n8n/Meta, ADR 0016/0017, intentionally out of scope — no welcome message, no "BAJA" opt-out per user decision). Endpoints added to the API contract above, including `GET /community/clients?...&consent=approved|declined` (user decision: "Acepta promociones" badge Aprobó/Descartó). `CommunityController`/`CommunityModule` wired into `AppModule`.
+  - Fix (orchestrator, same commit): `backend/src/app.module.ts` `ConfigModule.forRoot({ ignoreEnvFile: NODE_ENV==='test' })` — stops e2e from reading the developer's real `.env` (admin credentials/Atlas URI), which was silently winning over every spec's `createTestApp` overrides and made every admin-gated e2e suite (auth/inventory/cash-closings, not just community) fail with 401. Confirmed pre-existing via `git stash` before this fix.
+  - Verification (`backend/`): `pnpm build` ok; `pnpm test` — 64/64 unit tests pass (12 new: `PhoneNumber` VO with valid/invalid format table, `RegisterClientUseCase` new/repeat/rejected-phone/rejected-consent, list/get/history/events/update/consent-filter use cases against fakes); `pnpm test:e2e` — 15/15 pass (5 new community cases: public register without a session, repeat-visit counting, invalid-phone 422 + rejection event, no-consent 422, admin list/search/get/patch/history, 404 on unknown id); `pnpm lint` clean.
+
 ## Next step
-T7 (Inventario UI) and T8 (Historial spreadsheet UI) can now build on `src/admin/inventory/` and `src/admin/cash-closings/` respectively, importing only from `src/admin/shared/*` and `src/admin/auth/useAuth.js` per `src/admin/README.md`. T9 (docs: ADR 0019, TECH-DESIGN, backend README env vars) still pending. Open issue: the repo-wide ESLint config is broken (see above) — worth a separate fix so `pnpm lint` becomes usable again.
+T12 (public `/registrar/usuario` form) and T13 (panel Clientes section) build on `backend/src/community` per the API contract above. T9 (docs: ADR 0019, TECH-DESIGN, backend README env vars) still pending. Open issue: the repo-wide ESLint config is broken (see above) — worth a separate fix so `pnpm lint` becomes usable again for the frontend.
