@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import LimaClock from './LimaClock.jsx';
-import { useAuth } from '../../auth/useAuth.js';
 
 /**
  * Admin shell: fixed sidebar on desktop, collapsible drawer on mobile, plus
- * a header with the logged-in admin's name and the live Lima clock.
+ * a header with the live Lima clock on the left.
  */
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { admin } = useAuth();
 
   return (
     <div className="min-h-screen bg-brand-navy text-brand-ink">
@@ -32,7 +30,7 @@ export default function AdminLayout() {
       )}
 
       <div className="flex min-h-screen flex-col md:pl-64">
-        <header className="flex items-center justify-between border-b border-slate-800 bg-brand-navy-dark px-4 py-3 md:px-8">
+        <header className="flex items-center gap-4 border-b border-slate-800 bg-brand-navy-dark px-4 py-3 md:px-8">
           <button
             type="button"
             className="rounded-lg p-2 text-brand-ink hover:bg-slate-800 md:hidden"
@@ -41,7 +39,6 @@ export default function AdminLayout() {
           >
             &#9776;
           </button>
-          <span className="text-sm text-slate-400">{admin ? `Hola, ${admin.username}` : ''}</span>
           <LimaClock />
         </header>
 

@@ -6,6 +6,7 @@ import AdminLayout from './shared/layout/AdminLayout.jsx';
 import { ToastProvider } from './shared/ui/index.js';
 import InventoryPage from './inventory/InventoryPage.jsx';
 import CashClosingsPage from './cash-closings/CashClosingsPage.jsx';
+import ClientsPage from './clients/ClientsPage.jsx';
 
 /**
  * Admin sub-router, mounted at `/admin/*` and lazy-loaded from `App.jsx` so
@@ -23,6 +24,7 @@ export default function AdminRoutes() {
               <Route index element={<Navigate to="inventario" replace />} />
               <Route path="inventario" element={<InventoryPage />} />
               <Route path="historial" element={<CashClosingsPage />} />
+              <Route path="clientes" element={<ClientsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="login" replace />} />

@@ -5,6 +5,7 @@ import Button from '../ui/Button.jsx';
 const NAV_ITEMS = [
   { to: '/admin/inventario', label: 'Inventario' },
   { to: '/admin/historial', label: 'Historial' },
+  { to: '/admin/clientes', label: 'Clientes' },
 ];
 
 const linkClasses = ({ isActive }) =>
@@ -17,7 +18,7 @@ export default function Sidebar({ onNavigate }) {
   const { logout } = useAuth();
 
   return (
-    <div className="flex h-full flex-col bg-brand-navy-dark px-4 py-6">
+    <div className="flex h-full w-full flex-col border-r border-slate-800 bg-brand-navy-dark px-4 py-6">
       <div className="mb-8 flex items-center gap-3 px-2">
         <img src="/Armalytech_logo.png" alt="ArmalyTech" className="h-10 w-10 object-contain" />
         <span className="text-lg font-semibold text-brand-ink">ArmalyTech</span>
@@ -31,7 +32,7 @@ export default function Sidebar({ onNavigate }) {
         ))}
       </nav>
 
-      <Button variant="ghost" className="justify-start" onClick={logout}>
+      <Button variant="ghost" className="w-full justify-start" onClick={logout}>
         Cerrar sesión
       </Button>
     </div>
