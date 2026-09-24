@@ -5,6 +5,9 @@
     { "source": "/api/inventory/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/inventory/:path*" },
     { "source": "/api/cash-closings/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/cash-closings/:path*" },
     { "source": "/api/community/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/community/:path*" },
+    { "source": "/api/staff/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/staff/:path*" },
+    { "source": "/api/account/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/account/:path*" },
+    { "source": "/api/tickets/:path*", "destination": "https://REPLACE_WITH_BACKEND_URL/api/tickets/:path*" },
     { "source": "/((?!api/).*)", "destination": "/" }
   ]
 }

@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/useAuth.js';
 import { prefetchInventory } from '../../inventory/api/prefetch.js';
 import { prefetchCashClosings } from '../../cash-closings/api/prefetch.js';
 import { prefetchClients } from '../../clients/api/prefetch.js';
+import { prefetchStaff } from '../../staff/api/prefetch.js';
 
 // T14: on hover/focus, warm both the route's lazy chunk and its first query
 // so the click itself feels instant instead of showing a loading skeleton.
@@ -49,6 +50,7 @@ export default function Sidebar({ onNavigate }) {
           {
             to: '/admin/personal',
             label: 'Personal',
+            prefetchData: prefetchStaff,
             prefetchChunk: () => import('../../staff/StaffPage.jsx'),
           },
         ]
