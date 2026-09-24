@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { cashClosingsApi } from '../api/cashClosingsApi.js';
 import { cashClosingsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
-import { appendRows, buildGridRows, emptyRow, toApiPayload } from '../lib/grid.js';
+import { appendRow, appendRows, buildGridRows, emptyRow, toApiPayload } from '../lib/grid.js';
 
 /**
  * Owns the editable rows for one date (T14: TanStack Query for the fetch;
@@ -103,6 +103,11 @@ export function useCashClosingsGrid(selectedDate) {
     setRows((current) => appendRows(current));
   }, []);
 
+  /** Adds exactly one empty row — used by the Glide grid's trailing row (T15). */
+  const addRow = useCallback(() => {
+    setRows((current) => appendRow(current));
+  }, []);
+
   const deleteRow = useCallback(
     (rowIndex) => {
       setRowStatus((current) => ({ ...current, [rowIndex]: 'saving' }));
@@ -131,6 +136,7 @@ export function useCashClosingsGrid(selectedDate) {
     updateCell,
     saveRow,
     addRows,
+    addRow,
     deleteRow,
   };
 }

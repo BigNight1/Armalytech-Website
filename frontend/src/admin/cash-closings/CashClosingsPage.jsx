@@ -26,7 +26,7 @@ export default function CashClosingsPage() {
   const [summaryTab, setSummaryTab] = useState('day');
   const today = useMemo(() => todayInLima(), []);
 
-  const { rows, isLoading, rowStatus, updateCell, saveRow, addRows, deleteRow } =
+  const { rows, isLoading, rowStatus, updateCell, saveRow, addRow, deleteRow } =
     useCashClosingsGrid(selectedDate);
   const { totals: tabTotals, label, isLoading: isSummaryLoading } = useCashClosingsSummary(
     selectedDate,
@@ -65,7 +65,7 @@ export default function CashClosingsPage() {
             rowStatus={rowStatus}
             onCellChange={updateCell}
             onCellCommit={saveRow}
-            onAddRows={addRows}
+            onAddRow={addRow}
             onDeleteRow={deleteRow}
           />
         )}

@@ -76,6 +76,11 @@ export function appendRows(rows, count = ADD_ROW_COUNT) {
   return [...rows, ...Array.from({ length: count }, (_, i) => emptyRow(nextIndex + i))];
 }
 
+/** Appends exactly one empty row (used by the Glide grid's trailing row, T15). */
+export function appendRow(rows) {
+  return appendRows(rows, 1);
+}
+
 /** The next cell in reading order (left-to-right, wraps to the next row). */
 export function getNextCell(rowIndex, field, rowCount) {
   const idx = FIELDS.indexOf(field);

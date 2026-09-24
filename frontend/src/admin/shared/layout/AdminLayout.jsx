@@ -12,6 +12,9 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-brand-navy text-brand-ink">
+      {/* Portal target for Glide Data Grid's cell-edit overlay (T15, Historial). */}
+      <div id="portal" style={{ position: 'fixed', left: 0, top: 0, zIndex: 9999 }} />
+
       <div className="hidden w-64 shrink-0 md:fixed md:inset-y-0 md:left-0 md:flex md:w-64">
         <Sidebar />
       </div>
