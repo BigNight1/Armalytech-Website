@@ -27,6 +27,7 @@ Out of scope now: Tickets (Phase 2), messaging n8n/Meta (Phase 5).
 - Deleting a brand/model cascades to its children, same as the SQLite FKs in the desktop app.
 
 - Messaging (user, 2026-09-23): NO welcome message; NO "BAJA" opt-out flow; campaigns postponed (to be analyzed later). The only automated message is the pickup + review request when a ticket becomes `listo` (not `entregado` as ADR 0017 said), sent only to clients whose "Acepta promociones" is Aprobó. Template draft: `n8n/templates/equipo-listo-resena.md`.
+- UX (user, 2026-09-23): Glide Data Grid (MIT) for Historial; react-day-picker for dates; TanStack Query + skeletons + prefetch for smooth navigation; remove the top totals bar in Historial (duplicates the right-hand summary). Rejected: AG Grid Community (range selection/fill handle/clipboard are Enterprise), Handsontable (commercial license).
 - Clientes table: Nombre, Apellido, Número, "Acepta promociones" = Aprobó / Descartó.
 
 ## Architecture (user requirement, 2026-09-23)
@@ -75,6 +76,10 @@ Strategy: ask-on-risk (default). Forecast is well above 400 authored lines → c
 - [x] T11 — Backend community feature (clients, E.164 Peru normalization, phone dedup, consent, visits, community history events). Route: delegated. Commit `95aa029`.
 - [x] T12 — Public `/registrar/usuario` form. Route: delegated. Commit `df0b3bd`.
 - [x] T13 — Panel Clientes section (list/search, visits, consent, per-client history). Route: delegated. Commit `e496086`.
+
+- [ ] T14 — Data layer: TanStack Query v5 for every admin feature (cache, stale-while-revalidate, sidebar hover prefetch), skeletons instead of spinners, loading shown only after ~250ms, Historial fetches only the visible summary tab. Route: delegated.
+- [ ] T15 — Historial grid on Glide Data Grid (resize/move columns, range selection, copy/paste with Excel, fill handle, keyboard), top totals bar removed. Route: delegated.
+- [ ] T16 — react-day-picker (es locale, Tailwind-styled) replaces the native date input in Historial and Clientes > Actividad. Route: delegated.
 
 ## Acceptance criteria
 - Backend e2e tests pass; frontend builds and lints.
