@@ -33,15 +33,27 @@ const linkClasses = ({ isActive }) =>
     isActive ? 'bg-brand-orange text-white' : 'text-brand-ink hover:bg-slate-800'
   }`;
 
-/** Left sidebar: logo, section nav, and logout. `onNavigate` closes the mobile drawer. */
 export default function Sidebar({ onNavigate }) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const queryClient = useQueryClient();
 
   const handlePrefetch = (item) => () => {
-    item.prefetchData(queryClient);
-    item.prefetchChunk();
+    if (item.prefetchData) item.prefetchData(queryClient);
+    if (item.prefetchChunk) item.prefetchChunk();
   };
+
+  const navItems = [
+    ...NAV_ITEMS,
+    ...(user?.role === 'owner'
+      ? [
+          {
+            to: '/admin/personal',
+            label: 'Personal',
+            prefetchChunk: () => import('../../staff/StaffPage.jsx'),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="flex h-full w-full flex-col border-r border-slate-800 bg-brand-navy-dark px-4 py-6">
@@ -51,7 +63,7 @@ export default function Sidebar({ onNavigate }) {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

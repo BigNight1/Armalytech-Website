@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import LimaClock from './LimaClock.jsx';
+import MustChangePasswordModal from '../../auth/components/MustChangePasswordModal.jsx';
 
 /**
  * Admin shell: fixed sidebar on desktop, collapsible drawer on mobile, plus
@@ -14,6 +15,7 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-brand-navy text-brand-ink">
       {/* Portal target for Glide Data Grid's cell-edit overlay (T15, Historial). */}
       <div id="portal" style={{ position: 'fixed', left: 0, top: 0, zIndex: 9999 }} />
+      <MustChangePasswordModal />
 
       <div className="hidden w-64 shrink-0 md:fixed md:inset-y-0 md:left-0 md:flex md:w-64">
         <Sidebar />
