@@ -74,7 +74,6 @@ export function useCashClosingsGrid(selectedDate) {
 
   const deleteRow = useCallback(
     (rowIndex) => {
-      const cleared = emptyRow(rowIndex);
       // Nothing in the database for this row: just clear/remove it locally.
       if (!persistedRef.current.has(rowIndex)) {
         lastSavedRef.current.delete(rowIndex);

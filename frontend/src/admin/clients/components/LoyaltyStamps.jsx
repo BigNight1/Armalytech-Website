@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 5-Stamp Loyalty Component for ArmalyTech Client Program.
  * Visualizes progress towards the 20% discount on the 5th visit.

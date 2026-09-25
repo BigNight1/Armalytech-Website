@@ -8,7 +8,6 @@ import ContactSection from "../ContactSection.jsx";
 
 const PHONE = "+51 924 548 268";
 const PHONE_LINK = "tel:+51924548268";
-const EMAIL = "armalytech@email.com";
 const ADDRESS = "Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja";
 const HORARIO = "Lun–Sáb 10AM – 8PM ";
 

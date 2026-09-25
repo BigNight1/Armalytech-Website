@@ -10,7 +10,6 @@ import FaqSection from "../FaqSection.jsx";
 import CtaSection from "../CtaSection.jsx";
 import ContactSection from "../ContactSection.jsx";
 import Footer from "../Footer.jsx";
-import { WhatsAppWidget } from "react-whatsapp-widget";
 import "react-whatsapp-widget/dist/index.css";
 import Navbar from "../Navbar/NavBar.jsx";
 
