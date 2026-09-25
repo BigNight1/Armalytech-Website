@@ -65,3 +65,79 @@ backend (`backend/src/inventory/`):
 - Se agrega además: **borrado en cascada** al eliminar una marca o un modelo — elimina también sus
   modelos/repuestos hijos, replicando el comportamiento de las FKs `ON DELETE CASCADE` de la SQLite
   de la app de escritorio (`Invetario-Armalytech`), en vez de bloquear el borrado o dejar huérfanos.
+
+## Actualización (2026-09-25): inventario v2
+
+El local no solo guarda repuestos de reparación: también vende accesorios (parlantes, audífonos,
+cargadores, cables tipo C / V8 / Lightning) y guarda micas, zócalos y pantallas que dependen del
+modelo de celular. La jerarquía `marcas → modelos → repuestos` no representa bien ninguno de los dos
+casos: un accesorio no pertenece a un modelo de celular, y una misma mica puede servir para varios
+modelos (duplicarla por modelo desincroniza el stock). Esta actualización **reemplaza** el modelo de
+inventario de la sección Decisión; el modelo de tickets se amplía más abajo y en el ADR 0007.
+
+### Catálogo e inventario
+
+- **marcas**: `{ _id, nombre }`. Las crea el usuario. Se usan tanto para celulares (Samsung) como
+  para productos (JBL).
+- **celulares**: `{ _id, marcaId, nombre }` (antes `modelos`). Es el catálogo de compatibilidad, no
+  guarda stock.
+- **categorias**: `{ _id, nombre }` — Pantallas, Micas, Zócalos, Cables, Cargadores, Parlantes,
+  Audífonos, Repuestos. Se precargan y el usuario puede agregar más.
+- **productos** (reemplaza a `repuestos`): `{ _id, categoriaId, marcaId?, nombre, modelo?, stock,
+  costo, precioVenta, stockMinimo, compatibles: [celularId], activo, createdAt, updatedAt }`.
+  `compatibles` es opcional: vacío para accesorios genéricos, con uno o más celulares para micas,
+  zócalos, pantallas y repuestos.
+
+### Movimientos, ventas y cobros
+
+- **movimientosStock**: `{ _id, productoId, tipo, cantidad, stockResultante, referencia: { tipo,
+  id }, motivo?, usuarioId, fecha }`, con `tipo` ∈ `venta | ticket_salida | ticket_devolucion |
+  ajuste_entrada | ajuste_salida`. Todo cambio de stock escribe un movimiento (kardex); nada se
+  borra. Si el conteo físico no coincide con el sistema, el historial muestra por qué.
+- **ventas**: `{ _id, productoId, cantidad, precioUnitario, costoUnitario, metodoPago, usuarioId,
+  fecha }`, con `metodoPago` ∈ `efectivo | yape`. El botón "Vender" descuenta stock, crea la venta,
+  su movimiento y un cobro.
+- **cobros**: `{ _id, origen: ticket | venta, referenciaId, titulo, descripcion, total, adelanto,
+  saldo, metodoPago, costoPiezas, usuarioId, fecha }`. El Historial (ADR 0019) muestra los cobros
+  del día como filas automáticas de solo lectura que suman al total junto con las filas manuales.
+  Regla de uso: lo que entra por el panel no se vuelve a anotar a mano.
+- Los botones +/− se conservan para ajustes (llegada de mercadería, rotura) y generan un movimiento
+  `ajuste_*`.
+
+### Atomicidad
+
+Se mantiene el update condicional atómico (`$inc` con filtro `stock >= n`) por producto. Cuando una
+operación descuenta varios productos (un ticket con dos piezas), se aplican en orden y, si uno falla
+por stock insuficiente, se revierten los ya aplicados (compensación) y la API responde `409` con el
+producto faltante. Los movimientos se escriben después de cada `$inc` exitoso.
+
+### Buscador
+
+Una sola caja de búsqueda en el inventario, reutilizada al elegir piezas en un ticket:
+
+- Si el texto coincide con un celular ("A54"), muestra los productos compatibles agrupados por
+  categoría, con stock y precio.
+- Si no, busca por nombre, marca o modelo del producto ("cargador samsung", "tipo c").
+- Filtros rápidos por categoría y por "stock bajo" (`stock <= stockMinimo`).
+
+### Visibilidad
+
+Por ahora todos los usuarios del panel son administradores y ven costo y ganancia. Cuando exista un
+rol técnico (ADR 0022), se decide si el costo se oculta para ese rol.
+
+### Datos existentes y descartes
+
+- Los datos actuales de `marcas/modelos/repuestos` son de prueba: no se migran. El inventario v2
+  arranca vacío y el script de migración desde SQLite (ADR 0008) queda sin uso para repuestos.
+- Importar desde Excel: descartado por el usuario.
+
+### Tickets (ampliación)
+
+El documento de ticket agrega: `codigo` corto legible (`AT-000148`, secuencial por contador, para
+hablar por teléfono; el enlace público sigue usando `publicToken`), `equipo: { marcaId, celularId,
+color?, imei? }`, `fallaReportada`, `estadoIngreso` (daños visibles al recibir el equipo),
+`diagnostico?`, `piezas: [{ productoId, nombre, cantidad, precioUnitario, costoUnitario, estado:
+planificada | descontada | devuelta }]` (reemplaza a `repuestosUsados`), `manoDeObra`,
+`precioTotal`, `adelanto`, `metodoPago?`, `tecnicoId`, `garantiaDias`. La clave o patrón de
+desbloqueo nunca se guarda en el ticket ni aparece en el comprobante. Estados y flujo en el ADR
+0007.

@@ -43,3 +43,46 @@ cualquier transición (trabajando, listo, entregado, reabrir a pendiente) o la a
 - Trade-off: el ciclo 7/15 días necesita un job programado (cron/intervalo) en el backend NestJS y
   una política para el reabrir tickets abandonados; la regla exacta de "conservar vs. eliminar"
   también queda pendiente de confirmación.
+
+## Actualización (2026-09-25)
+
+Esta actualización reemplaza la lista de estados de la sección Decisión y resuelve el punto
+pendiente del ciclo de abandono.
+
+### Estados
+
+`pendiente → aprobado → trabajando → listo → entregado`, más `cancelado` y `abandonado`.
+
+| Estado | Significado | Efecto en stock y caja |
+|---|---|---|
+| `pendiente` | Equipo recibido, diagnóstico y precio en curso. Las piezas quedan **planificadas** y se muestra su stock disponible. | Ninguno |
+| `aprobado` | El cliente aceptó el precio. | Descuenta las piezas planificadas (`ticket_salida`); si falta stock, no se aprueba y se avisa cuál falta. Puede registrarse un adelanto. |
+| `trabajando` | El técnico está reparando. | Ninguno |
+| `listo` | Reparación terminada. Dispara el aviso por WhatsApp de equipo listo + pedido de reseña (decisión del 2026-09-23). | Ninguno |
+| `entregado` | El cliente retiró el equipo. | Crea el **cobro** (ADR 0006) y habilita el comprobante de servicio. |
+| `cancelado` | El cliente no aceptó o se desistió. Nuevo estado. | Devuelve al stock las piezas ya descontadas (`ticket_devolucion`). |
+| `abandonado` | 7 días sin cambios (automático). | Ninguno |
+
+- `aprobado` es nuevo: en el rubro, la pieza solo se usa cuando el cliente acepta el precio. Sin este
+  estado no hay un momento claro para descontar stock.
+- `cancelado` es nuevo: sin él, un ticket rechazado quedaba como `abandonado` y las piezas
+  descontadas no volvían al stock.
+- Revertir un estado queda registrado en `historialEstados`. Volver de `aprobado` (o posterior) a
+  `pendiente` devuelve las piezas descontadas, igual que cancelar.
+- Agregar una pieza a un ticket ya aprobado la descuenta en ese momento.
+
+### Ciclo de abandono (resuelto)
+
+Un ticket sin cambios en 7 días pasa a `abandonado` y **nunca se borra**: se oculta de la lista
+principal, sigue visible con un filtro y puede reabrirse. Borrarlo haría perder el rastro de las
+piezas descontadas y de lo cobrado. Se elimina la regla de borrado a los 15 días.
+
+### Comprobante de servicio
+
+Al entregar, el ticket tiene una página pública (`/ticket/<publicToken>`) con diseño de comprobante
+y el panel ofrece un botón que abre WhatsApp con el enlace ya escrito (sin costo de API de Meta). El
+documento se llama **"Comprobante de servicio"** y aclara que no es boleta SUNAT: no se emite
+comprobante electrónico en esta etapa. Contenido: logo, dirección y teléfono del local, código del
+ticket, título, cliente, equipo, falla reportada, fechas de ingreso y entrega, técnico, piezas y mano
+de obra con precios, adelanto, saldo, método de pago, garantía (días y exclusiones) y un QR al estado
+del ticket.
