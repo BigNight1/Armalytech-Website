@@ -136,6 +136,16 @@
   padding: 11px 12px 11px 0;
   border-bottom: 2px solid var(--admin-divider);
 }
+.admin-shell .admin-table th.text-right {
+  text-align: right;
+}
+.admin-shell .admin-table th.text-center {
+  text-align: center;
+}
+.admin-shell .admin-table th:last-child,
+.admin-shell .admin-table td:last-child {
+  padding-right: 0;
+}
 .admin-shell .admin-table td {
   padding: 8px 12px 8px 0;
   border-bottom: 1px solid var(--admin-divider);

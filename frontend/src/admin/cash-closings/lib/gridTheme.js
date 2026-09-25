@@ -16,6 +16,7 @@ const FONT_FAMILY = "'Archivo', system-ui, sans-serif";
 /** Base theme applied to the whole `DataEditor` for the given admin theme (`'claro' | 'oscuro'`). */
 export function buildGridTheme(theme) {
   const t = getThemeTokens(theme);
+  const isDark = theme === 'oscuro';
   return {
     accentColor: t.accent[500],
     accentFg: t.onAccent,
@@ -23,14 +24,14 @@ export function buildGridTheme(theme) {
 
     textDark: t.ink,
     textMedium: t.ink,
-    textLight: t.muted,
+    // Row numbers gutter text color - high contrast so row index (1, 2, 3...) is clearly legible
+    textLight: isDark ? '#cbd5e1' : '#334155',
     textBubble: t.ink,
-    // Glide's defaults for these are dark grays meant for light themes —
-    // without them the header/group text is unreadable on a dark surface.
-    textHeader: t.muted,
+    // Header text contrast for non-grouped columns like Estado
+    textHeader: isDark ? '#e2e8f0' : '#0f172a',
     textHeaderSelected: t.onAccent,
     textGroupHeader: t.onAccent,
-    bgIconHeader: t.muted,
+    bgIconHeader: isDark ? '#cbd5e1' : '#475569',
     fgIconHeader: t.surface,
 
     bgCell: t.bg,
@@ -45,6 +46,7 @@ export function buildGridTheme(theme) {
 
     borderColor: t.divider,
     horizontalBorderColor: t.divider,
+    headerBottomBorderColor: t.divider,
     drilldownBorder: t.accent[500],
 
     linkColor: t.accent[600],
@@ -74,20 +76,37 @@ export function buildGridTheme(theme) {
  */
 export function buildGetGroupDetails(theme) {
   const t = getThemeTokens(theme);
+  const isDark = theme === 'oscuro';
   return function getGroupDetails(groupName) {
     if (groupName === 'ingresos') {
       return {
         name: 'INGRESOS',
-        overrideTheme: { bgHeader: t.accent[500], textGroupHeader: t.onAccent, headerFontStyle: '800 12px' },
+        overrideTheme: {
+          bgHeader: t.accent[500],
+          textGroupHeader: '#0f172a',
+          textHeader: '#0f172a',
+          headerFontStyle: '700 13px',
+        },
       };
     }
     if (groupName === 'gastos') {
       return {
         name: 'GASTOS',
-        overrideTheme: { bgHeader: t.ink, textGroupHeader: t.bg, headerFontStyle: '800 12px' },
+        overrideTheme: {
+          bgHeader: isDark ? '#1e293b' : '#0f172a',
+          textGroupHeader: '#ffffff',
+          textHeader: isDark ? '#f1f5f9' : '#ffffff',
+          headerFontStyle: '700 13px',
+        },
       };
     }
-    return { name: '', overrideTheme: { bgHeader: t.bg } };
+    return {
+      name: '',
+      overrideTheme: {
+        bgHeader: t.bg,
+        textHeader: isDark ? '#e2e8f0' : '#0f172a',
+      },
+    };
   };
 }
 

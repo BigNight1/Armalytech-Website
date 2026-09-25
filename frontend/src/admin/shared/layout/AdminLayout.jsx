@@ -1,9 +1,24 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Sidebar from './Sidebar.jsx';
-import Header from './Header.jsx';
-import { BreadcrumbProvider } from './breadcrumb.jsx';
+import Header, { SECTION_LABELS } from './Header.jsx';
+import { BreadcrumbProvider, useBreadcrumbExtra } from './breadcrumb.jsx';
 import MustChangePasswordModal from '../../auth/components/MustChangePasswordModal.jsx';
+
+function AdminPageTitle() {
+  const location = useLocation();
+  const extra = useBreadcrumbExtra();
+  const segment = location.pathname.split('/')[2];
+  const section = SECTION_LABELS[segment] ?? 'Panel';
+  const title = extra ? `${extra} · ${section} · Armalytech` : `${section} · Armalytech`;
+
+  return (
+    <Helmet>
+      <title>{title}</title>
+    </Helmet>
+  );
+}
 
 /**
  * Admin shell: fixed 264px sidebar at `lg` and up, off-canvas drawer below
@@ -16,6 +31,7 @@ export default function AdminLayout() {
 
   return (
     <BreadcrumbProvider>
+      <AdminPageTitle />
       <div className="flex min-h-screen bg-bg text-ink">
         {/* Portal target for Glide Data Grid's cell-edit overlay (T15, Historial). */}
         <div id="portal" style={{ position: 'fixed', left: 0, top: 0, zIndex: 9999 }} />

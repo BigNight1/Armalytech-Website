@@ -91,15 +91,15 @@ function ProductRow({ product, onEdit, onMovements, onArchive, onRestore, onAdju
             <Button variant="icon" title="Movimientos" aria-label={`Movimientos de ${product.name}`} onClick={() => onMovements(product)}>
               <History size={16} />
             </Button>
-            <button
-              type="button"
+            <Button
+              variant="icon"
               title="Archivar"
               aria-label={`Archivar ${product.name}`}
               onClick={() => onArchive(product)}
-              className="flex h-9 w-9 items-center justify-center border border-line p-0 text-ink transition-colors hover:border-danger hover:text-danger-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="hover:border-danger hover:text-danger-ink"
             >
               <Archive size={16} />
-            </button>
+            </Button>
           </div>
         ) : (
           <Button variant="secondary" className="ml-auto" onClick={() => onRestore(product)}>

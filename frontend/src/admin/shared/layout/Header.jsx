@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeProvider.jsx';
 // First `/admin/<segment>` path piece -> breadcrumb section label. Feature
 // pages don't need to touch this; use `useBreadcrumb('Sub label')` (see
 // breadcrumb.jsx) for anything past the section itself.
-const SECTION_LABELS = {
+export const SECTION_LABELS = {
   inventario: 'Inventario',
   historial: 'Historial de caja',
   clientes: 'Clientes',

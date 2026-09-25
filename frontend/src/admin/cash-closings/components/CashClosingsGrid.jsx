@@ -216,7 +216,7 @@ export default function CashClosingsGrid({
           readonly: true,
           contentAlign: "center",
           cursor: "pointer",
-          themeOverride: { textDark: "#94a3b8" },
+          themeOverride: { textDark: isDark ? "#cbd5e1" : "#64748b" },
         };
       }
 

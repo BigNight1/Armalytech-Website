@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Moon, Sun } from 'lucide-react';
 import { useAuth } from './useAuth.js';
 import LoginBrandPanel from './components/LoginBrandPanel.jsx';
@@ -36,6 +37,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-bg text-ink lg:flex-row">
+      <Helmet>
+        <title>Ingresar · Panel Armalytech</title>
+      </Helmet>
       <LoginBrandPanel />
 
       <div className="flex flex-1 flex-col px-6 py-8 sm:px-10 lg:px-16 lg:py-12">
