@@ -187,12 +187,18 @@ export default function CashClosingsGrid({
         return;
 
       if (column.kind === "money") {
-        const parsed =
-          newValue.kind === GridCellKind.Number
-            ? newValue.data
-            : parseStrictMoney(newValue.data);
-        if (parsed === null || parsed === undefined) return; // invalid input, ignore
-        onCellChange(dataRow.rowIndex, column.id, String(parsed));
+        const raw = newValue.data;
+        // Delete/Backspace sends an empty Number cell: clear it instead of
+        // treating it as invalid input.
+        if (raw === undefined || raw === null || raw === "") {
+          onCellChange(dataRow.rowIndex, column.id, "");
+        } else {
+          const parsed =
+            newValue.kind === GridCellKind.Number ? raw : parseStrictMoney(raw);
+          if (parsed === null || parsed === undefined || Number.isNaN(parsed))
+            return; // invalid input, ignore
+          onCellChange(dataRow.rowIndex, column.id, String(parsed));
+        }
       } else {
         onCellChange(dataRow.rowIndex, column.id, newValue.data ?? "");
       }
