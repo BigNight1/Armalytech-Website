@@ -14,9 +14,9 @@ export default function LimaClock() {
   }, []);
 
   return (
-    <div className="flex flex-col items-start leading-tight text-brand-ink">
+    <div className="flex flex-col items-end leading-tight text-ink">
       <span className="font-mono text-lg font-semibold">{now.time}</span>
-      <span className="text-xs capitalize text-slate-400">{now.date} (Lima)</span>
+      <span className="text-xs capitalize text-muted">{now.date} · Lima</span>
     </div>
   );
 }

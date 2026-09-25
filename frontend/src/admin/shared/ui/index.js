@@ -9,4 +9,6 @@ export { default as Spinner } from './Spinner.jsx';
 export { default as Skeleton, SkeletonTable, SkeletonRows } from './Skeleton.jsx';
 export { default as DatePicker } from './DatePicker.jsx';
 export { default as DateRangePicker } from './DateRangePicker.jsx';
+export { default as Tag } from './Tag.jsx';
+export { default as Chip } from './Chip.jsx';
 export { ToastProvider, useToast } from './ToastProvider.jsx';

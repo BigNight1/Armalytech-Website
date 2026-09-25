@@ -11,17 +11,20 @@ const STORAGE_KEY = 'admin.historial.gridColumns.v2';
 // `grow` makes the detail columns absorb the leftover width so the grid fills
 // its container instead of leaving an empty band on the right. The status and
 // actions columns are fixed and always stay last (not user-movable).
+// `group` powers the design's grouped INGRESOS / GASTOS header band (Glide
+// `GridColumn.group`, themed per-group in `lib/gridTheme.js`'s
+// `buildGetGroupDetails`).
 export const BASE_COLUMNS = [
-  { id: 'cashIncome', title: 'Ingreso efectivo', width: 140, kind: 'money' },
-  { id: 'yapeIncome', title: 'Ingreso Yape', width: 130, kind: 'money' },
-  { id: 'incomeDetail', title: 'Detalle ingreso', width: 200, kind: 'text', grow: 1 },
-  { id: 'cashExpense', title: 'Gasto efectivo', width: 140, kind: 'money' },
-  { id: 'yapeExpense', title: 'Gasto Yape', width: 130, kind: 'money' },
-  { id: 'expenseDetail', title: 'Detalle gasto', width: 200, kind: 'text', grow: 1 },
+  { id: 'cashIncome', title: 'Efectivo', width: 140, kind: 'money', group: 'ingresos' },
+  { id: 'yapeIncome', title: 'Yape', width: 130, kind: 'money', group: 'ingresos' },
+  { id: 'incomeDetail', title: 'Detalle', width: 200, kind: 'text', grow: 1, group: 'ingresos' },
+  { id: 'cashExpense', title: 'Efectivo', width: 140, kind: 'money', group: 'gastos' },
+  { id: 'yapeExpense', title: 'Yape', width: 130, kind: 'money', group: 'gastos' },
+  { id: 'expenseDetail', title: 'Detalle', width: 200, kind: 'text', grow: 1, group: 'gastos' },
 ];
 
 export const FIXED_TRAILING_COLUMNS = [
-  { id: 'actions', title: '', width: 44, kind: 'actions' },
+  { id: 'actions', title: 'Estado', width: 90, kind: 'actions' },
 ];
 
 const BASE_ORDER = BASE_COLUMNS.map((c) => c.id);

@@ -1,4 +1,5 @@
 import ResumenBlock from './ResumenBlock.jsx';
+import { formatPEN } from '../../shared/lib/money.js';
 import { Skeleton } from '../../shared/ui/index.js';
 
 const TABS = [
@@ -8,22 +9,24 @@ const TABS = [
 ];
 
 /**
- * Day/week/month resumen tabs — port of the desktop `CierreResumenPanel` +
+ * Day/week/month resumen aside — port of the desktop `CierreResumenPanel` +
  * `CierreDeDiaResumen` merged into one presentational component. Purely
  * presentational: `activeTab` is owned by the container (T14), which fetches
- * only the visible tab's range instead of all three at once.
+ * only the visible tab's range instead of all three at once. Layout matches
+ * the design's Historial aside: tab switcher, title + date range, an
+ * accent-filled "Ingreso neto" highlight, then Efectivo / Yape breakdowns.
  */
-export default function SummaryPanel({ activeTab, onTabChange, totals, title, isLoading }) {
+export default function SummaryPanel({ activeTab, onTabChange, totals, title, range, isLoading }) {
   return (
-    <div className="flex flex-col gap-3 self-start rounded-lg border border-slate-700 bg-brand-navy-light/60 p-4">
-      <div className="flex gap-1 rounded-lg bg-slate-900 p-1">
+    <aside className="flex flex-col gap-[18px] self-start border-t-2 border-ink pt-4">
+      <div className="grid grid-cols-3 divide-x divide-line border border-line">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => onTabChange(tab.id)}
-            className={`flex-1 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
-              activeTab === tab.id ? 'bg-brand-orange text-white' : 'text-slate-400 hover:text-brand-ink'
+            className={`px-2 py-2.5 text-xs font-bold uppercase tracking-wide transition-colors ${
+              activeTab === tab.id ? 'bg-accent text-on-accent' : 'text-muted hover:text-ink'
             }`}
           >
             {tab.label}
@@ -31,7 +34,12 @@ export default function SummaryPanel({ activeTab, onTabChange, totals, title, is
         ))}
       </div>
 
-      <h3 className="text-sm font-semibold text-brand-ink">{title}</h3>
+      <div className="flex flex-col gap-1">
+        <p style={{ fontSize: '22px' }} className="font-archivo font-extrabold tracking-[-0.015em] text-ink">
+          {title}
+        </p>
+        {range && <span className="text-sm text-muted">{range}</span>}
+      </div>
 
       {isLoading ? (
         <div className="flex flex-col gap-2">
@@ -41,31 +49,28 @@ export default function SummaryPanel({ activeTab, onTabChange, totals, title, is
         </div>
       ) : (
         <>
+          <div className="flex flex-col bg-accent p-[18px] text-on-accent">
+            <span className="text-[13px] font-extrabold uppercase tracking-[0.12em]">Ingreso neto</span>
+            <span className="text-[42px] font-extrabold leading-[1.1] tracking-[-0.02em] tabular-nums">
+              {formatPEN(totals.netIncome)}
+            </span>
+            <span className="text-[15px] font-semibold">Bruto {formatPEN(totals.grossIncome)}</span>
+          </div>
+
           <ResumenBlock
             title="Efectivo"
-            rows={[
-              { label: 'Ingreso efectivo', value: totals.cashIncome },
-              { label: 'Gasto efectivo', value: totals.cashExpense },
-              { label: 'Total efectivo', value: totals.totalCash, emphasize: true },
-            ]}
+            income={totals.cashIncome}
+            expense={totals.cashExpense}
+            total={totals.totalCash}
           />
           <ResumenBlock
             title="Yape / Plin"
-            rows={[
-              { label: 'Ingreso Yape', value: totals.yapeIncome },
-              { label: 'Gasto Yape', value: totals.yapeExpense },
-              { label: 'Total Yape', value: totals.totalYape, emphasize: true },
-            ]}
-          />
-          <ResumenBlock
-            title="Totales"
-            rows={[
-              { label: 'Ingreso bruto', value: totals.grossIncome },
-              { label: 'Ingreso neto', value: totals.netIncome, emphasize: true },
-            ]}
+            income={totals.yapeIncome}
+            expense={totals.yapeExpense}
+            total={totals.totalYape}
           />
         </>
       )}
-    </div>
+    </aside>
   );
 }

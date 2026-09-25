@@ -3,9 +3,9 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 const ToastContext = createContext(null);
 
 const TYPE_CLASSES = {
-  info: 'border-slate-600 bg-slate-800',
-  success: 'border-green-600 bg-green-900/60',
-  error: 'border-red-600 bg-red-900/60',
+  info: 'border-line bg-surface text-ink',
+  success: 'border-accent bg-accent-100 text-accent-900',
+  error: 'border-danger bg-danger-bg text-danger-ink',
 };
 
 const DEFAULT_DURATION_MS = 4000;
@@ -50,7 +50,7 @@ export function ToastProvider({ children }) {
           <div
             key={toast.id}
             role="status"
-            className={`pointer-events-auto rounded-lg border px-4 py-3 text-sm text-brand-ink shadow-lg ${
+            className={`pointer-events-auto border px-4 py-3 text-sm shadow-admin-lg ${
               TYPE_CLASSES[toast.type] ?? TYPE_CLASSES.info
             }`}
           >

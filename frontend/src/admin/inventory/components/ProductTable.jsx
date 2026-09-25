@@ -1,36 +1,38 @@
+import { Archive, History, Minus, Pencil, Plus } from 'lucide-react';
 import { formatPEN } from '../../shared/lib/money.js';
+import { Button, Tag } from '../../shared/ui/index.js';
 
 const HIDE_NARROW = 'hidden md:table-cell';
 
 function StockCell({ product, onAdjust }) {
   const isLow = product.stock <= product.minStock;
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
+      <div className="flex items-center border border-line">
         <button
           type="button"
           disabled={!product.active || product.stock <= 0}
           onClick={() => onAdjust(product.id, -1)}
           aria-label={`Restar stock a ${product.name}`}
-          className="flex h-6 w-6 items-center justify-center rounded border border-slate-700 text-sm leading-none text-brand-ink hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex h-[30px] w-[30px] items-center justify-center text-ink hover:bg-row-hover disabled:cursor-not-allowed disabled:opacity-30"
         >
-          −
+          <Minus size={14} strokeWidth={2.4} />
         </button>
-        <span className="w-6 text-center font-semibold">{product.stock}</span>
+        <span className="w-9 border-x border-line text-center font-extrabold tabular-nums">{product.stock}</span>
         <button
           type="button"
           disabled={!product.active}
           onClick={() => onAdjust(product.id, 1)}
           aria-label={`Sumar stock a ${product.name}`}
-          className="flex h-6 w-6 items-center justify-center rounded border border-slate-700 text-sm leading-none text-brand-ink hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex h-[30px] w-[30px] items-center justify-center text-ink hover:bg-row-hover disabled:cursor-not-allowed disabled:opacity-30"
         >
-          +
+          <Plus size={14} strokeWidth={2.4} />
         </button>
       </div>
       {isLow && (
-        <span className="inline-flex w-fit items-center rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400">
-          Stock bajo
-        </span>
+        <Tag variant="danger" className="whitespace-nowrap">
+          Bajo
+        </Tag>
       )}
     </div>
   );
@@ -38,21 +40,18 @@ function StockCell({ product, onAdjust }) {
 
 function CompatiblePhones({ phones }) {
   if (!phones || phones.length === 0) {
-    return <span className="text-slate-500">—</span>;
+    return <span className="text-muted">—</span>;
   }
-  const shown = phones.slice(0, 3);
+  const shown = phones.slice(0, 2);
   const rest = phones.length - shown.length;
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex max-w-[220px] flex-wrap gap-1">
       {shown.map((phone) => (
-        <span
-          key={phone.id}
-          className="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300"
-        >
+        <Tag key={phone.id} variant="neutral" className="whitespace-nowrap normal-case tracking-normal">
           {phone.brandName} {phone.name}
-        </span>
+        </Tag>
       ))}
-      {rest > 0 && <span className="text-[11px] text-slate-500">+{rest}</span>}
+      {rest > 0 && <span className="py-0.5 text-xs text-muted">+{rest}</span>}
     </div>
   );
 }
@@ -60,42 +59,52 @@ function CompatiblePhones({ phones }) {
 function ProductRow({ product, onEdit, onMovements, onArchive, onRestore, onAdjust }) {
   const profit = product.salePrice - product.cost;
   return (
-    <tr className={`text-brand-ink transition-colors ${product.active ? 'hover:bg-slate-800/60' : 'opacity-50'}`}>
-      <td className="px-4 py-3">
-        <div className="font-medium">{product.name}</div>
-        <div className="text-xs text-slate-400">
+    <tr className={product.active ? '' : 'opacity-55'}>
+      <td>
+        <div className="font-bold">{product.name}</div>
+        <div className="text-sm text-muted">
           {[product.brand?.name, product.model].filter(Boolean).join(' · ') || '—'}
         </div>
       </td>
-      <td className="px-4 py-3">{product.category.name}</td>
-      <td className={`px-4 py-3 ${HIDE_NARROW}`}>
+      <td>{product.category.name}</td>
+      <td className={HIDE_NARROW}>
         <CompatiblePhones phones={product.compatiblePhones} />
       </td>
-      <td className="px-4 py-3">
+      <td>
         <StockCell product={product} onAdjust={onAdjust} />
       </td>
-      <td className={`px-4 py-3 ${HIDE_NARROW}`}>{formatPEN(product.cost)}</td>
-      <td className="px-4 py-3">{formatPEN(product.salePrice)}</td>
-      <td className={`px-4 py-3 ${HIDE_NARROW} ${profit < 0 ? 'text-red-400' : 'text-green-400'}`}>
+      <td className={`${HIDE_NARROW} whitespace-nowrap text-right tabular-nums text-muted`}>{formatPEN(product.cost)}</td>
+      <td className="whitespace-nowrap text-right font-bold tabular-nums">{formatPEN(product.salePrice)}</td>
+      <td
+        className={`${HIDE_NARROW} whitespace-nowrap text-right font-bold tabular-nums ${
+          profit < 0 ? 'text-danger-ink' : 'text-ink'
+        }`}
+      >
         {formatPEN(profit)}
       </td>
-      <td className="px-4 py-3 text-right whitespace-nowrap">
+      <td className="text-right">
         {product.active ? (
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => onEdit(product)} className="text-xs font-medium text-brand-orange hover:underline">
-              Editar
-            </button>
-            <button type="button" onClick={() => onMovements(product)} className="text-xs font-medium text-slate-300 hover:underline">
-              Movimientos
-            </button>
-            <button type="button" onClick={() => onArchive(product)} className="text-xs font-medium text-red-400 hover:underline">
-              Archivar
+          <div className="flex justify-end gap-1">
+            <Button variant="icon" title="Editar" aria-label={`Editar ${product.name}`} onClick={() => onEdit(product)}>
+              <Pencil size={16} />
+            </Button>
+            <Button variant="icon" title="Movimientos" aria-label={`Movimientos de ${product.name}`} onClick={() => onMovements(product)}>
+              <History size={16} />
+            </Button>
+            <button
+              type="button"
+              title="Archivar"
+              aria-label={`Archivar ${product.name}`}
+              onClick={() => onArchive(product)}
+              className="flex h-9 w-9 items-center justify-center border border-line p-0 text-ink transition-colors hover:border-danger hover:text-danger-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <Archive size={16} />
             </button>
           </div>
         ) : (
-          <button type="button" onClick={() => onRestore(product)} className="text-xs font-medium text-brand-orange hover:underline">
+          <Button variant="secondary" className="ml-auto" onClick={() => onRestore(product)}>
             Restaurar
-          </button>
+          </Button>
         )}
       </td>
     </tr>
@@ -107,21 +116,18 @@ const HEAD_CELLS = [
   { key: 'category', label: 'Categoría' },
   { key: 'phones', label: 'Compatible con', hidden: true },
   { key: 'stock', label: 'Stock' },
-  { key: 'cost', label: 'Costo', hidden: true },
-  { key: 'price', label: 'Precio' },
-  { key: 'profit', label: 'Ganancia', hidden: true },
-  { key: 'actions', label: '', right: true },
+  { key: 'cost', label: 'Costo', hidden: true, right: true },
+  { key: 'price', label: 'Precio', right: true },
+  { key: 'profit', label: 'Ganancia', hidden: true, right: true },
+  { key: 'actions', label: 'Acciones', right: true },
 ];
 
 function TableHead() {
   return (
-    <thead className="bg-slate-900/60 text-left text-xs uppercase tracking-wide text-slate-400">
+    <thead>
       <tr>
         {HEAD_CELLS.map((cell) => (
-          <th
-            key={cell.key}
-            className={`px-4 py-3 ${cell.hidden ? HIDE_NARROW : ''} ${cell.right ? 'text-right' : ''}`}
-          >
+          <th key={cell.key} className={`${cell.hidden ? HIDE_NARROW : ''} ${cell.right ? 'text-right' : ''}`}>
             {cell.label}
           </th>
         ))}
@@ -137,15 +143,15 @@ function TableHead() {
  */
 export default function ProductTable({ products, groups, ...rowActions }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-700">
-      <table className="min-w-full divide-y divide-slate-700 text-sm">
+    <div className="overflow-x-auto border-t-2 border-ink">
+      <table className="admin-table">
         <TableHead />
         {groups ? (
           groups.map((group) => (
-            <tbody key={group.categoryId} className="divide-y divide-slate-800">
-              <tr className="bg-slate-900/40">
-                <td colSpan={HEAD_CELLS.length} className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  {group.categoryName} <span className="font-normal text-slate-500">({group.products.length})</span>
+            <tbody key={group.categoryId}>
+              <tr>
+                <td colSpan={HEAD_CELLS.length} className="bg-surface text-xs font-bold uppercase tracking-wide text-muted">
+                  {group.categoryName} <span className="font-medium text-muted">({group.products.length})</span>
                 </td>
               </tr>
               {group.products.map((product) => (
@@ -154,7 +160,7 @@ export default function ProductTable({ products, groups, ...rowActions }) {
             </tbody>
           ))
         ) : (
-          <tbody className="divide-y divide-slate-800">
+          <tbody>
             {products.map((product) => (
               <ProductRow key={product.id} product={product} {...rowActions} />
             ))}

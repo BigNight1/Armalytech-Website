@@ -9,14 +9,29 @@ const TYPE_LABELS = {
   ajuste_salida: 'Salida',
 };
 
-/** Stock movements (kardex) for one product, newest first. */
+/**
+ * Stock movements (kardex) for one product, newest first. Rendered via the
+ * shared `Modal` as a wide (820px) centered dialog (`bordered`, `size="xl"`)
+ * matching the design (`mov` panel, closeMov).
+ */
 export default function MovementsModal({ open, product, movements, isLoading, page, totalPages, onPageChange, onClose }) {
-  if (!open || !product) return null;
-
   return (
     <Modal
-      open={open}
-      title={`Movimientos — ${product.name}`}
+      open={open && Boolean(product)}
+      bordered
+      size="xl"
+      title={product ? `Movimientos — ${product.name}` : 'Movimientos'}
+      header={
+        product && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-bold uppercase tracking-[0.14em] text-accent-ink">Movimientos · kardex</span>
+            <h2 className="text-2xl">
+              {product.name}
+              {product.model ? ` · ${product.model}` : ''}
+            </h2>
+          </div>
+        )
+      }
       onClose={onClose}
       footer={
         <Button variant="ghost" onClick={onClose}>
@@ -26,61 +41,49 @@ export default function MovementsModal({ open, product, movements, isLoading, pa
     >
       <div className="flex flex-col gap-3">
         {isLoading ? (
-          <SkeletonRows rows={5} columns={1} />
+          <SkeletonRows rows={5} columns={6} />
         ) : movements.length === 0 ? (
-          <p className="text-sm text-slate-400">Sin movimientos registrados.</p>
+          <p className="text-sm text-muted">Sin movimientos registrados.</p>
         ) : (
-          <div className="max-h-80 overflow-y-auto">
-            <table className="min-w-full text-xs">
-              <thead className="sticky top-0 bg-brand-navy-light text-left uppercase tracking-wide text-slate-400">
-                <tr>
-                  <th className="py-1.5 pr-2">Fecha</th>
-                  <th className="py-1.5 pr-2">Tipo</th>
-                  <th className="py-1.5 pr-2">Cantidad</th>
-                  <th className="py-1.5 pr-2">Stock después</th>
-                  <th className="py-1.5 pr-2">Motivo</th>
-                  <th className="py-1.5">Usuario</th>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th className="text-right">Cantidad</th>
+                <th className="text-right">Stock después</th>
+                <th>Motivo</th>
+                <th>Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {movements.map((movement) => (
+                <tr key={movement.id}>
+                  <td className="whitespace-nowrap">{formatMovementDate(movement.occurredAt)}</td>
+                  <td className="font-semibold">{TYPE_LABELS[movement.type] ?? movement.type}</td>
+                  <td className={`text-right font-extrabold tabular-nums ${movement.quantity >= 0 ? 'text-accent-ink' : 'text-danger-ink'}`}>
+                    {movement.quantity >= 0 ? `+${movement.quantity}` : movement.quantity}
+                  </td>
+                  <td className="text-right tabular-nums">{movement.stockAfter}</td>
+                  <td className="text-muted">{movement.reason ?? '—'}</td>
+                  <td className="text-muted">{movement.userEmail}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {movements.map((movement) => (
-                  <tr key={movement.id} className="text-brand-ink">
-                    <td className="whitespace-nowrap py-1.5 pr-2">{formatMovementDate(movement.occurredAt)}</td>
-                    <td className="py-1.5 pr-2">{TYPE_LABELS[movement.type] ?? movement.type}</td>
-                    <td className={`py-1.5 pr-2 font-semibold ${movement.quantity >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {movement.quantity >= 0 ? `+${movement.quantity}` : movement.quantity}
-                    </td>
-                    <td className="py-1.5 pr-2">{movement.stockAfter}</td>
-                    <td className="py-1.5 pr-2 text-slate-400">{movement.reason ?? '—'}</td>
-                    <td className="py-1.5 text-slate-400">{movement.userEmail}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 text-xs text-slate-400">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-              className="rounded-lg border border-slate-700 px-2 py-1 disabled:opacity-40"
-            >
+          <div className="flex items-center justify-center gap-3 text-sm text-muted">
+            <Button variant="secondary" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
               Anterior
-            </button>
+            </Button>
             <span>
               Página {page} de {totalPages}
             </span>
-            <button
-              type="button"
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-              className="rounded-lg border border-slate-700 px-2 py-1 disabled:opacity-40"
-            >
+            <Button variant="secondary" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
               Siguiente
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -16,17 +16,34 @@ export default function CatalogTab({
   phoneActions,
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <CatalogPanel title="Marcas" itemLabel="marca" items={brands} isLoading={isLoadingBrands} {...brandActions} />
+    <div className="grid grid-cols-1 border-t-2 border-ink lg:grid-cols-3">
+      <CatalogPanel
+        title="Marcas"
+        countLabel="marcas"
+        itemLabel="marca"
+        items={brands}
+        isLoading={isLoadingBrands}
+        className="lg:pr-6"
+        {...brandActions}
+      />
       <PhonesPanel
         brands={brands}
         phones={phones}
         isLoading={isLoadingPhones}
         brandFilter={phoneBrandFilter}
         onBrandFilterChange={onPhoneBrandFilterChange}
+        className="border-t-2 border-line lg:border-l-2 lg:border-t-0 lg:px-6"
         {...phoneActions}
       />
-      <CatalogPanel title="Categorías" itemLabel="categoría" items={categories} isLoading={isLoadingCategories} {...categoryActions} />
+      <CatalogPanel
+        title="Categorías"
+        countLabel="categorías"
+        itemLabel="categoría"
+        items={categories}
+        isLoading={isLoadingCategories}
+        className="border-t-2 border-line lg:border-l-2 lg:border-t-0 lg:pl-6"
+        {...categoryActions}
+      />
     </div>
   );
 }

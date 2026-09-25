@@ -6,6 +6,7 @@ import RequireAuth from './auth/RequireAuth.jsx';
 import LoginPage from './auth/LoginPage.jsx';
 import AdminLayout from './shared/layout/AdminLayout.jsx';
 import { ToastProvider, SkeletonTable } from './shared/ui/index.js';
+import { ThemeProvider } from './shared/theme/ThemeProvider.jsx';
 import { queryClient } from './shared/api/queryClient.js';
 
 // T14: each section is its own lazy chunk (on top of AdminRoutes already
@@ -21,7 +22,7 @@ const AccountPage = lazy(() => import('./account/AccountPage.jsx'));
 function SectionSkeleton() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-6 w-40 animate-pulse rounded bg-slate-700/50" />
+      <div className="h-6 w-40 animate-pulse bg-line" />
       <SkeletonTable rows={8} columns={5} />
     </div>
   );
@@ -33,63 +34,70 @@ function SectionSkeleton() {
  * (it navigates on 401/logout), so it lives inside here, not in `App.jsx`.
  * `QueryClientProvider` (T14) wraps everything below it so every feature
  * hook shares the same cache.
+ *
+ * `ThemeProvider` is the outermost UI wrapper (only `QueryClientProvider`,
+ * a plain context, sits above it): it renders the `.admin-shell` root every
+ * admin token resolves against, so it has to cover the login screen and the
+ * toast stack too, not just `AdminLayout`'s protected subtree.
  */
 export default function AdminRoutes() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="login" element={<LoginPage />} />
-            <Route element={<RequireAuth />}>
-              <Route element={<AdminLayout />}>
-                <Route index element={<Navigate to="inventario" replace />} />
-                <Route
-                  path="inventario"
-                  element={
-                    <Suspense fallback={<SectionSkeleton />}>
-                      <InventoryPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="historial"
-                  element={
-                    <Suspense fallback={<SectionSkeleton />}>
-                      <CashClosingsPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="clientes"
-                  element={
-                    <Suspense fallback={<SectionSkeleton />}>
-                      <ClientsPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="personal"
-                  element={
-                    <Suspense fallback={<SectionSkeleton />}>
-                      <StaffPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="cuenta"
-                  element={
-                    <Suspense fallback={<SectionSkeleton />}>
-                      <AccountPage />
-                    </Suspense>
-                  }
-                />
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="login" element={<LoginPage />} />
+              <Route element={<RequireAuth />}>
+                <Route element={<AdminLayout />}>
+                  <Route index element={<Navigate to="inventario" replace />} />
+                  <Route
+                    path="inventario"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <InventoryPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="historial"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <CashClosingsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="clientes"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <ClientsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="personal"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <StaffPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="cuenta"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <AccountPage />
+                      </Suspense>
+                    }
+                  />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="login" replace />} />
-          </Routes>
-        </AuthProvider>
-      </ToastProvider>
+              <Route path="*" element={<Navigate to="login" replace />} />
+            </Routes>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

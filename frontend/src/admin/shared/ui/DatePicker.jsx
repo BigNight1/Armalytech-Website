@@ -9,26 +9,28 @@ import { todayInLima } from '../lib/time.js';
 const defaultClassNames = getDefaultClassNames();
 
 /**
- * Tailwind/brand overrides for `DayPicker` (T16), shared by `DatePicker` and
- * `DateRangePicker`: dark navy surface, orange selected/range days, today
- * marked with an orange ring.
+ * Admin token overrides for `DayPicker` (T16, restyled R1), shared by
+ * `DatePicker` and `DateRangePicker`: surface background, accent
+ * selected/range days, today marked with an accent ring. `chevron` and
+ * `nav_button` are set explicitly (react-day-picker's own default is blue)
+ * so the month-nav arrows follow the accent token instead.
  */
 export const dayPickerClassNames = {
-  root: `${defaultClassNames.root} bg-brand-navy-light text-brand-ink p-3 rounded-lg`,
+  root: `${defaultClassNames.root} bg-surface text-ink p-3`,
   months: defaultClassNames.months,
-  month_caption: `${defaultClassNames.month_caption} text-sm font-semibold text-brand-ink`,
-  weekday: `${defaultClassNames.weekday} text-slate-400`,
-  day: `${defaultClassNames.day} text-brand-ink`,
-  day_button: `${defaultClassNames.day_button} hover:bg-slate-700 rounded-md`,
-  today: `${defaultClassNames.today} border border-brand-orange rounded-md`,
-  selected: `${defaultClassNames.selected} bg-brand-orange text-white rounded-md`,
-  range_start: `${defaultClassNames.range_start} bg-brand-orange text-white rounded-l-md`,
-  range_end: `${defaultClassNames.range_end} bg-brand-orange text-white rounded-r-md`,
-  range_middle: `${defaultClassNames.range_middle} bg-brand-orange/25 text-brand-ink`,
-  outside: `${defaultClassNames.outside} text-slate-600`,
-  disabled: `${defaultClassNames.disabled} text-slate-700`,
-  chevron: `${defaultClassNames.chevron} fill-brand-orange`,
-  nav_button: `${defaultClassNames.nav_button ?? ''} hover:bg-slate-700 rounded-md`,
+  month_caption: `${defaultClassNames.month_caption} text-sm font-semibold text-ink`,
+  weekday: `${defaultClassNames.weekday} text-muted`,
+  day: `${defaultClassNames.day} text-ink`,
+  day_button: `${defaultClassNames.day_button} hover:bg-row-hover`,
+  today: `${defaultClassNames.today} border border-accent`,
+  selected: `${defaultClassNames.selected} bg-accent text-on-accent`,
+  range_start: `${defaultClassNames.range_start} bg-accent text-on-accent`,
+  range_end: `${defaultClassNames.range_end} bg-accent text-on-accent`,
+  range_middle: `${defaultClassNames.range_middle} bg-accent-100 text-accent-900`,
+  outside: `${defaultClassNames.outside} text-muted opacity-60`,
+  disabled: `${defaultClassNames.disabled} text-muted opacity-40`,
+  chevron: `${defaultClassNames.chevron} fill-accent`,
+  nav_button: `${defaultClassNames.nav_button ?? ''} hover:bg-row-hover`,
 };
 
 /** `'2026-09-23' -> '23/09/2026'` for the trigger button label. */
@@ -62,14 +64,14 @@ export default function DatePicker({ value, onChange, maxDate, label, className 
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {label && <span className="mb-1 block text-xs text-brand-ink">{label}</span>}
+      {label && <span className="mb-1 block text-xs text-ink">{label}</span>}
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={popoverId}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-orange"
+        className="border border-line bg-surface px-3 py-1.5 text-sm text-ink focus:outline-none focus-visible:border-accent"
       >
         {formatDisplay(value)}
       </button>
@@ -79,7 +81,7 @@ export default function DatePicker({ value, onChange, maxDate, label, className 
           id={popoverId}
           role="dialog"
           aria-label={label ?? 'Elegir fecha'}
-          className={`absolute z-20 mt-2 rounded-lg border border-slate-700 shadow-xl ${align === 'end' ? 'right-0' : 'left-0'}`}
+          className={`absolute z-20 mt-2 border border-line bg-bg shadow-admin-lg ${align === 'end' ? 'right-0' : 'left-0'}`}
         >
           <DayPicker
             mode="single"

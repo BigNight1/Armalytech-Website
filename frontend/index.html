@@ -53,8 +53,20 @@
       media="print"
       onload="this.media='all'"
     />
+    <!-- Admin panel redesign (R1): Archivo 400/600/800, used only inside
+         `.admin-shell` (src/admin/shared/theme/tokens.css). Chosen as a
+         Google Fonts link — same async-load pattern as the public site's
+         other fonts above — over @fontsource, to avoid adding a new npm
+         dependency for a font family already served this way elsewhere in
+         this file. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@300;400;500;600;700&display=swap" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@300;400;500;600;700&family=Archivo:wght@400;600;800&display=swap" />
     </noscript>
 
     <!-- Google tag: carga después de idle para no competir con LCP -->

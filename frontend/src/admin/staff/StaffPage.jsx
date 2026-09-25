@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { KeyRound, Plus } from 'lucide-react';
 import { staffApi } from './api/staffApi.js';
 import { useAuth } from '../auth/useAuth.js';
-import { useToast, Button, Input, Modal, ConfirmDialog, SkeletonTable } from '../shared/ui/index.js';
+import { useToast, Button, Input, Modal, ConfirmDialog, SkeletonTable, Tag } from '../shared/ui/index.js';
 
 export default function StaffPage() {
   const { user } = useAuth();
@@ -88,90 +89,82 @@ export default function StaffPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-xl font-semibold text-brand-ink">Personal del Panel</h1>
-          <p className="text-sm text-slate-400">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex max-w-[680px] flex-col gap-1.5">
+          <span className="text-[13px] font-bold uppercase tracking-[0.14em] text-accent-ink">Administración</span>
+          <h1>Personal del panel</h1>
+          <p className="mt-1 text-base text-muted">
             Gestiona los accesos del equipo, crea credenciales temporales o desactiva usuarios.
           </p>
         </div>
-        <Button onClick={() => setCreateModalOpen(true)}>+ Nuevo personal</Button>
+        <Button onClick={() => setCreateModalOpen(true)}>
+          <Plus size={18} strokeWidth={2.2} />
+          <span>Nuevo personal</span>
+        </Button>
       </div>
 
       {isLoading ? (
-        <SkeletonTable rows={4} columns={5} />
+        <SkeletonTable rows={4} columns={6} />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-700 bg-brand-navy">
-          <table className="w-full text-left text-sm text-brand-ink">
-            <thead className="border-b border-slate-700 bg-brand-navy-light text-xs uppercase tracking-wider text-slate-400">
+        <div className="overflow-x-auto border-t-2 border-ink">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Correo electrónico</th>
-                <th className="px-4 py-3">Rol</th>
-                <th className="px-4 py-3">Estado</th>
-                <th className="px-4 py-3">Creado por</th>
-                <th className="px-4 py-3">Fecha registro</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
+                <th>Correo electrónico</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Creado por</th>
+                <th className="whitespace-nowrap">Registro</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody>
               {staffList.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                  <td colSpan={6} className="p-8 text-center text-muted">
                     No hay personal registrado aún.
                   </td>
                 </tr>
               ) : (
                 staffList.map((member) => {
                   const isSelf = member.id === user?.id;
+                  const initials = (member.email || '')
+                    .split('@')[0]
+                    .slice(0, 2)
+                    .toUpperCase();
                   return (
-                    <tr key={member.id} className="hover:bg-slate-800/50">
-                      <td className="px-4 py-3 font-medium text-white">
-                        {member.email}
-                        {isSelf && (
-                          <span className="ml-2 rounded bg-brand-orange/20 px-1.5 py-0.5 text-xs text-brand-orange">
-                            Tú
+                    <tr key={member.id} className={member.active ? '' : 'opacity-70'}>
+                      <td>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="flex h-9 w-9 flex-none items-center justify-center border border-line bg-surface text-sm font-extrabold text-ink">
+                            {initials}
                           </span>
-                        )}
-                        {member.mustChangePassword && (
-                          <span className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-xs text-amber-400">
-                            Clave temporal
-                          </span>
-                        )}
+                          <span className="font-bold text-ink">{member.email}</span>
+                          {isSelf && <Tag variant="solid">Tú</Tag>}
+                          {member.mustChangePassword && (
+                            <span className="whitespace-nowrap border border-accent px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide text-accent-ink">
+                              Clave temporal
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
-                        {member.role === 'owner' ? (
-                          <span className="inline-flex rounded-full bg-orange-500/20 px-2.5 py-0.5 text-xs font-medium text-orange-400">
-                            Principal (Owner)
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-400">
-                            Personal (Admin)
-                          </span>
-                        )}
+                      <td>
+                        <Tag variant={member.role === 'owner' ? 'solid' : 'neutral'}>
+                          {member.role === 'owner' ? 'Principal (Owner)' : 'Personal (Admin)'}
+                        </Tag>
                       </td>
-                      <td className="px-4 py-3">
-                        {member.active ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                            Activo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-medium text-red-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                            Inactivo
-                          </span>
-                        )}
+                      <td>
+                        <span className="inline-flex items-center gap-2 font-semibold text-ink">
+                          <span className={`h-[9px] w-[9px] ${member.active ? 'bg-ink' : 'bg-danger'}`} />
+                          <span>{member.active ? 'Activo' : 'Inactivo'}</span>
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
-                        {member.createdBy ?? 'Sistema (Bootstrap)'}
+                      <td className="text-muted">{member.createdBy ?? 'Sistema (Bootstrap)'}</td>
+                      <td className="tabular-nums text-muted">
+                        {member.createdAt ? new Date(member.createdAt).toLocaleDateString('es-PE') : '—'}
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
-                        {member.createdAt
-                          ? new Date(member.createdAt).toLocaleDateString('es-PE')
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="text-right">
+                        <div className="flex justify-end gap-1.5">
                           <button
                             type="button"
                             onClick={() => {
@@ -179,18 +172,19 @@ export default function StaffPage() {
                               setResetPasswordVal('');
                               setResetModalOpen(true);
                             }}
-                            className="rounded px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+                            className="inline-flex h-9 items-center gap-2 whitespace-nowrap border border-line px-3 text-sm font-bold text-ink transition-colors hover:border-accent hover:text-accent-ink"
                           >
-                            Resetear clave
+                            <KeyRound size={15} />
+                            <span>Resetear clave</span>
                           </button>
                           {!isSelf && (
                             <button
                               type="button"
                               onClick={() => setConfirmToggleUser(member)}
-                              className={`rounded px-2 py-1 text-xs font-medium ${
+                              className={`h-9 whitespace-nowrap border px-3 text-sm font-bold transition-colors ${
                                 member.active
-                                  ? 'text-red-400 hover:bg-red-950/40'
-                                  : 'text-emerald-400 hover:bg-emerald-950/40'
+                                  ? 'border-danger text-danger-ink hover:bg-danger-bg'
+                                  : 'border-line text-ink hover:border-accent hover:text-accent-ink'
                               }`}
                             >
                               {member.active ? 'Desactivar' : 'Activar'}
@@ -208,15 +202,11 @@ export default function StaffPage() {
       )}
 
       {/* Modal Nuevo Personal */}
-      <Modal
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        title="Crear nuevo personal"
-      >
+      <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Crear nuevo personal">
         <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
-          <p className="text-xs text-slate-400">
-            Crea una cuenta con una contraseña temporal. En su primer ingreso, el sistema le exigirá
-            crear su propia contraseña privada.
+          <p className="text-[15px] leading-normal text-muted">
+            Crea una cuenta con una contraseña temporal. En su primer ingreso, el sistema le exigirá crear su propia
+            contraseña privada.
           </p>
           <Input
             label="Correo electrónico"
@@ -236,12 +226,8 @@ export default function StaffPage() {
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
-          <div className="mt-2 flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setCreateModalOpen(false)}
-            >
+          <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
+            <Button type="button" variant="secondary" onClick={() => setCreateModalOpen(false)}>
               Cancelar
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
@@ -261,9 +247,9 @@ export default function StaffPage() {
         title={`Resetear contraseña: ${selectedStaff?.email ?? ''}`}
       >
         <form onSubmit={handleResetSubmit} className="flex flex-col gap-4">
-          <p className="text-xs text-slate-400">
-            Asigna una nueva clave temporal. Las sesiones activas de este usuario se cerrarán
-            inmediatamente y se le pedirá cambiarla al ingresar.
+          <p className="text-[15px] leading-normal text-muted">
+            Asigna una nueva clave temporal. Las sesiones activas de este usuario se cerrarán inmediatamente y se le
+            pedirá cambiarla al ingresar.
           </p>
           <Input
             label="Nueva contraseña temporal"
@@ -274,7 +260,7 @@ export default function StaffPage() {
             onChange={(e) => setResetPasswordVal(e.target.value)}
             required
           />
-          <div className="mt-2 flex justify-end gap-2">
+          <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
             <Button
               type="button"
               variant="secondary"
@@ -302,6 +288,8 @@ export default function StaffPage() {
             : `¿Deseas reactivar el acceso para ${confirmToggleUser?.email}?`
         }
         confirmLabel={confirmToggleUser?.active ? 'Desactivar' : 'Activar'}
+        danger={Boolean(confirmToggleUser?.active)}
+        loading={toggleStatusMutation.isPending}
         onConfirm={() => {
           if (confirmToggleUser) {
             toggleStatusMutation.mutate({

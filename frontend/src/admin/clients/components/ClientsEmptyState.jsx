@@ -39,24 +39,21 @@ export default function ClientsEmptyState() {
             <Button variant="secondary" onClick={handleCopy}>
               {copied ? 'Enlace copiado' : 'Copiar enlace de registro'}
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => window.open(registerUrl, '_blank', 'noopener')}
-            >
+            <Button variant="ghost" onClick={() => window.open(registerUrl, '_blank', 'noopener')}>
               Abrir en una pestaña nueva
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted">
             {STEPS.map((item, index) => (
               <div key={item.step} className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-orange/20 font-semibold text-brand-orange">
+                  <span className="flex h-6 w-6 items-center justify-center bg-accent-100 font-bold text-accent-800">
                     {item.step}
                   </span>
                   <span>{item.label}</span>
                 </div>
-                {index < STEPS.length - 1 && <span className="text-slate-600">→</span>}
+                {index < STEPS.length - 1 && <span className="text-muted">→</span>}
               </div>
             ))}
           </div>

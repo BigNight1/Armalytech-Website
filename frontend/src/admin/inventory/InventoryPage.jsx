@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
+import { Plus, Search } from 'lucide-react';
 import { useCategories } from './hooks/useCategories.js';
 import { useBrands } from './hooks/useBrands.js';
 import { usePhones } from './hooks/usePhones.js';
 import { useProducts } from './hooks/useProducts.js';
 import { useProductMovements } from './hooks/useProductMovements.js';
 import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
+import { useBreadcrumb } from '../shared/layout/breadcrumb.jsx';
 import CategoryChips from './components/CategoryChips.jsx';
 import ProductTable from './components/ProductTable.jsx';
 import ProductFormModal from './components/ProductFormModal.jsx';
@@ -27,11 +29,6 @@ function groupByCategory(products) {
   return order.map((key) => byCategory.get(key));
 }
 
-const TABS = [
-  { key: 'productos', label: 'Productos' },
-  { key: 'catalogo', label: 'Catálogo' },
-];
-
 /** Container for the Inventario section: product catalog + brand/phone/category management. */
 export default function InventoryPage() {
   const [tab, setTab] = useState('productos');
@@ -39,6 +36,8 @@ export default function InventoryPage() {
   const [movementsProduct, setMovementsProduct] = useState(null);
   const [pendingArchive, setPendingArchive] = useState(null);
   const [phoneBrandFilter, setPhoneBrandFilter] = useState('');
+
+  useBreadcrumb(tab === 'catalogo' ? 'Catálogo' : null);
 
   const categories = useCategories();
   const brands = useBrands();
@@ -69,6 +68,8 @@ export default function InventoryPage() {
   const groups = products.matchedPhones.length > 0 ? groupByCategory(products.items) : null;
   const totalPages = Math.max(1, Math.ceil(products.total / products.pageSize));
   const totalMovementPages = Math.max(1, Math.ceil(movements.total / movements.pageSize));
+  const rangeStart = products.total === 0 ? 0 : (products.page - 1) * products.pageSize + 1;
+  const rangeEnd = Math.min(products.page * products.pageSize, products.total);
 
   async function handleSubmitProduct(payload) {
     if (productModal?.mode === 'edit') {
@@ -88,64 +89,76 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-brand-ink">Inventario</h1>
-        {tab === 'productos' && <Button onClick={() => setProductModal({ mode: 'create' })}>+ Producto</Button>}
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-accent-ink">Operación</span>
+          <h1>Inventario</h1>
+        </div>
+        {tab === 'productos' && (
+          <Button onClick={() => setProductModal({ mode: 'create' })}>
+            <Plus size={18} strokeWidth={2.2} />
+            <span>Nuevo producto</span>
+          </Button>
+        )}
       </div>
 
-      <div className="flex gap-2 border-b border-slate-700">
-        {TABS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setTab(item.key)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-              tab === item.key ? 'border-brand-orange text-brand-ink' : 'border-transparent text-slate-400 hover:text-brand-ink'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div className="flex gap-7 border-b-2 border-line">
+        <button
+          type="button"
+          onClick={() => setTab('productos')}
+          className={`-mb-0.5 border-b-[3px] pb-2.5 text-[15px] transition-colors ${
+            tab === 'productos' ? 'border-accent font-bold text-ink' : 'border-transparent font-semibold text-muted hover:text-ink'
+          }`}
+        >
+          Productos <span className="font-medium text-muted">{products.total}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('catalogo')}
+          className={`-mb-0.5 border-b-[3px] pb-2.5 text-[15px] transition-colors ${
+            tab === 'catalogo' ? 'border-accent font-bold text-ink' : 'border-transparent font-semibold text-muted hover:text-ink'
+          }`}
+        >
+          Catálogo
+        </button>
       </div>
 
       {tab === 'productos' ? (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3">
-            <div className="w-full max-w-md">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative w-full max-w-md">
+              <Search size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted opacity-60" />
               <Input
                 name="product-search"
                 placeholder="Buscar por celular (ej. A54) o producto..."
                 value={products.searchInput}
                 onChange={(e) => products.setSearch(e.target.value)}
+                className="pl-10"
               />
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CategoryChips
-                categories={categories.categories}
-                selectedId={products.categoryId}
-                onSelect={products.setCategoryId}
-                lowStock={products.lowStock}
-                onToggleLowStock={products.setLowStock}
+            <CategoryChips
+              categories={categories.categories}
+              selectedId={products.categoryId}
+              onSelect={products.setCategoryId}
+              lowStock={products.lowStock}
+              onToggleLowStock={products.setLowStock}
+            />
+            <label className="ml-auto flex items-center gap-2 text-[15px] text-ink">
+              <input
+                type="checkbox"
+                checked={products.includeArchived}
+                onChange={(e) => products.setIncludeArchived(e.target.checked)}
+                className="h-[17px] w-[17px] accent-accent"
               />
-              <button
-                type="button"
-                onClick={() => products.setIncludeArchived(!products.includeArchived)}
-                className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  products.includeArchived
-                    ? 'border-slate-400 bg-slate-700 text-brand-ink'
-                    : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500'
-                }`}
-              >
-                Archivados
-              </button>
-            </div>
+              <span>Archivados</span>
+            </label>
           </div>
 
           {products.matchedPhones.length > 0 && (
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-muted">
               Compatibles con{' '}
-              <span className="font-medium text-brand-ink">
+              <span className="font-medium text-ink">
                 {products.matchedPhones.map((phone) => `${phone.brandName} ${phone.name}`).join(', ')}
               </span>
             </p>
@@ -164,29 +177,30 @@ export default function InventoryPage() {
                 onRestore={(product) => products.restoreProduct(product.id)}
                 onAdjust={(id, delta) => products.adjustStock(id, delta)}
               />
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
-                  <button
-                    type="button"
+              <div className="flex items-center justify-between gap-3 text-[15px] text-muted">
+                <span>
+                  Mostrando {rangeStart}–{rangeEnd} de {products.total} productos
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
                     disabled={products.page <= 1}
                     onClick={() => products.setPage(products.page - 1)}
-                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
                   >
                     Anterior
-                  </button>
-                  <span>
+                  </Button>
+                  <span className="px-2 font-semibold text-ink">
                     Página {products.page} de {totalPages}
                   </span>
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     disabled={products.page >= totalPages}
                     onClick={() => products.setPage(products.page + 1)}
-                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
                   >
                     Siguiente
-                  </button>
+                  </Button>
                 </div>
-              )}
+              </div>
             </>
           ) : (
             <EmptyState

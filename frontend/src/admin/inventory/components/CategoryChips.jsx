@@ -1,36 +1,26 @@
-function chipClass(active, activeClasses) {
-  return `inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-    active ? activeClasses : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500'
-  }`;
-}
+import { Chip } from '../../shared/ui/index.js';
 
 /** Category filter chips ("Todas" + one per category) plus the "Stock bajo" toggle chip. */
 export default function CategoryChips({ categories, selectedId, onSelect, lowStock, onToggleLowStock }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={() => onSelect(undefined)}
-        className={chipClass(selectedId === undefined, 'border-brand-orange bg-brand-orange text-white')}
-      >
+    <div className="flex flex-wrap items-center gap-1.5">
+      <Chip active={selectedId === undefined} onClick={() => onSelect(undefined)}>
         Todas
-      </button>
+      </Chip>
       {categories.map((category) => (
-        <button
-          key={category.id}
-          type="button"
-          onClick={() => onSelect(category.id)}
-          className={chipClass(selectedId === category.id, 'border-brand-orange bg-brand-orange text-white')}
-        >
+        <Chip key={category.id} active={selectedId === category.id} onClick={() => onSelect(category.id)}>
           {category.name}
-        </button>
+        </Chip>
       ))}
       <button
         type="button"
         onClick={() => onToggleLowStock(!lowStock)}
-        className={chipClass(lowStock, 'border-red-500 bg-red-500/20 text-red-300')}
+        className={`inline-flex h-9 items-center gap-1.5 border px-3 text-sm font-semibold transition-colors ${
+          lowStock ? 'border-danger bg-danger-bg text-danger-ink' : 'border-line bg-transparent text-ink hover:bg-surface'
+        }`}
       >
-        Stock bajo
+        <span className="h-2 w-2 bg-danger" aria-hidden="true" />
+        <span>Stock bajo</span>
       </button>
     </div>
   );

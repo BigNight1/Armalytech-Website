@@ -4,12 +4,14 @@ import LoyaltyStamps from './LoyaltyStamps.jsx';
 import { clientsApi } from '../api/clientsApi.js';
 import { formatPhone } from '../lib/format.js';
 
-export default function RegisterVisitModal({
-  open,
-  onClose,
-  initialClient = null,
-  onVisitRegistered,
-}) {
+const NOTICE_CLASSES = {
+  success: 'border-t-2 border-ink bg-surface text-ink',
+  threshold: 'border-t-2 border-accent bg-accent-100 text-accent-ink',
+  reward: 'border-t-2 border-accent bg-accent-100 font-bold text-accent-900',
+  error: 'border-t-2 border-danger bg-danger-bg text-danger-ink',
+};
+
+export default function RegisterVisitModal({ open, onClose, initialClient = null, onVisitRegistered }) {
   const [phone, setPhone] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [foundClient, setFoundClient] = useState(null);
@@ -69,12 +71,12 @@ export default function RegisterVisitModal({
       if (res.thresholdReached) {
         setResultNotice({
           type: 'threshold',
-          message: '¡Sello 4 alcanzado! Se ha emitido notificación por WhatsApp / n8n con el descuento del 20% para la próxima visita.',
+          message: '¡Sello 4 alcanzado! Se ha emitido notificación por WhatsApp con el descuento del 20% para la próxima visita.',
         });
       } else if (res.rewardReady) {
         setResultNotice({
           type: 'reward',
-          message: '¡5 Sellos completados! El cliente ha desbloqueado su 20% de descuento para aplicar en esta reparación.',
+          message: '¡5 sellos completados! El cliente ha desbloqueado su 20% de descuento para aplicar en esta reparación.',
         });
       } else {
         setResultNotice({
@@ -83,9 +85,7 @@ export default function RegisterVisitModal({
         });
       }
 
-      if (onVisitRegistered) {
-        onVisitRegistered(updated);
-      }
+      if (onVisitRegistered) onVisitRegistered(updated);
     } catch (err) {
       setSearchError(err?.message || 'Error al registrar visita');
     } finally {
@@ -96,10 +96,10 @@ export default function RegisterVisitModal({
   const nextStamps = foundClient ? Math.min(5, (foundClient.stamps ?? 0) + 1) : 1;
 
   return (
-    <Modal open={open} title="Registrar Visita de Cliente" onClose={onClose}>
+    <Modal open={open} title="Registrar visita de cliente" onClose={onClose}>
       <div className="flex flex-col gap-4">
         {!initialClient && (
-          <form onSubmit={handleSearch} className="flex gap-2 items-end">
+          <form onSubmit={handleSearch} className="flex items-end gap-2">
             <div className="flex-1">
               <Input
                 label="Buscar cliente por teléfono o nombre"
@@ -116,60 +116,42 @@ export default function RegisterVisitModal({
         )}
 
         {searchError && (
-          <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5">
-            {searchError}
-          </p>
+          <p className="border border-danger bg-danger-bg p-2.5 text-xs text-danger-ink">{searchError}</p>
         )}
 
         {foundClient && (
-          <div className="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex flex-col gap-3 border border-line p-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div>
-                <h4 className="text-sm font-semibold text-brand-ink">
+                <h4 className="text-sm font-bold text-ink">
                   {foundClient.firstName} {foundClient.lastName}
                 </h4>
-                <p className="text-xs text-slate-400">
-                  {formatPhone(foundClient.phoneE164)}
-                </p>
+                <p className="text-xs tabular-nums text-muted">{formatPhone(foundClient.phoneE164)}</p>
               </div>
               <div className="text-right">
-                <span className="text-[11px] text-slate-400">Total histórico</span>
-                <p className="text-sm font-bold text-brand-ink">
-                  {foundClient.visitCount ?? 0} visitas
-                </p>
+                <span className="text-[11px] text-muted">Total histórico</span>
+                <p className="text-sm font-bold text-ink">{foundClient.visitCount ?? 0} visitas</p>
               </div>
             </div>
 
             <LoyaltyStamps stamps={foundClient.stamps ?? 0} size="md" />
 
             {resultNotice ? (
-              <div
-                className={`p-3 rounded-xl border text-xs ${
-                  resultNotice.type === 'reward'
-                    ? 'border-amber-500/30 bg-amber-500/10 text-amber-300 font-medium'
-                    : resultNotice.type === 'threshold'
-                    ? 'border-orange-500/30 bg-orange-500/10 text-orange-300'
-                    : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                }`}
-              >
+              <div className={`p-3 text-xs ${NOTICE_CLASSES[resultNotice.type] ?? NOTICE_CLASSES.success}`}>
                 {resultNotice.message}
               </div>
             ) : (
               <div className="flex items-center justify-between pt-2">
-                <span className="text-xs text-slate-400">
-                  Al confirmar pasará a:{' '}
-                  <strong className="text-brand-orange">{nextStamps} / 5 sellos</strong>
+                <span className="text-xs text-muted">
+                  Al confirmar pasará a: <strong className="text-accent-ink">{nextStamps} / 5 sellos</strong>
                 </span>
-                <Button
-                  onClick={handleConfirmVisit}
-                  disabled={isSubmitting}
-                >
+                <Button onClick={handleConfirmVisit} disabled={isSubmitting}>
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <Spinner size="sm" /> Guardando…
                     </span>
                   ) : (
-                    'Confirmar Visita (+1)'
+                    'Confirmar visita (+1)'
                   )}
                 </Button>
               </div>

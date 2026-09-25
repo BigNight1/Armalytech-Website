@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Search } from 'lucide-react';
 import { useClients } from './hooks/useClients.js';
 import { useClientEvents } from './hooks/useClientEvents.js';
 import { useCommunityEvents } from './hooks/useCommunityEvents.js';
@@ -9,13 +11,21 @@ import ClientDetailModal from './components/ClientDetailModal.jsx';
 import RegisterVisitModal from './components/RegisterVisitModal.jsx';
 import ActivityTab from './components/ActivityTab.jsx';
 import StatCards from './components/StatCards.jsx';
-import { Button, Input, Select, SkeletonTable } from '../shared/ui/index.js';
+import { Button, Select, SkeletonTable, useToast } from '../shared/ui/index.js';
 import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
+import { useBreadcrumb } from '../shared/layout/breadcrumb.jsx';
+import { clientsApi } from './api/clientsApi.js';
+import { clientsKeys } from './api/queryKeys.js';
 
 const CONSENT_OPTIONS = [
-  { value: 'all', label: 'Todos' },
+  { value: 'all', label: 'Promociones: Todos' },
   { value: 'approved', label: 'Aprobó' },
   { value: 'declined', label: 'Descartó' },
+];
+
+const TABS = [
+  { key: 'clientes', label: 'Clientes y sellos' },
+  { key: 'actividad', label: 'Actividad' },
 ];
 
 /** Container for the Clientes section: client list/search + loyalty & "Actividad" tab. */
@@ -23,7 +33,11 @@ export default function ClientsPage() {
   const [tab, setTab] = useState('clientes'); // 'clientes' | 'actividad'
   const [selectedClient, setSelectedClient] = useState(null);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
-  const [visitModalClient, setVisitModalClient] = useState(null);
+
+  useBreadcrumb(tab === 'actividad' ? 'Actividad' : null);
+
+  const { notify } = useToast();
+  const queryClient = useQueryClient();
 
   const clientsState = useClients();
   const clientEvents = useClientEvents(selectedClient?.id);
@@ -34,6 +48,28 @@ export default function ClientsPage() {
   const showClientsLoading = useDelayedFlag(clientsState.isLoading);
   const showActivityLoading = useDelayedFlag(communityEvents.isLoading);
   const totalPages = Math.max(1, Math.ceil(clientsState.total / clientsState.pageSize));
+
+  // One-click "+1 visita" from the table row (design: `c.addVisit`). Guarded
+  // against double clicks via `isPending` + `variables` (disables just the
+  // row that's in flight, not the whole table).
+  const quickVisitMutation = useMutation({
+    mutationFn: (clientId) => clientsApi.registerClientVisit(clientId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: clientsKeys.all });
+      if (res.thresholdReached) {
+        notify('¡Sello 4 alcanzado! Se envió recordatorio por WhatsApp para la promo del 20%.', { type: 'success' });
+      } else if (res.rewardReady) {
+        notify('¡5 sellos acumulados! El 20% de descuento está listo para canjear.', { type: 'success' });
+      } else {
+        notify(`Visita registrada. Sellos actuales: ${res.client.stamps}/5.`, { type: 'success' });
+      }
+      if (selectedClient?.id === res.client.id) {
+        setSelectedClient(res.client);
+        clientEvents.refetch();
+      }
+    },
+    onError: (err) => notify(err.message ?? 'No se pudo registrar la visita', { type: 'error' }),
+  });
 
   async function handleSaveClient(id, changes) {
     const updated = await clientsState.updateClient(id, changes);
@@ -49,11 +85,6 @@ export default function ClientsPage() {
     clientEvents.refetch();
   }
 
-  function handleOpenVisitModal(client = null) {
-    setVisitModalClient(client);
-    setIsVisitModalOpen(true);
-  }
-
   function handleVisitRegistered() {
     clientsState.refetch();
     stats.refetch();
@@ -63,11 +94,15 @@ export default function ClientsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-brand-ink">Clientes & Fidelización</h1>
-        <Button onClick={() => handleOpenVisitModal(null)} className="flex items-center gap-1.5 shadow-md shadow-orange-500/20">
-          <span>+ Registrar Visita</span>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-bold uppercase tracking-[0.14em] text-accent-ink">Fidelización</span>
+          <h1>Clientes</h1>
+        </div>
+        <Button onClick={() => setIsVisitModalOpen(true)}>
+          <Plus size={18} strokeWidth={2.2} />
+          <span>Registrar visita</span>
         </Button>
       </div>
 
@@ -77,62 +112,61 @@ export default function ClientsPage() {
         approvedConsent={stats.approvedConsent}
       />
 
-      <div className="flex gap-2 border-b border-slate-700">
-        {[
-          { key: 'clientes', label: 'Clientes & Sellos' },
-          { key: 'actividad', label: 'Actividad' },
-        ].map((item) => (
+      <div className="flex flex-wrap items-center gap-7 border-b-2 border-line">
+        {TABS.map((item) => (
           <button
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === item.key
-                ? 'border-brand-orange text-brand-ink'
-                : 'border-transparent text-slate-400 hover:text-brand-ink'
+            className={`-mb-0.5 border-b-[3px] py-2.5 text-[15px] transition-colors ${
+              tab === item.key ? 'border-accent font-bold text-ink' : 'border-transparent font-semibold text-muted hover:text-ink'
             }`}
           >
             {item.label}
           </button>
         ))}
+
+        {tab === 'clientes' && (
+          <div className="ml-auto flex flex-wrap gap-3 pb-2.5">
+            <div className="relative w-full sm:w-[300px]">
+              <Search size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                name="clients-search"
+                placeholder="Nombre, apellido o número..."
+                value={clientsState.query}
+                onChange={(e) => clientsState.setQuery(e.target.value)}
+                className="min-h-[40px] w-full border border-line bg-surface py-2 pl-9 pr-3 text-[15px] text-ink placeholder:text-muted focus:outline-none focus-visible:border-accent"
+              />
+            </div>
+            <Select
+              options={CONSENT_OPTIONS}
+              value={clientsState.consent}
+              onChange={(e) => clientsState.setConsent(e.target.value)}
+              className="w-full sm:w-[230px]"
+            />
+          </div>
+        )}
       </div>
 
       {tab === 'clientes' ? (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="w-full max-w-xs">
-              <Input
-                name="clients-search"
-                label="Buscar"
-                placeholder="Nombre, apellido o número..."
-                value={clientsState.query}
-                onChange={(e) => clientsState.setQuery(e.target.value)}
-              />
-            </div>
-            <Select
-              label="Acepta promociones"
-              options={CONSENT_OPTIONS}
-              value={clientsState.consent}
-              onChange={(e) => clientsState.setConsent(e.target.value)}
-            />
-          </div>
-
           {showClientsLoading ? (
-            <SkeletonTable rows={6} columns={5} />
+            <SkeletonTable rows={6} columns={8} />
           ) : hasClients ? (
             <>
               <ClientsTable
                 clients={clientsState.items}
                 onSelectClient={setSelectedClient}
-                onRegisterVisit={(client) => handleOpenVisitModal(client)}
+                onQuickVisit={(client) => quickVisitMutation.mutate(client.id)}
+                pendingVisitId={quickVisitMutation.isPending ? quickVisitMutation.variables : null}
               />
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
+                <div className="flex items-center justify-center gap-3 text-sm text-muted">
                   <button
                     type="button"
                     disabled={clientsState.page <= 1}
                     onClick={() => clientsState.setPage(clientsState.page - 1)}
-                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
+                    className="border border-line px-3 py-1 disabled:opacity-40"
                   >
                     Anterior
                   </button>
@@ -143,7 +177,7 @@ export default function ClientsPage() {
                     type="button"
                     disabled={clientsState.page >= totalPages}
                     onClick={() => clientsState.setPage(clientsState.page + 1)}
-                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
+                    className="border border-line px-3 py-1 disabled:opacity-40"
                   >
                     Siguiente
                   </button>
@@ -176,12 +210,8 @@ export default function ClientsPage() {
 
       <RegisterVisitModal
         open={isVisitModalOpen}
-        initialClient={visitModalClient}
         onVisitRegistered={handleVisitRegistered}
-        onClose={() => {
-          setIsVisitModalOpen(false);
-          setVisitModalClient(null);
-        }}
+        onClose={() => setIsVisitModalOpen(false)}
       />
     </div>
   );

@@ -1,11 +1,14 @@
-/** "Acepta promociones" badge: Aprobó (green) when true, Descartó (muted/red) when false. */
+/**
+ * "Acepta promociones" badge: soft accent tint when approved, muted outline
+ * when declined (design: `consentTag()` — normal case, not the uppercase
+ * `Tag` treatment, so this stays a small local span instead of reusing
+ * `shared/ui/Tag`).
+ */
 export default function ConsentBadge({ approved }) {
-  const classes = approved
-    ? 'bg-green-500/15 text-green-400 border-green-500/30'
-    : 'bg-red-500/10 text-red-400/80 border-red-500/20';
+  const classes = approved ? 'bg-accent-100 text-accent-800' : 'border border-line text-muted';
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${classes}`}>
+    <span className={`inline-flex items-center whitespace-nowrap px-2 py-0.5 text-[13px] font-bold ${classes}`}>
       {approved ? 'Aprobó' : 'Descartó'}
     </span>
   );

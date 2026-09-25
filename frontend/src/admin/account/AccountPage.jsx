@@ -1,11 +1,41 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth.js';
 import { accountApi } from './api/accountApi.js';
-import { useToast, Button, Input } from '../shared/ui/index.js';
+import { useToast } from '../shared/ui/index.js';
+import { useTheme } from '../shared/theme/ThemeProvider.jsx';
+import { useBreadcrumb } from '../shared/layout/breadcrumb.jsx';
+import AccountTabs from './components/AccountTabs.jsx';
+import ProfileTab from './components/ProfileTab.jsx';
+import SettingsTab from './components/SettingsTab.jsx';
 
+const VALID_TABS = ['perfil', 'config'];
+
+/**
+ * Container: reads `?tab=perfil|config` (Sidebar's user menu links here),
+ * owns the email/password form state and API calls, wires Configuración's
+ * theme picker to `useTheme()`. Task brief keeps both credential forms
+ * (email + password) under Perfil — see `ProfileTab.jsx` for why that
+ * diverges from the design's own tab split.
+ */
 export default function AccountPage() {
   const { user, login } = useAuth();
   const { notify } = useToast();
+  const { isDark, setTheme } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const rawTab = searchParams.get('tab');
+  const activeTab = VALID_TABS.includes(rawTab) ? rawTab : 'perfil';
+
+  useBreadcrumb(activeTab === 'perfil' ? 'Perfil' : 'Configuración');
+
+  const setActiveTab = (tab) => {
+    setSearchParams((params) => {
+      const next = new URLSearchParams(params);
+      next.set('tab', tab);
+      return next;
+    });
+  };
 
   // Email form state
   const [newEmail, setNewEmail] = useState('');
@@ -71,109 +101,44 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-brand-ink">Mi Cuenta</h1>
-        <p className="text-sm text-slate-400">
-          Gestiona tu correo de acceso y tus credenciales de seguridad.
-        </p>
+    <div className="flex max-w-5xl flex-col gap-6">
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[13px] font-bold uppercase tracking-[0.14em] text-accent-ink">Mi cuenta</span>
+        <h1 className="text-[40px]">{activeTab === 'perfil' ? 'Perfil' : 'Configuración'}</h1>
+        <p className="mt-1 text-base text-muted">Gestiona tu correo de acceso y tus credenciales de seguridad.</p>
       </div>
 
-      {/* Info perfil */}
-      <div className="rounded-xl border border-slate-700 bg-brand-navy p-6">
-        <h2 className="text-base font-medium text-white">Datos de la sesión</h2>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="text-xs text-slate-400">Correo actual</label>
-            <p className="text-sm font-medium text-brand-ink">{user?.email}</p>
-          </div>
-          <div>
-            <label className="text-xs text-slate-400">Rol en el panel</label>
-            <div className="mt-1">
-              {user?.role === 'owner' ? (
-                <span className="inline-flex rounded-full bg-orange-500/20 px-2.5 py-0.5 text-xs font-medium text-orange-400">
-                  Principal (Owner)
-                </span>
-              ) : (
-                <span className="inline-flex rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-medium text-blue-400">
-                  Personal (Admin)
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <AccountTabs active={activeTab} onChange={setActiveTab} />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Cambiar Email */}
-        <div className="rounded-xl border border-slate-700 bg-brand-navy p-6">
-          <h2 className="text-base font-medium text-white">Cambiar correo electrónico</h2>
-          <p className="mt-1 text-xs text-slate-400">
-            Ingresa tu nuevo correo y confirma con tu contraseña actual.
-          </p>
-
-          <form onSubmit={handleEmailSubmit} className="mt-4 flex flex-col gap-4">
-            <Input
-              label="Nuevo correo electrónico"
-              type="email"
-              placeholder="nuevo@armalytech.com"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              required
-            />
-            <Input
-              label="Contraseña actual"
-              type="password"
-              placeholder="••••••••"
-              value={emailCurrentPassword}
-              onChange={(e) => setEmailCurrentPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" disabled={savingEmail} className="mt-2">
-              {savingEmail ? 'Guardando…' : 'Guardar nuevo correo'}
-            </Button>
-          </form>
-        </div>
-
-        {/* Cambiar Contraseña */}
-        <div className="rounded-xl border border-slate-700 bg-brand-navy p-6">
-          <h2 className="text-base font-medium text-white">Cambiar contraseña</h2>
-          <p className="mt-1 text-xs text-slate-400">
-            Al cambiar tu contraseña, cualquier otra sesión abierta en otros dispositivos se
-            cerrará por seguridad.
-          </p>
-
-          <form onSubmit={handlePasswordSubmit} className="mt-4 flex flex-col gap-4">
-            <Input
-              label="Contraseña actual"
-              type="password"
-              placeholder="••••••••"
-              value={passwordCurrentPassword}
-              onChange={(e) => setPasswordCurrentPassword(e.target.value)}
-              required
-            />
-            <Input
-              label="Nueva contraseña (mínimo 8 caracteres)"
-              type="password"
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-            <Input
-              label="Confirmar nueva contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" disabled={savingPassword} className="mt-2">
-              {savingPassword ? 'Actualizando…' : 'Actualizar contraseña'}
-            </Button>
-          </form>
-        </div>
-      </div>
+      {activeTab === 'perfil' ? (
+        <ProfileTab
+          user={user}
+          emailForm={{
+            newEmail,
+            currentPassword: emailCurrentPassword,
+            saving: savingEmail,
+            onNewEmailChange: (e) => setNewEmail(e.target.value),
+            onCurrentPasswordChange: (e) => setEmailCurrentPassword(e.target.value),
+            onSubmit: handleEmailSubmit,
+          }}
+        />
+      ) : (
+        <SettingsTab
+          isDark={isDark}
+          onSetLight={() => setTheme('claro')}
+          onSetDark={() => setTheme('oscuro')}
+          passwordForm={{
+            currentPassword: passwordCurrentPassword,
+            newPassword,
+            confirmPassword,
+            saving: savingPassword,
+            onCurrentPasswordChange: (e) => setPasswordCurrentPassword(e.target.value),
+            onNewPasswordChange: (e) => setNewPassword(e.target.value),
+            onConfirmPasswordChange: (e) => setConfirmPassword(e.target.value),
+            onSubmit: handlePasswordSubmit,
+          }}
+        />
+      )}
     </div>
   );
 }

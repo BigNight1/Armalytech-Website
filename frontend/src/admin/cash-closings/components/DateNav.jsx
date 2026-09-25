@@ -1,46 +1,40 @@
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DatePicker } from '../../shared/ui/index.js';
-import { formatDateLabel, formatDayOfWeek } from '../lib/dateRange.js';
 
 /**
  * Day picker for the Historial grid: prev/next arrows, a popover date picker,
- * and a "Hoy" badge — mirrors the desktop `CierreDeDia` header without MUI.
+ * and a "Hoy" badge in one bordered bar (design: `Historial de caja`'s
+ * header-right control) — mirrors the desktop `CierreDeDia` header.
  */
 export default function DateNav({ selectedDate, isToday, maxDate, onPrevDay, onNextDay, onPickDate }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-700 bg-brand-navy-light/60 px-4 py-3">
+    <div className="flex items-stretch self-start border border-line">
       <button
         type="button"
         onClick={onPrevDay}
-        className="rounded-md p-1.5 text-brand-ink hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange"
         aria-label="Día anterior"
+        className="flex w-11 items-center justify-center border-r border-line text-ink hover:text-accent-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
       >
-        <FiChevronLeft size={18} />
+        <ChevronLeft size={18} />
       </button>
 
-      <div className="flex flex-col items-center leading-tight">
-        <span className="text-xs uppercase tracking-wide text-slate-400">{formatDayOfWeek(selectedDate)}</span>
-        <span className="text-sm font-semibold text-brand-ink">{formatDateLabel(selectedDate)}</span>
-        <span className="h-4 text-[10px] font-semibold uppercase text-brand-orange">{isToday ? 'Hoy' : ' '}</span>
-      </div>
+      <DatePicker value={selectedDate} maxDate={maxDate} onChange={onPickDate} align="end" />
+
+      {isToday && (
+        <span className="flex items-center bg-accent px-3 text-[13px] font-extrabold uppercase tracking-[0.1em] text-on-accent">
+          Hoy
+        </span>
+      )}
 
       <button
         type="button"
         onClick={onNextDay}
         disabled={isToday}
-        className="rounded-md p-1.5 text-brand-ink hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange"
         aria-label="Día siguiente"
+        className="flex w-11 items-center justify-center border-l border-line text-ink hover:text-accent-ink disabled:cursor-not-allowed disabled:opacity-[0.35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
       >
-        <FiChevronRight size={18} />
+        <ChevronRight size={18} />
       </button>
-
-      <DatePicker
-        className="ml-auto"
-        align="end"
-        value={selectedDate}
-        maxDate={maxDate}
-        onChange={onPickDate}
-      />
     </div>
   );
 }

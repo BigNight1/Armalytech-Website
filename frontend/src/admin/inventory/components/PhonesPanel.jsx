@@ -1,8 +1,15 @@
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button, ConfirmDialog, Input, Select, SkeletonRows } from '../../shared/ui/index.js';
 
-/** Catálogo "Celulares" panel: filter by brand, create/rename/delete. */
-export default function PhonesPanel({ brands, phones, isLoading, brandFilter, onBrandFilterChange, onCreate, onRename, onDelete }) {
+/**
+ * Catálogo "Celulares" panel: filter by brand, create/rename/delete.
+ * The design's "Celulares" panel creates a new phone from a single
+ * "Nuevo modelo" text field — this app's data model requires a brand per
+ * phone, so the brand + model inputs from the previous version are kept
+ * (documented deviation) instead of the design's one-field mock.
+ */
+export default function PhonesPanel({ brands, phones, isLoading, brandFilter, onBrandFilterChange, onCreate, onRename, onDelete, className = '' }) {
   const [newBrandId, setNewBrandId] = useState('');
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -55,8 +62,11 @@ export default function PhonesPanel({ brands, phones, isLoading, brandFilter, on
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-700 p-4">
-      <h2 className="text-sm font-semibold text-brand-ink">Celulares</h2>
+    <section className={`flex flex-col gap-3.5 py-5 ${className}`}>
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-2xl">Celulares</h2>
+        <span className="tabular-nums text-[15px] text-muted">{phones.length} modelos</span>
+      </div>
 
       <Select
         name="phones-brand-filter"
@@ -80,18 +90,18 @@ export default function PhonesPanel({ brands, phones, isLoading, brandFilter, on
           <Input name="new-phone-name" label="Modelo" placeholder="Ej: A54" value={newName} onChange={(e) => setNewName(e.target.value)} />
         </div>
         <Button type="submit" disabled={saving || !newBrandId || !newName.trim()}>
-          +
+          Agregar
         </Button>
       </form>
 
       {isLoading ? (
         <SkeletonRows rows={4} columns={1} />
       ) : phones.length === 0 ? (
-        <p className="text-xs text-slate-500">Sin registros.</p>
+        <p className="text-sm text-muted">Sin registros.</p>
       ) : (
-        <ul className="flex flex-col divide-y divide-slate-800">
+        <ul className="flex flex-col border-t-2 border-line">
           {phones.map((phone) => (
-            <li key={phone.id} className="flex items-center justify-between gap-2 py-2">
+            <li key={phone.id} className="flex min-h-[52px] items-center gap-2.5 border-b border-line py-2">
               {editingId === phone.id ? (
                 <form onSubmit={handleRename} className="flex flex-1 items-center gap-2">
                   <Input
@@ -101,26 +111,35 @@ export default function PhonesPanel({ brands, phones, isLoading, brandFilter, on
                     className="flex-1"
                     autoFocus
                   />
-                  <Button type="submit" variant="ghost" disabled={saving}>
+                  <Button type="submit" disabled={saving}>
                     Guardar
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                  <Button type="button" variant="secondary" onClick={() => setEditingId(null)}>
                     Cancelar
                   </Button>
                 </form>
               ) : (
                 <>
-                  <span className="text-sm text-brand-ink">
-                    {phone.brandName} {phone.name}
-                  </span>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => startEdit(phone)} className="text-xs font-medium text-brand-orange hover:underline">
-                      Editar
-                    </button>
-                    <button type="button" onClick={() => setPendingDelete(phone)} className="text-xs font-medium text-red-400 hover:underline">
-                      Eliminar
-                    </button>
-                  </div>
+                  <span className="min-w-[70px] text-sm text-muted">{phone.brandName}</span>
+                  <span className="flex-1 font-semibold text-ink">{phone.name}</span>
+                  <button
+                    type="button"
+                    title="Renombrar"
+                    aria-label={`Renombrar ${phone.brandName} ${phone.name}`}
+                    onClick={() => startEdit(phone)}
+                    className="flex h-8 w-8 items-center justify-center text-muted hover:text-accent-ink"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Eliminar"
+                    aria-label={`Eliminar ${phone.brandName} ${phone.name}`}
+                    onClick={() => setPendingDelete(phone)}
+                    className="flex h-8 w-8 items-center justify-center text-muted hover:text-danger-ink"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </>
               )}
             </li>
@@ -131,11 +150,11 @@ export default function PhonesPanel({ brands, phones, isLoading, brandFilter, on
       <ConfirmDialog
         open={Boolean(pendingDelete)}
         title="Confirmar eliminación"
-        message={pendingDelete ? `Se eliminará "${pendingDelete.brandName} ${pendingDelete.name}".` : ''}
+        message={pendingDelete ? `Se eliminará "${pendingDelete.brandName} ${pendingDelete.name}" del catálogo. Esta acción no se puede deshacer.` : ''}
         confirmLabel="Eliminar"
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDelete(null)}
       />
-    </div>
+    </section>
   );
 }

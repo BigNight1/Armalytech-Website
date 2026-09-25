@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button, ConfirmDialog, Input, SkeletonRows } from '../../shared/ui/index.js';
 
 /**
@@ -6,7 +7,7 @@ import { Button, ConfirmDialog, Input, SkeletonRows } from '../../shared/ui/inde
  * (brands, categories). Delete goes through a ConfirmDialog; the owning
  * hook shows the "in use" 409 toast.
  */
-export default function CatalogPanel({ title, items, isLoading, itemLabel, onCreate, onRename, onDelete }) {
+export default function CatalogPanel({ title, countLabel, items, isLoading, itemLabel, onCreate, onRename, onDelete, className = '' }) {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState('');
@@ -58,30 +59,35 @@ export default function CatalogPanel({ title, items, isLoading, itemLabel, onCre
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-700 p-4">
-      <h2 className="text-sm font-semibold text-brand-ink">{title}</h2>
+    <section className={`flex flex-col gap-3.5 py-5 ${className}`}>
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-2xl">{title}</h2>
+        <span className="tabular-nums text-[15px] text-muted">
+          {items.length} {countLabel}
+        </span>
+      </div>
 
-      <form onSubmit={handleCreate} className="flex items-center gap-2">
+      <form onSubmit={handleCreate} className="flex">
         <Input
           name={`new-${itemLabel}`}
-          placeholder={`Nueva ${itemLabel}...`}
+          placeholder={`Nueva ${itemLabel}`}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          className="flex-1"
+          className="border-r-0"
         />
-        <Button type="submit" disabled={saving || !newName.trim()}>
-          +
+        <Button type="submit" disabled={saving || !newName.trim()} className="shrink-0">
+          Agregar
         </Button>
       </form>
 
       {isLoading ? (
         <SkeletonRows rows={4} columns={1} />
       ) : items.length === 0 ? (
-        <p className="text-xs text-slate-500">Sin registros.</p>
+        <p className="text-sm text-muted">Sin registros.</p>
       ) : (
-        <ul className="flex flex-col divide-y divide-slate-800">
+        <ul className="flex flex-col border-t-2 border-line">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center justify-between gap-2 py-2">
+            <li key={item.id} className="flex min-h-[52px] items-center gap-2.5 border-b border-line py-2">
               {editingId === item.id ? (
                 <form onSubmit={handleRename} className="flex flex-1 items-center gap-2">
                   <Input
@@ -91,24 +97,34 @@ export default function CatalogPanel({ title, items, isLoading, itemLabel, onCre
                     className="flex-1"
                     autoFocus
                   />
-                  <Button type="submit" variant="ghost" disabled={saving}>
+                  <Button type="submit" disabled={saving}>
                     Guardar
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                  <Button type="button" variant="secondary" onClick={() => setEditingId(null)}>
                     Cancelar
                   </Button>
                 </form>
               ) : (
                 <>
-                  <span className="text-sm text-brand-ink">{item.name}</span>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => startEdit(item)} className="text-xs font-medium text-brand-orange hover:underline">
-                      Editar
-                    </button>
-                    <button type="button" onClick={() => setPendingDelete(item)} className="text-xs font-medium text-red-400 hover:underline">
-                      Eliminar
-                    </button>
-                  </div>
+                  <span className="flex-1 font-semibold text-ink">{item.name}</span>
+                  <button
+                    type="button"
+                    title="Renombrar"
+                    aria-label={`Renombrar ${item.name}`}
+                    onClick={() => startEdit(item)}
+                    className="flex h-8 w-8 items-center justify-center text-muted hover:text-accent-ink"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Eliminar"
+                    aria-label={`Eliminar ${item.name}`}
+                    onClick={() => setPendingDelete(item)}
+                    className="flex h-8 w-8 items-center justify-center text-muted hover:text-danger-ink"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </>
               )}
             </li>
@@ -119,11 +135,11 @@ export default function CatalogPanel({ title, items, isLoading, itemLabel, onCre
       <ConfirmDialog
         open={Boolean(pendingDelete)}
         title="Confirmar eliminación"
-        message={pendingDelete ? `Se eliminará "${pendingDelete.name}".` : ''}
+        message={pendingDelete ? `Se eliminará "${pendingDelete.name}" del catálogo. Esta acción no se puede deshacer.` : ''}
         confirmLabel="Eliminar"
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDelete(null)}
       />
-    </div>
+    </section>
   );
 }

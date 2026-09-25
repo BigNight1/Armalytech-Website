@@ -20,6 +20,9 @@ const AdminRoutes = lazy(() => import('./admin/AdminRoutes.jsx'));
 // Lazy-loaded QR/NFC landing page (community registration, ADR 0012):
 // its own bundle chunk, kept out of both the public and admin bundles.
 const RegisterPage = lazy(() => import('./community/RegisterPage.jsx'));
+// Lazy-loaded public ticket status page (R3, rediseno-panel): own bundle
+// chunk, kept out of both the public and admin bundles.
+const TicketPage = lazy(() => import('./ticket/TicketPage.jsx'));
 
 const CompanyIcon = () => (
   <img 
@@ -72,6 +75,17 @@ function App() {
             element={
               <Suspense fallback={<div className="min-h-screen bg-brand-navy" />}>
                 <RegisterPage />
+              </Suspense>
+            }
+          />
+          {/* Public ticket status page (ADR 0006 publicToken): own lazy
+              chunk. Not part of hideSiteChrome — it reuses the site's own
+              NavBar/Footer/WhatsApp widget (see TicketPage.jsx). */}
+          <Route
+            path="/ticket/:token"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-[#f8fafc]" />}>
+                <TicketPage />
               </Suspense>
             }
           />

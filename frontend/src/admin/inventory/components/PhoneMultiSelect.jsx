@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
+import { X } from 'lucide-react';
 import { Button, Input, Select } from '../../shared/ui/index.js';
 
 /**
  * Searchable multi-select for a product's compatible phones, with inline
  * "Agregar celular" (pick brand + name) that creates a new phone and
- * selects it immediately.
+ * selects it immediately. The design's "Compatible con" field is a plain
+ * dropdown of static options; it can't express search-as-you-type or
+ * inline phone creation, so this keeps the existing search + add-new UX
+ * restyled to the design's chip/border look instead.
  */
 export default function PhoneMultiSelect({ phones, selectedIds, onChange, brands, onCreatePhone }) {
   const [query, setQuery] = useState('');
@@ -61,24 +65,24 @@ export default function PhoneMultiSelect({ phones, selectedIds, onChange, brands
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-brand-ink">Compatible con</span>
+    <div className="flex flex-col gap-2.5">
+      <span className="text-sm text-muted">Compatible con</span>
 
       {selectedPhones.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selectedPhones.map((phone) => (
             <span
               key={phone.id}
-              className="inline-flex items-center gap-1 rounded-full border border-brand-orange/40 bg-brand-orange/10 px-2.5 py-1 text-xs text-brand-orange"
+              className="inline-flex h-[34px] items-center gap-1.5 border border-ink py-0 pl-2.5 pr-1.5 text-sm font-semibold"
             >
               {phone.brandName} {phone.name}
               <button
                 type="button"
                 onClick={() => removePhone(phone.id)}
-                className="text-brand-orange/70 hover:text-brand-orange"
+                className="flex h-6 w-6 items-center justify-center text-muted hover:text-danger-ink"
                 aria-label={`Quitar ${phone.brandName} ${phone.name}`}
               >
-                &#10005;
+                <X size={14} strokeWidth={2.2} />
               </button>
             </span>
           ))}
@@ -94,13 +98,13 @@ export default function PhoneMultiSelect({ phones, selectedIds, onChange, brands
           autoComplete="off"
         />
         {matches.length > 0 && (
-          <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-slate-700 bg-slate-900 shadow-lg">
+          <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto border border-line bg-bg shadow-admin-lg">
             {matches.map((phone) => (
               <li key={phone.id}>
                 <button
                   type="button"
                   onClick={() => addPhone(phone.id)}
-                  className="block w-full px-3 py-2 text-left text-sm text-brand-ink hover:bg-slate-800"
+                  className="block w-full px-3 py-2 text-left text-sm text-ink hover:bg-row-hover"
                 >
                   {phone.brandName} {phone.name}
                 </button>
@@ -111,7 +115,7 @@ export default function PhoneMultiSelect({ phones, selectedIds, onChange, brands
       </div>
 
       {showAdd ? (
-        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-700 p-3">
+        <div className="flex flex-wrap items-end gap-2 border border-line p-3">
           <div className="w-36">
             <Select
               name="new-phone-brand"
@@ -138,11 +142,7 @@ export default function PhoneMultiSelect({ phones, selectedIds, onChange, brands
           </Button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => setShowAdd(true)}
-          className="w-fit text-xs font-medium text-brand-orange hover:underline"
-        >
+        <button type="button" onClick={() => setShowAdd(true)} className="w-fit text-xs font-bold text-accent-ink hover:underline">
           + Agregar celular
         </button>
       )}

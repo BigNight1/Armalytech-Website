@@ -12,7 +12,7 @@ export default function Spinner({ size = 'md', className = '' }) {
     <span
       role="status"
       aria-label="Cargando"
-      className={`inline-block animate-spin rounded-full border-slate-600 border-t-brand-orange ${sizeClass} ${className}`}
+      className={`inline-block animate-spin rounded-full border-line border-t-accent ${sizeClass} ${className}`}
     />
   );
 }

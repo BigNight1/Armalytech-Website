@@ -1,76 +1,110 @@
 /**
- * Glide Data Grid theme for the Historial spreadsheet (T15), built from the
- * same brand hex values as `tailwind.config.js` (`brand.orange` / `brand.navy`
- * / `brand.ink`) since Glide draws on canvas and can't read Tailwind classes.
- * Kept in one place so any brand-color change only needs updating here (and
- * in `tailwind.config.js`).
+ * Glide Data Grid theme for the Historial spreadsheet (R2c), rebuilt from
+ * `shared/theme/tokens.js` (the JS mirror of `tokens.css`) so the grid
+ * follows the admin light/dark tokens live — Glide draws on canvas and can't
+ * read CSS variables or Tailwind classes directly, so `CashClosingsGrid`
+ * re-derives this theme with `useMemo` whenever `useTheme()`'s `theme`
+ * changes. Match is "as closely as the Theme API allows" (canvas ≠ pixel
+ * identical to the DOM design, accepted scope limitation) — see
+ * `odd/tasks/rediseno-panel.md` R2c.
  */
-const BRAND = {
-  orange: '#f97316',
-  orangeLight: 'rgba(249, 115, 22, 0.18)',
-  navy: '#0f172a',
-  navyLight: '#1e293b',
-  navyDark: '#020617',
-  ink: '#e2e8f0',
-  slate400: '#94a3b8',
-  slate700: 'rgba(148, 163, 184, 0.25)',
-};
+import { getThemeTokens } from '../../shared/theme/tokens.js';
 
-// Tailwind's default `font-sans` stack — the admin panel doesn't override it,
-// so the grid should render with the same family as the rest of the page.
-const FONT_FAMILY =
-  'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+// Matches `.admin-shell`'s `font-family: 'Archivo', system-ui, sans-serif`.
+const FONT_FAMILY = "'Archivo', system-ui, sans-serif";
 
-/** Base dark-navy/orange theme applied to the whole `DataEditor`. */
-export const gridTheme = {
-  accentColor: BRAND.orange,
-  accentFg: '#ffffff',
-  accentLight: BRAND.orangeLight,
+/** Base theme applied to the whole `DataEditor` for the given admin theme (`'claro' | 'oscuro'`). */
+export function buildGridTheme(theme) {
+  const t = getThemeTokens(theme);
+  return {
+    accentColor: t.accent[500],
+    accentFg: t.onAccent,
+    accentLight: t.accent[100],
 
-  textDark: BRAND.ink,
-  textMedium: BRAND.ink,
-  textLight: BRAND.slate400,
-  textBubble: BRAND.ink,
-  // Glide's defaults for these are dark grays meant for light themes — without
-  // them the headers and row numbers are unreadable on navy.
-  textHeader: BRAND.ink,
-  textHeaderSelected: '#ffffff',
-  textGroupHeader: BRAND.ink,
-  bgIconHeader: BRAND.slate400,
-  fgIconHeader: BRAND.navy,
+    textDark: t.ink,
+    textMedium: t.ink,
+    textLight: t.muted,
+    textBubble: t.ink,
+    // Glide's defaults for these are dark grays meant for light themes —
+    // without them the header/group text is unreadable on a dark surface.
+    textHeader: t.muted,
+    textHeaderSelected: t.onAccent,
+    textGroupHeader: t.onAccent,
+    bgIconHeader: t.muted,
+    fgIconHeader: t.surface,
 
-  bgCell: BRAND.navy,
-  bgCellMedium: BRAND.navyLight,
-  bgHeader: BRAND.navyLight,
-  bgHeaderHasFocus: '#334155',
-  bgHeaderHovered: '#334155',
+    bgCell: t.bg,
+    bgCellMedium: t.surface,
+    bgHeader: t.surface,
+    bgHeaderHasFocus: t.accent[100],
+    bgHeaderHovered: t.accent[100],
 
-  bgBubble: BRAND.navyLight,
-  bgBubbleSelected: BRAND.orange,
-  bgSearchResult: 'rgba(249, 115, 22, 0.25)',
+    bgBubble: t.surface,
+    bgBubbleSelected: t.accent[500],
+    bgSearchResult: t.accent[200],
 
-  borderColor: BRAND.slate700,
-  horizontalBorderColor: BRAND.slate700,
-  drilldownBorder: BRAND.orange,
+    borderColor: t.divider,
+    horizontalBorderColor: t.divider,
+    drilldownBorder: t.accent[500],
 
-  linkColor: BRAND.orange,
+    linkColor: t.accent[600],
 
-  cellHorizontalPadding: 8,
-  cellVerticalPadding: 6,
+    cellHorizontalPadding: 12,
+    cellVerticalPadding: 6,
 
-  headerFontStyle: '600 13px',
-  baseFontStyle: '14px',
-  fontFamily: FONT_FAMILY,
-  editorFontSize: '14px',
+    headerFontStyle: '600 13px',
+    baseFontStyle: '14px',
+    fontFamily: FONT_FAMILY,
+    editorFontSize: '14px',
 
-  lineHeight: 1.4,
-  roundingRadius: 6,
-};
+    lineHeight: 1.4,
+    // Design: 0 radius everywhere — squares off the selection/marching-ants
+    // corners too (the closest canvas equivalent of "no rounded corners").
+    roundingRadius: 0,
+  };
+}
 
-/** Row-level overrides (T15 save-status indicator): a subtle red tint while a row is in `error`. */
-export function rowThemeOverride(status) {
-  if (status === 'error') {
-    return { bgCell: 'rgba(248, 113, 113, 0.08)' };
-  }
-  return undefined;
+/**
+ * Builds the `getGroupDetails` callback for the grouped INGRESOS / GASTOS
+ * column headers (design: accent-filled "Ingresos" band, ink-filled
+ * "Gastos" band spanning their 3 columns each). Columns without a `.group`
+ * (row-number gutter, Estado) fall through to the empty-string case, themed
+ * to the page background so they read as blank like the design's bare cells
+ * instead of inheriting the column-header row's surface tint.
+ */
+export function buildGetGroupDetails(theme) {
+  const t = getThemeTokens(theme);
+  return function getGroupDetails(groupName) {
+    if (groupName === 'ingresos') {
+      return {
+        name: 'INGRESOS',
+        overrideTheme: { bgHeader: t.accent[500], textGroupHeader: t.onAccent, headerFontStyle: '800 12px' },
+      };
+    }
+    if (groupName === 'gastos') {
+      return {
+        name: 'GASTOS',
+        overrideTheme: { bgHeader: t.ink, textGroupHeader: t.bg, headerFontStyle: '800 12px' },
+      };
+    }
+    return { name: '', overrideTheme: { bgHeader: t.bg } };
+  };
+}
+
+/**
+ * Row-level overrides: a bold/surface-tinted look for the synthetic totals
+ * row (design's "Total" row under the data), a subtle red tint while a row
+ * is in `error` (T15 save-status indicator) — in that priority order.
+ */
+export function buildRowThemeOverride(theme) {
+  const t = getThemeTokens(theme);
+  return function rowThemeOverride(status, { isTotals = false } = {}) {
+    if (isTotals) {
+      return { bgCell: t.surface, baseFontStyle: '800 14px', textDark: t.ink };
+    }
+    if (status === 'error') {
+      return { bgCell: t.dangerBg };
+    }
+    return undefined;
+  };
 }

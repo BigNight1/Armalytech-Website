@@ -10,6 +10,27 @@ import {
 } from '../lib/format.js';
 import { clientsApi } from '../api/clientsApi.js';
 
+const CHANNEL_LABELS = { qr: 'QR', nfc: 'NFC', manual: 'Manual' };
+
+const MESSAGE_CLASSES = {
+  success: 'border-t-2 border-ink bg-surface text-ink',
+  threshold: 'border-t-2 border-accent bg-accent-100 text-accent-ink',
+  reward: 'border-t-2 border-accent bg-accent-100 font-bold text-accent-900',
+  error: 'border-t-2 border-danger bg-danger-bg text-danger-ink',
+};
+
+const MESSAGE_BUTTONS = [
+  { key: 'promo_20', title: 'Enviar promo 20%', subtitle: 'Recordatorio de descuento' },
+  { key: 'google_review', title: 'Pedir reseña', subtitle: '5 estrellas en Google Maps' },
+  { key: 'reconnect', title: 'Invitar a volver', subtitle: 'Mantenimiento de equipo' },
+];
+
+/** `'Jhon', 'Medina' -> 'JM'` — the drawer header avatar (design: `cli.initials`). */
+function getClientInitials(firstName, lastName) {
+  const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase();
+  return initials || '--';
+}
+
 export default function ClientDetailModal({
   client,
   events,
@@ -58,12 +79,12 @@ export default function ClientDetailModal({
       if (res.thresholdReached) {
         setActionMessage({
           type: 'threshold',
-          text: '¡Sello 4 alcanzado! Se ha enviado recordatorio por WhatsApp / n8n para la promo del 20%.',
+          text: '¡Sello 4 alcanzado! Se ha enviado recordatorio por WhatsApp para la promo del 20%.',
         });
       } else if (res.rewardReady) {
         setActionMessage({
           type: 'reward',
-          text: '¡5 Sellos acumulados! El 20% de descuento está listo para ser canjeado.',
+          text: '¡5 sellos acumulados! El 20% de descuento está listo para ser canjeado.',
         });
       } else {
         setActionMessage({
@@ -86,7 +107,7 @@ export default function ClientDetailModal({
       if (onClientUpdated) onClientUpdated(updated);
       setActionMessage({
         type: 'reward',
-        text: '¡Premio de 20% canjeado exitosamente! El ciclo de sellos se reinició a 0 para el siguiente premio.',
+        text: '¡Premio de 20% canjeado! El ciclo de sellos se reinició a 0 para el siguiente premio.',
       });
     } catch (err) {
       setActionMessage({ type: 'error', text: err?.message || 'Error al canjear premio' });
@@ -110,14 +131,13 @@ export default function ClientDetailModal({
       const res = await clientsApi.sendMessage(client.id, template);
       const messageText = res.message || '';
 
-      // Open WhatsApp Web with pre-filled message
       const cleanPhone = client.phoneE164.replace(/\D/g, '');
       const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`;
       window.open(waUrl, '_blank', 'noopener,noreferrer');
 
       setActionMessage({
         type: 'success',
-        text: `Acción ejecutada: WhatsApp preparado y evento registrado (${template}).`,
+        text: 'WhatsApp abierto con el mensaje preparado y evento registrado.',
       });
     } catch (err) {
       setActionMessage({ type: 'error', text: err?.message || 'Error al emitir mensaje' });
@@ -126,173 +146,166 @@ export default function ClientDetailModal({
     }
   }
 
-  const isRewardReady = (client.stamps ?? 0) >= 5;
+  const stamps = client.stamps ?? 0;
+  const canClaim = stamps >= 5;
+  const badge = stamps >= 5 ? '¡20% OFF desbloqueado!' : stamps === 4 ? '¡A 1 visita del premio!' : null;
+  const loyaltyText =
+    stamps >= 5
+      ? 'Completó 5 visitas. Puede canjear su 20% de descuento en esta reparación.'
+      : stamps === 4
+      ? 'Se envió recordatorio por WhatsApp. En su próxima visita gana 20% de descuento.'
+      : 'Acumula 5 visitas de reparación o servicio para ganar 20% de descuento.';
+
+  const initials = getClientInitials(client.firstName, client.lastName);
 
   return (
-    <Modal open={Boolean(client)} title="Detalle del Cliente" onClose={onClose}>
+    <Modal
+      open={Boolean(client)}
+      variant="drawer"
+      size="lg"
+      title={`${client.firstName} ${client.lastName}`}
+      header={
+        <div className="flex items-center gap-4">
+          <span className="flex h-14 w-14 flex-none items-center justify-center bg-ink text-xl font-extrabold text-bg">
+            {initials}
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-bold uppercase tracking-[0.14em] text-accent-ink">Detalle del cliente</span>
+            <h2 className="text-2xl">
+              {client.firstName} {client.lastName}
+            </h2>
+            <span className="text-[15px] tabular-nums text-muted">
+              {formatPhone(client.phoneE164)} · {CHANNEL_LABELS[client.channel] ?? client.channel}
+            </span>
+          </div>
+        </div>
+      }
+      onClose={onClose}
+    >
       <div className="flex flex-col gap-5">
-        {/* Loyalty Program Section */}
-        <div className="flex flex-col gap-3">
-          <LoyaltyStamps stamps={client.stamps ?? 0} size="md" />
+        {/* Loyalty program */}
+        <section className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-muted">
+              Programa de fidelización
+            </span>
+            {badge && <span className="bg-accent px-2 py-0.5 text-[13px] font-extrabold text-on-accent">{badge}</span>}
+            <span className="ml-auto text-[15px] font-extrabold text-ink">{stamps} / 5 sellos</span>
+          </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddVisit}
-                disabled={isActionLoading}
-              >
-                {isActionLoading ? <Spinner size="sm" /> : '+ Registrar 1 Visita'}
+          <LoyaltyStamps stamps={stamps} size="lg" />
+
+          <p className="text-[15px] leading-normal text-muted">{loyaltyText}</p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" onClick={handleAddVisit} disabled={isActionLoading}>
+              {isActionLoading ? <Spinner size="sm" /> : <span>+ Registrar 1 visita</span>}
+            </Button>
+
+            {canClaim && (
+              <Button onClick={handleClaimReward} disabled={isActionLoading}>
+                ★ Canjear 20% de descuento
               </Button>
+            )}
 
-              {isRewardReady && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleClaimReward}
-                  disabled={isActionLoading}
-                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold border-none shadow-md shadow-orange-500/30"
-                >
-                  ★ Canjear 20% de Descuento
-                </Button>
-              )}
-            </div>
-
-            <div className="text-right text-xs text-slate-400">
-              Ciclo actual: <strong className="text-brand-ink">#{client.loyaltyCycle ?? 1}</strong> | Canjeados:{' '}
-              <strong className="text-brand-ink">{client.rewardsClaimed ?? 0}</strong>
-            </div>
+            <span className="ml-auto text-sm text-muted">
+              Ciclo <strong className="text-ink">#{client.loyaltyCycle ?? 1}</strong> · Canjeados{' '}
+              <strong className="text-ink">{client.rewardsClaimed ?? 0}</strong>
+            </span>
           </div>
 
           {actionMessage && (
-            <div
-              className={`p-2.5 rounded-lg border text-xs ${
-                actionMessage.type === 'error'
-                  ? 'border-rose-500/30 bg-rose-500/10 text-rose-300'
-                  : actionMessage.type === 'reward'
-                  ? 'border-amber-500/30 bg-amber-500/10 text-amber-300 font-semibold'
-                  : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              }`}
-            >
+            <div className={`p-3 text-[15px] ${MESSAGE_CLASSES[actionMessage.type] ?? MESSAGE_CLASSES.success}`}>
               {actionMessage.text}
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Direct Messaging / n8n Action Buttons */}
-        <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-3 flex flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Acciones de Mensajería & Fidelización
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={isActionLoading || !client.marketingConsent}
-              onClick={() => handleSendMessage('promo_20')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-400 hover:bg-orange-500/20 disabled:opacity-40 transition-colors"
-              title="Enviar o preparar recordatorio del 20% de descuento"
-            >
-              <span>🎯 Enviar Promo 20%</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isActionLoading || !client.marketingConsent}
-              onClick={() => handleSendMessage('google_review')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1.5 text-xs font-medium text-amber-400 hover:bg-amber-500/20 disabled:opacity-40 transition-colors"
-              title="Solicitar reseña 5 estrellas en Google Maps"
-            >
-              <span>⭐ Pedir Reseña Maps</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isActionLoading || !client.marketingConsent}
-              onClick={() => handleSendMessage('reconnect')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1.5 text-xs font-medium text-cyan-400 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors"
-              title="Invitar a volver para mantenimiento de equipo"
-            >
-              <span>🔄 Invitar a Volver</span>
-            </button>
+        {/* WhatsApp messaging */}
+        <section className="flex flex-col gap-3 border-t-2 border-ink pt-4">
+          <h3>Mensajería por WhatsApp</h3>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {MESSAGE_BUTTONS.map((btn) => (
+              <button
+                key={btn.key}
+                type="button"
+                disabled={isActionLoading || !client.marketingConsent}
+                onClick={() => handleSendMessage(btn.key)}
+                className="flex flex-col items-start gap-1 border border-line p-3 text-left text-[15px] text-ink transition-colors hover:border-accent disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                <span className="font-extrabold">{btn.title}</span>
+                <span className="text-[13px] text-muted">{btn.subtitle}</span>
+              </button>
+            ))}
           </div>
           {!client.marketingConsent && (
-            <p className="text-[11px] text-amber-400/80">
-              * El cliente descartó promociones. Activa la casilla abajo si el cliente solicita recibir mensajes.
+            <p className="text-sm text-accent-ink">
+              El cliente descartó promociones. Activa &ldquo;Acepta promociones&rdquo; abajo y guarda si pide recibir
+              mensajes.
             </p>
           )}
-        </div>
+        </section>
 
-        {/* Client Edit Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3 border-t border-slate-700/80 pt-4">
+        {/* Datos */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 border-t-2 border-ink pt-4">
+          <h3>Datos</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Input
               label="Nombre"
+              size="lg"
               value={form.firstName}
               onChange={(e) => setForm((prev) => ({ ...prev, firstName: e.target.value }))}
             />
             <Input
               label="Apellido"
+              size="lg"
               value={form.lastName}
               onChange={(e) => setForm((prev) => ({ ...prev, lastName: e.target.value }))}
             />
           </div>
 
-          <p className="text-sm text-slate-400">
-            WhatsApp:{' '}
-            <span className="text-brand-ink font-mono font-medium">
-              {formatPhone(client.phoneE164)}
-            </span>
-          </p>
-
-          <label className="flex items-center gap-2 text-sm text-brand-ink cursor-pointer select-none">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-slate-600 text-brand-orange focus:ring-brand-orange"
-              checked={form.marketingConsent}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, marketingConsent: e.target.checked }))
-              }
-            />
-            <span>Acepta promociones</span>
-            <ConsentBadge approved={form.marketingConsent} />
-          </label>
-
-          <div className="flex justify-end pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex cursor-pointer select-none items-center gap-2.5 text-[15px] text-ink">
+              <input
+                type="checkbox"
+                checked={form.marketingConsent}
+                onChange={(e) => setForm((prev) => ({ ...prev, marketingConsent: e.target.checked }))}
+                className="h-[18px] w-[18px] accent-accent"
+              />
+              <span>Acepta promociones</span>
+              <ConsentBadge approved={form.marketingConsent} />
+            </label>
             <Button type="submit" disabled={isSaving}>
               {isSaving ? 'Guardando…' : 'Guardar cambios'}
             </Button>
           </div>
         </form>
 
-        {/* Event History */}
-        <div className="border-t border-slate-700 pt-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Historial de Visitas y Eventos
-          </h3>
+        {/* History */}
+        <section className="border-t-2 border-ink pt-4">
+          <h3 className="mb-2">Historial de visitas y eventos</h3>
           {isLoadingEvents ? (
             <Spinner />
           ) : events.length === 0 ? (
-            <p className="text-sm text-slate-400">Sin eventos registrados todavía.</p>
+            <p className="text-sm text-muted">Sin eventos registrados todavía.</p>
           ) : (
-            <ul className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
-              {events.map((event) => (
+            <ul className="flex max-h-48 flex-col overflow-y-auto pr-1">
+              {events.map((event, index) => (
                 <li
                   key={event.id}
-                  className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 text-xs"
+                  className="flex items-center gap-3 border-b border-line py-2.5 text-[15px]"
                 >
-                  <span className="font-medium text-brand-ink">
+                  <span className={`h-2.5 w-2.5 flex-none ${index === 0 ? 'bg-accent' : 'bg-line'}`} />
+                  <span className="flex-1 font-semibold text-ink">
                     {EVENT_TYPE_LABELS[event.type] ?? event.type}
-                    {event.rejectReason &&
-                      ` — ${REJECT_REASON_LABELS[event.rejectReason] ?? event.rejectReason}`}
+                    {event.rejectReason && ` — ${REJECT_REASON_LABELS[event.rejectReason] ?? event.rejectReason}`}
                   </span>
-                  <span className="text-slate-400">{formatLimaShort(event.occurredAt)}</span>
+                  <span className="whitespace-nowrap text-sm text-muted">{formatLimaShort(event.occurredAt)}</span>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </section>
       </div>
     </Modal>
   );

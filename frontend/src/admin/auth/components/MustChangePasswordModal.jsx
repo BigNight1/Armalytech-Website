@@ -44,10 +44,10 @@ export default function MustChangePasswordModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-slate-700 bg-brand-navy p-6 shadow-2xl">
-        <h2 className="text-xl font-semibold text-white">Crea tu nueva contraseña</h2>
-        <p className="mt-2 text-sm text-slate-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-md border-t-4 border-accent bg-bg p-7 text-ink shadow-admin-lg">
+        <h2 className="text-xl">Crea tu nueva contraseña</h2>
+        <p className="mt-2 text-[15px] text-muted">
           Esta es tu primera vez ingresando con una contraseña temporal. Por seguridad, debes crear
           tu contraseña personal para continuar.
         </p>
@@ -75,7 +75,7 @@ export default function MustChangePasswordModal() {
             required
           />
 
-          <Button type="submit" disabled={loading} className="mt-4 w-full">
+          <Button type="submit" disabled={loading} className="mt-2 w-full">
             {loading ? 'Guardando…' : 'Establecer nueva contraseña y entrar'}
           </Button>
         </form>

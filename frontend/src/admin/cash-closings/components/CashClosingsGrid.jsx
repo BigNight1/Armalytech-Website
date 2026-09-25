@@ -1,21 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataEditor, GridCellKind } from "@glideapps/glide-data-grid";
+import { Plus } from "lucide-react";
 import "@glideapps/glide-data-grid/dist/index.css";
 import "./cashClosingsGrid.css";
 import { formatPEN } from "../../shared/lib/money.js";
-import { ConfirmDialog } from "../../shared/ui/index.js";
+import { Button, ConfirmDialog } from "../../shared/ui/index.js";
+import { useTheme } from "../../shared/theme/ThemeProvider.jsx";
 import { parseStrictMoney } from "../lib/fields.js";
 import {
   FIXED_TRAILING_COLUMNS,
   loadColumnLayout,
   saveColumnLayout,
 } from "../lib/columnLayout.js";
-import { gridTheme, rowThemeOverride } from "../lib/gridTheme.js";
+import { buildGridTheme, buildGetGroupDetails, buildRowThemeOverride } from "../lib/gridTheme.js";
 
 const SAVE_DEBOUNCE_MS = 400;
 const ROW_HEIGHT = 36;
 const HEADER_HEIGHT = 38;
+const GROUP_HEADER_HEIGHT = 32;
 const MAX_GRID_HEIGHT = 640;
+// Money columns whose totals-row cell reads straight from `totals` (design's
+// "Total" row) — text columns (`incomeDetail`/`expenseDetail`) and the
+// trailing `actions` column are handled separately, see `getCellContent`.
+const TOTALS_MONEY_FIELDS = new Set(["cashIncome", "yapeIncome", "cashExpense", "yapeExpense"]);
 
 const STATUS_SYMBOL = { saving: "…", saved: "✓", error: "⚠" };
 const STATUS_COLOR = { saving: "#94a3b8", saved: "#4ade80", error: "#f87171" };
@@ -52,11 +59,13 @@ function useContainerWidth() {
 export default function CashClosingsGrid({
   rows,
   rowStatus,
+  totals,
   onCellChange,
   onCellCommit,
   onAddRow,
   onDeleteRow,
 }) {
+  const { theme, isDark } = useTheme();
   const [movableColumns, setMovableColumns] = useState(() =>
     loadColumnLayout(),
   );
@@ -66,6 +75,14 @@ export default function CashClosingsGrid({
     [movableColumns],
   );
   const [containerRef, containerWidth] = useContainerWidth();
+
+  // Glide draws on canvas, so it can't read CSS variables — rebuild its
+  // theme objects from the JS token mirror whenever the admin theme flips
+  // (light/dark, R2c).
+  const theGridTheme = useMemo(() => buildGridTheme(theme), [theme]);
+  const getGroupDetails = useMemo(() => buildGetGroupDetails(theme), [theme]);
+  const rowThemeOverride = useMemo(() => buildRowThemeOverride(theme), [theme]);
+  const totalsRowIndex = rows.length;
 
   // Debounce saves so a paste/fill touching many cells triggers one save per
   // row instead of one PUT per keystroke/cell.
@@ -95,8 +112,58 @@ export default function CashClosingsGrid({
   const getCellContent = useCallback(
     ([col, row]) => {
       const column = columns[col];
+      if (!column) {
+        return {
+          kind: GridCellKind.Text,
+          data: "",
+          displayData: "",
+          allowOverlay: false,
+        };
+      }
+
+      // Synthetic last row (design's bold "Total" row) — read-only, driven
+      // by `totals` instead of a real data row.
+      if (row === totalsRowIndex) {
+        if (column.kind === "actions") {
+          return {
+            kind: GridCellKind.Text,
+            data: "",
+            displayData: "",
+            allowOverlay: false,
+            readonly: true,
+          };
+        }
+        if (column.id === "incomeDetail") {
+          return {
+            kind: GridCellKind.Text,
+            data: "Total",
+            displayData: "TOTAL",
+            allowOverlay: false,
+            readonly: true,
+          };
+        }
+        if (column.id === "expenseDetail") {
+          return {
+            kind: GridCellKind.Text,
+            data: "",
+            displayData: "",
+            allowOverlay: false,
+            readonly: true,
+          };
+        }
+        const value = TOTALS_MONEY_FIELDS.has(column.id) ? (totals?.[column.id] ?? 0) : 0;
+        return {
+          kind: GridCellKind.Number,
+          data: value,
+          displayData: formatPEN(value),
+          allowOverlay: false,
+          readonly: true,
+          contentAlign: "right",
+        };
+      }
+
       const dataRow = rows[row];
-      if (!column || !dataRow) {
+      if (!dataRow) {
         return {
           kind: GridCellKind.Text,
           data: "",
@@ -172,7 +239,7 @@ export default function CashClosingsGrid({
         allowOverlay: true,
       };
     },
-    [columns, rows, rowStatus],
+    [columns, rows, rowStatus, totals, totalsRowIndex],
   );
 
   const applyEdit = useCallback(
@@ -289,14 +356,12 @@ export default function CashClosingsGrid({
     setPendingDeleteRow(null);
   }, [pendingDeleteRow, onDeleteRow]);
 
-  const onRowAppended = useCallback(async () => {
-    onAddRow();
-    return "bottom";
-  }, [onAddRow]);
-
   const getRowThemeOverride = useCallback(
-    (row) => rowThemeOverride(rowStatus[rows[row]?.rowIndex]),
-    [rows, rowStatus],
+    (row) =>
+      row === totalsRowIndex
+        ? rowThemeOverride(undefined, { isTotals: true })
+        : rowThemeOverride(rowStatus[rows[row]?.rowIndex]),
+    [rows, rowStatus, rowThemeOverride, totalsRowIndex],
   );
 
   const gridColumns = useMemo(
@@ -306,61 +371,75 @@ export default function CashClosingsGrid({
         title: c.title,
         width: c.width,
         grow: c.grow,
+        group: c.group,
       })),
     [columns],
   );
 
-  // Fit the content (header + rows + trailing "add" row) so short days don't
-  // leave an empty block under the grid; long days scroll inside it.
+  // Fit the content (group band + header + data rows + the synthetic totals
+  // row) so short days don't leave an empty block under the grid; long days
+  // scroll inside it. Adding rows is now the external "+ Agregar fila"
+  // button below (design), not Glide's own trailing/sticky row — the design
+  // places a real "Total" row last inside the grid instead.
   const gridHeight = Math.min(
-    HEADER_HEIGHT + (rows.length + 1) * ROW_HEIGHT + 2,
+    GROUP_HEADER_HEIGHT + HEADER_HEIGHT + (rows.length + 1) * ROW_HEIGHT + 2,
     MAX_GRID_HEIGHT,
   );
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full min-w-0 overflow-hidden historial-grid rounded-lg border border-slate-700 [color-scheme:dark]"
-    >
-      {containerWidth === null ? (
-        <div style={{ height: gridHeight }} />
-      ) : (
-        <DataEditor
-          getCellContent={getCellContent}
-          columns={gridColumns}
-          rows={rows.length}
-          width={containerWidth}
-          height={gridHeight}
-          rowHeight={ROW_HEIGHT}
-          headerHeight={HEADER_HEIGHT}
-          theme={gridTheme}
-          getRowThemeOverride={getRowThemeOverride}
-          rowMarkers="number"
-          rowSelect="multi"
-          rangeSelect="rect"
-          fillHandle
-          keybindings={{ copy: true, paste: true, selectAll: true }}
-          getCellsForSelection
-          coercePasteValue={coercePasteValue}
-          onCellEdited={onCellEdited}
-          onCellsEdited={onCellsEdited}
-          onColumnResize={onColumnResize}
-          onColumnResizeEnd={onColumnResizeEnd}
-          onColumnMoved={onColumnMoved}
-          onDelete={onDelete}
-          onCellClicked={onCellClicked}
-          onRowAppended={onRowAppended}
-          trailingRowOptions={{
-            sticky: true,
-            tint: true,
-            hint: "Agregar filas",
-          }}
-          minColumnWidth={70}
-          maxColumnWidth={480}
-          smoothScrollX
-          smoothScrollY
-        />
-      )}
+    <div className="flex min-w-0 flex-col gap-3">
+      <div
+        ref={containerRef}
+        className="historial-grid w-full min-w-0 overflow-hidden border-2 border-ink"
+        style={{ colorScheme: isDark ? "dark" : "light" }}
+      >
+        {containerWidth === null ? (
+          <div style={{ height: gridHeight }} />
+        ) : (
+          <DataEditor
+            getCellContent={getCellContent}
+            columns={gridColumns}
+            rows={rows.length + 1}
+            width={containerWidth}
+            height={gridHeight}
+            rowHeight={ROW_HEIGHT}
+            headerHeight={HEADER_HEIGHT}
+            groupHeaderHeight={GROUP_HEADER_HEIGHT}
+            theme={theGridTheme}
+            getGroupDetails={getGroupDetails}
+            getRowThemeOverride={getRowThemeOverride}
+            rowMarkers="number"
+            rowSelect="multi"
+            rangeSelect="rect"
+            fillHandle
+            keybindings={{ copy: true, paste: true, selectAll: true }}
+            getCellsForSelection
+            coercePasteValue={coercePasteValue}
+            onCellEdited={onCellEdited}
+            onCellsEdited={onCellsEdited}
+            onColumnResize={onColumnResize}
+            onColumnResizeEnd={onColumnResizeEnd}
+            onColumnMoved={onColumnMoved}
+            onDelete={onDelete}
+            onCellClicked={onCellClicked}
+            minColumnWidth={70}
+            maxColumnWidth={480}
+            smoothScrollX
+            smoothScrollY
+          />
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="secondary" onClick={onAddRow}>
+          <Plus size={17} />
+          <span>Agregar fila</span>
+        </Button>
+        <span className="text-sm text-muted">
+          Tab, Enter o flechas para moverte · pega directo desde Excel
+        </span>
+      </div>
+
       <ConfirmDialog
         open={pendingDeleteRow !== null}
         title="Eliminar fila"

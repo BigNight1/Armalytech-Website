@@ -1,0 +1,146 @@
+/*
+ * Admin design tokens (Claude Design redesign, ADR-less — see
+ * odd/tasks/rediseno-panel.md and design/panel-admin/.../Panel Admin
+ * Rediseño.dc.html for the source of truth).
+ *
+ * Scoped under `.admin-shell` (never `body`/`:root`) so the public website
+ * keeps its current look untouched. `.admin-shell` is the single wrapper
+ * rendered by <ThemeProvider> around the whole /admin/* tree (login screen
+ * included), so every admin page — and later the public ticket page via the
+ * same class — resolves these variables.
+ *
+ * IMPORTANT: this app already ships `<body class="dark">` globally for the
+ * public site's Tailwind `dark:` utilities (see src/App.jsx usages). That
+ * means Tailwind's class-based dark-mode variant is permanently "on" for
+ * every descendant of <body>, admin included, and cannot be used to toggle
+ * the admin theme. Admin dark mode is implemented instead as plain CSS
+ * variable overrides keyed off `.admin-shell.dark` (a compound selector on
+ * the admin root itself) — no `dark:` Tailwind utility is used anywhere in
+ * the admin tree. `tailwind.config.js` maps semantic color names (bg,
+ * surface, ink, muted, line, accent-*, danger*, ...) straight to these
+ * variables, so `bg-surface text-ink border-line` always resolves to the
+ * current admin theme regardless of the global `dark` class on <body>.
+ */
+
+.admin-shell {
+  /* Accent ramp — identical in both themes (see the design's `vars()`). */
+  --admin-accent-100: #ffedd5;
+  --admin-accent-200: #fed7aa;
+  --admin-accent-300: #fdba74;
+  --admin-accent-400: #fb923c;
+  --admin-accent-500: #f97316;
+  --admin-accent-600: #ea580c;
+  --admin-accent-700: #c2410c;
+  --admin-accent-800: #9a3412;
+  --admin-accent-900: #7c2d12;
+  --admin-accent: var(--admin-accent-500);
+  /* Fixed dark-navy foreground used on solid accent fills (buttons, "Hoy"
+     badge, totals row) — always #0f172a regardless of theme, per the design. */
+  --admin-on-accent: #0f172a;
+
+  /* Sidebar tint for the active nav item / hover — always on the dark navy
+     sidebar surface, so these don't change between themes either. */
+  --admin-side-active-bg: rgba(249, 115, 22, 0.16);
+  --admin-side-active-ink: #fdba74;
+  --admin-side-hover: rgba(226, 232, 240, 0.08);
+  --admin-side-ink: #e2e8f0;
+  --admin-side-muted: #94a3b8;
+  --admin-side-divider: rgba(226, 232, 240, 0.12);
+
+  /* Light theme (default — design's `temaInicial: 'claro'`). */
+  --admin-bg: #f8fafc;
+  --admin-surface: #eef2f7;
+  --admin-ink: #0f172a;
+  --admin-muted: #475569;
+  --admin-divider: rgba(15, 23, 42, 0.2);
+  --admin-side-bg: #0f172a;
+  --admin-side-pop: #1e293b;
+  --admin-danger: #dc2626;
+  --admin-danger-bg: #fef2f2;
+  --admin-danger-ink: #b91c1c;
+  --admin-ink-accent: #c2410c;
+  --admin-row-hover: rgba(15, 23, 42, 0.05);
+  --admin-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.2);
+
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-ink);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.admin-shell.dark {
+  --admin-bg: #0f172a;
+  --admin-surface: #1e293b;
+  --admin-ink: #e2e8f0;
+  --admin-muted: #94a3b8;
+  --admin-divider: rgba(226, 232, 240, 0.2);
+  --admin-side-bg: #020617;
+  --admin-side-pop: #0f172a;
+  --admin-danger: #ef4444;
+  --admin-danger-bg: rgba(239, 68, 68, 0.14);
+  --admin-danger-ink: #fca5a5;
+  --admin-ink-accent: #fdba74;
+  --admin-row-hover: rgba(226, 232, 240, 0.06);
+  --admin-shadow-lg: 0 0 0 1px rgba(226, 232, 240, 0.08), 0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+/* Headings: Archivo 800, -0.015em tracking, design's type scale.
+   Wrapped in `:where(.admin-shell)` so the whole selector keeps only the
+   plain element's specificity (0,0,1) — a Tailwind utility class like
+   `text-[22px]` (specificity 0,1,0) always wins without needing `!text-[..]`
+   overrides in feature code. See README "Design tokens" for the contract. */
+:where(.admin-shell) h1,
+:where(.admin-shell) h2,
+:where(.admin-shell) h3,
+:where(.admin-shell) h4 {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+  margin: 0;
+}
+:where(.admin-shell) h1 {
+  font-size: 42px;
+}
+:where(.admin-shell) h2 {
+  font-size: 32px;
+}
+:where(.admin-shell) h3 {
+  font-size: 25px;
+}
+:where(.admin-shell) h4 {
+  font-size: 20px;
+}
+
+.admin-shell :focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+
+/* Shared table look (header row, row rules, hover) — see README for the
+   `<table className="admin-table">` convention feature pages should follow. */
+.admin-shell .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.admin-shell .admin-table th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  padding: 11px 12px 11px 0;
+  border-bottom: 2px solid var(--admin-divider);
+}
+.admin-shell .admin-table td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--admin-divider);
+  vertical-align: middle;
+}
+.admin-shell .admin-table tbody tr:hover {
+  background: var(--admin-row-hover);
+}

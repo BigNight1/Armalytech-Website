@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, Modal, NumberInput, Select } from '../../shared/ui/index.js';
+import { formatPEN } from '../../shared/lib/money.js';
 import PhoneMultiSelect from './PhoneMultiSelect.jsx';
 
 const DEFAULT_MIN_STOCK = 2;
@@ -72,6 +73,10 @@ function validate(values, mode) {
  * Create/edit modal for a product. Stock only changes through the +/-
  * adjust buttons once the product exists (PATCH never touches stock, per
  * the backend contract), so edit mode shows it read-only.
+ *
+ * Rendered as a right-side drawer via the shared `Modal` (design: `pf`
+ * panel, 620px, closePf) — `variant="drawer" size="md"`. ConfirmDialog and
+ * the product-form validation error still follow the shared danger tokens.
  */
 export default function ProductFormModal({
   open,
@@ -103,10 +108,13 @@ export default function ProductFormModal({
     }
   }, [open, mode, product]);
 
-  if (!open) return null;
-
   const allBrands = [...brands, ...extraBrands.filter((b) => !brands.some((existing) => existing.id === b.id))];
   const editingWithBrand = mode === 'edit' && Boolean(product?.brand);
+
+  const cost = Number(values.cost) || 0;
+  const salePrice = Number(values.salePrice) || 0;
+  const profit = salePrice - cost;
+  const margin = salePrice > 0 ? Math.round((profit / salePrice) * 100) : 0;
 
   function setField(field, value) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -160,11 +168,21 @@ export default function ProductFormModal({
   return (
     <Modal
       open={open}
+      variant="drawer"
+      size="md"
       title={mode === 'edit' ? 'Editar producto' : 'Nuevo producto'}
+      header={
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-accent-ink">
+            {mode === 'edit' ? 'Inventario · editar' : 'Inventario · nuevo'}
+          </span>
+          <h2 className="text-2xl">{mode === 'edit' ? 'Editar producto' : 'Nuevo producto'}</h2>
+        </div>
+      }
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={submitting}>
+          <Button variant="secondary" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
@@ -173,11 +191,12 @@ export default function ProductFormModal({
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="contents">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select
             name="categoryId"
             label="Categoría"
+            size="lg"
             value={values.categoryId}
             onChange={(e) => setField('categoryId', e.target.value)}
             error={errors.categoryId}
@@ -188,12 +207,13 @@ export default function ProductFormModal({
             <Select
               name="brandId"
               label="Marca (opcional)"
+              size="lg"
               value={values.brandId}
               onChange={(e) => setField('brandId', e.target.value)}
               options={[{ value: '', label: 'Sin marca' }, ...allBrands.map((b) => ({ value: b.id, label: b.name }))]}
             />
             {editingWithBrand && (
-              <span className="text-xs text-slate-500">La marca no se puede quitar, solo cambiar por otra.</span>
+              <span className="text-xs text-muted">La marca no se puede quitar, solo cambiar por otra.</span>
             )}
             {showNewBrand ? (
               <div className="mt-1 flex items-center gap-2">
@@ -211,11 +231,7 @@ export default function ProductFormModal({
                 </Button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => setShowNewBrand(true)}
-                className="w-fit text-xs font-medium text-brand-orange hover:underline"
-              >
+              <button type="button" onClick={() => setShowNewBrand(true)} className="w-fit text-xs font-bold text-accent-ink hover:underline">
                 + Nueva marca
               </button>
             )}
@@ -226,6 +242,7 @@ export default function ProductFormModal({
           <Input
             name="name"
             label="Nombre"
+            size="lg"
             placeholder="Ej: Mica de vidrio 9H"
             value={values.name}
             onChange={(e) => setField('name', e.target.value)}
@@ -234,6 +251,7 @@ export default function ProductFormModal({
           <Input
             name="model"
             label="Modelo (opcional)"
+            size="lg"
             placeholder="Ej: Tipo C 1m"
             value={values.model}
             onChange={(e) => setField('model', e.target.value)}
@@ -241,28 +259,29 @@ export default function ProductFormModal({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {mode === 'create' ? (
             <NumberInput
               name="stock"
               label="Stock inicial"
+              size="lg"
               min="0"
               value={values.stock}
               onChange={(e) => setField('stock', e.target.value)}
               error={errors.stock}
             />
           ) : (
-            <div className="flex flex-col gap-1 text-sm text-brand-ink">
-              <span className="font-medium">Stock</span>
-              <span className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-slate-300">
+            <div className="flex flex-col gap-1.5 text-sm text-ink">
+              <span className="text-xs font-medium text-muted">Stock</span>
+              <span className="flex min-h-[46px] items-center border border-dashed border-line bg-surface px-3 text-base font-extrabold">
                 {product?.stock ?? 0}
               </span>
-              <span className="text-xs text-slate-500">El stock se cambia con +/−</span>
             </div>
           )}
           <NumberInput
             name="cost"
-            label="Costo"
+            label="Costo (S/)"
+            size="lg"
             min="0"
             step="0.01"
             value={values.cost}
@@ -271,7 +290,8 @@ export default function ProductFormModal({
           />
           <NumberInput
             name="salePrice"
-            label="Precio de venta"
+            label="Precio venta (S/)"
+            size="lg"
             min="0"
             step="0.01"
             value={values.salePrice}
@@ -281,11 +301,26 @@ export default function ProductFormModal({
           <NumberInput
             name="minStock"
             label="Stock mínimo"
+            size="lg"
             min="0"
             value={values.minStock}
             onChange={(e) => setField('minStock', e.target.value)}
             error={errors.minStock}
           />
+        </div>
+        {mode === 'edit' && <span className="-mt-2 text-sm text-muted">El stock se cambia con los botones + / − de la tabla.</span>}
+
+        <div className="flex flex-col border-t-2 border-ink border-b-2 border-b-line sm:flex-row">
+          <div className="flex flex-1 flex-col gap-0.5 py-3.5">
+            <span className="text-sm text-muted">Ganancia por unidad</span>
+            <span className={`text-[28px] font-extrabold tabular-nums ${profit < 0 ? 'text-danger-ink' : 'text-accent-ink'}`}>
+              {formatPEN(profit)}
+            </span>
+          </div>
+          <div className="flex flex-1 flex-col gap-0.5 border-t border-line py-3.5 sm:border-l-2 sm:border-t-0 sm:pl-5">
+            <span className="text-sm text-muted">Margen sobre venta</span>
+            <span className="text-[28px] font-extrabold">{margin} %</span>
+          </div>
         </div>
 
         <PhoneMultiSelect

@@ -48,14 +48,14 @@ export default function DateRangePicker({ value, onChange, maxDate, label, class
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {label && <span className="mb-1 block text-xs text-brand-ink">{label}</span>}
+      {label && <span className="mb-1 block text-xs text-ink">{label}</span>}
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={popoverId}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-orange"
+        className="border border-line bg-surface px-3 py-1.5 text-sm text-ink focus:outline-none focus-visible:border-accent"
       >
         {formatDisplay(value)}
       </button>
@@ -65,7 +65,7 @@ export default function DateRangePicker({ value, onChange, maxDate, label, class
           id={popoverId}
           role="dialog"
           aria-label={label ?? 'Elegir rango de fechas'}
-          className="absolute z-20 mt-2 rounded-lg border border-slate-700 shadow-xl"
+          className="absolute z-20 mt-2 border border-line bg-bg shadow-admin-lg"
         >
           <DayPicker
             mode="range"

@@ -1,6 +1,11 @@
-/* Dark scrollbars for Glide Data Grid's own scroller (it ignores Tailwind). */
+/*
+ * Theme-aware scrollbars for Glide Data Grid's own scroller (it ignores
+ * Tailwind) — `.historial-grid` lives inside `.admin-shell`, so the
+ * `--admin-*` custom properties resolve to the current light/dark theme
+ * automatically (R2c, was hardcoded to the old permanent-dark palette).
+ */
 .historial-grid .dvn-scroller {
-  scrollbar-color: #475569 #0f172a;
+  scrollbar-color: var(--admin-muted) var(--admin-bg);
   scrollbar-width: thin;
 }
 
@@ -10,12 +15,12 @@
 }
 
 .historial-grid .dvn-scroller::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--admin-bg);
 }
 
 .historial-grid .dvn-scroller::-webkit-scrollbar-thumb {
-  background: #475569;
-  border: 2px solid #0f172a;
+  background: var(--admin-muted);
+  border: 2px solid var(--admin-bg);
   border-radius: 9999px;
 }
 
