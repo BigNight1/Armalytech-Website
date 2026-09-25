@@ -2,11 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../domain/user.entity';
+import { resolveJwtSecret } from '../../shared/config/secrets';
 import { SessionPayload } from './session.types';
 
 /**
  * ADR 0021: Issues and verifies JWT tokens traveling in an httpOnly cookie.
- * Signed with JWT_SECRET (or SESSION_SECRET as fallback).
+ * Signed with JWT_SECRET (SESSION_SECRET accepted as a deprecated alias,
+ * see `resolveJwtSecret`). There is no fallback secret: `env.validation.ts`
+ * already refuses to start the app if neither is set.
  */
 @Injectable()
 export class SessionTokenService {
@@ -22,11 +25,10 @@ export class SessionTokenService {
   }
 
   private getSecret(): string {
-    return (
-      this.configService.get<string>('JWT_SECRET') ||
-      this.configService.get<string>('SESSION_SECRET') ||
-      'default-jwt-secret-armalytech'
-    );
+    return resolveJwtSecret({
+      JWT_SECRET: this.configService.get<string>('JWT_SECRET'),
+      SESSION_SECRET: this.configService.get<string>('SESSION_SECRET'),
+    }).secret;
   }
 
   async buildToken(user: User): Promise<string> {
@@ -52,18 +54,5 @@ export class SessionTokenService {
     } catch {
       return null;
     }
-  }
-
-  // Backward compatibility with Admin entity
-  async buildPayload(admin: { id: string; username: string }): Promise<string> {
-    return this.buildToken({
-      id: admin.id,
-      email: admin.username,
-      passwordHash: '',
-      role: 'owner',
-      active: true,
-      tokenVersion: 0,
-      mustChangePassword: false,
-    });
   }
 }

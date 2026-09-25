@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { validate } from './shared/config/env.validation';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -20,7 +21,9 @@ import { AccountModule } from './account/account.module';
       // Atlas URI): its values would win over the per-spec overrides.
       ignoreEnvFile: process.env.NODE_ENV === 'test',
     }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    // High global ceiling: only the per-route @Throttle limits (login, public
+    // register) are meant to bite; normal panel use (grid pastes, prefetch) must not.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 1000 }]),
     MongooseModule.forRootAsync({
       useFactory: () => ({
         uri: process.env.MONGODB_URI,
@@ -33,6 +36,12 @@ import { AccountModule } from './account/account.module';
     CommunityModule,
     StaffModule,
     AccountModule,
+  ],
+  providers: [
+    // Registers ThrottlerGuard globally so the `@Throttle(...)` decorators
+    // (e.g. login's 5/60s limit) are actually enforced. Without this, the
+    // decorator only attaches metadata that nothing ever reads.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

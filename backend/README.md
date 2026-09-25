@@ -1,10 +1,12 @@
 # ArmalyTech backend
 
 NestJS (TypeScript) backend for the ArmalyTech admin panel: authentication, inventory
-(brands → models → parts) and daily cash closings ("Historial"). See
-`odd/tasks/panel-inventario-historial.md` for the feature spec and API contract, and
-`frontend/adrs/` (0002, 0003, 0004, 0005, 0006, 0008, 0010, 0011) for the accepted
-architecture decisions this backend implements.
+v2 (brands, phones, categories, products with stock movements) and daily cash closings
+("Historial"). See `odd/tasks/inventario-v2.md` for the inventory v2 feature spec and
+API contract, and `frontend/adrs/` (0002, 0003, 0004, 0005, 0006, 0008, 0010, 0011,
+0020) for the accepted architecture decisions this backend implements — 0006's
+"Actualización (2026-09-25)" section is the source of truth for the inventory v2 data
+model.
 
 ## Architecture
 
@@ -45,7 +47,8 @@ See `.env.example`. Never commit `.env` (gitignored at the repo root and in
 | `MONGODB_URI` | Mongo connection string (Atlas in production; local/in-memory for dev — ADR 0003). |
 | `PORT` | Local dev HTTP port (`main.ts`). Ignored by the Vercel serverless entry. |
 | `NODE_ENV` | `development` \| `production` \| `test`. Controls the `Secure` cookie flag. |
-| `SESSION_SECRET` | Signs the session cookie (`cookie-parser`, ADR 0004). Use a long random value in production. |
+| `JWT_SECRET` | Signs and verifies the session JWT (ADR 0021). Required (or see `SESSION_SECRET` below), at least 32 characters, long and random in production. The app refuses to start without one. |
+| `SESSION_SECRET` | **Deprecated** alias for `JWT_SECRET`, kept only for the current deployment (local `.env` and Vercel still set this name). Accepted with the same length requirement, but logs a startup warning telling you to rename it. Set `JWT_SECRET` instead when you next touch the environment. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Used once, at bootstrap, to create the single admin account when the `admins` collection is empty. |
 | `SESSION_MAX_AGE_SECONDS` | Session cookie lifetime in seconds (default 12h). |
 | `DNS_SERVERS` | Optional, local dev only. Comma-separated DNS servers (e.g. `8.8.8.8,1.1.1.1`) when the machine resolver refuses SRV lookups (`querySrv ECONNREFUSED` with `mongodb+srv://`). |
@@ -78,10 +81,11 @@ Errors always come back as:
 
 ## SQLite → MongoDB migration
 
-`scripts/migrate-sqlite.ts` reads the desktop app's SQLite file (`brands`,
-`models`, `parts`, `cierre_dia`) and upserts it into MongoDB idempotently, keyed
-by natural keys (brand name; brand + model name; model + part name; date +
-row index). It reuses the same Mongoose schemas as the running app.
+`scripts/migrate-sqlite.ts` reads the desktop app's SQLite file's `cierre_dia` table
+and upserts it into MongoDB idempotently, keyed by natural key (date + row index). It
+reuses the same Mongoose schema as the running app. Inventory v2 (brands, phones,
+categories, products) is **not** migrated: the old `brands`/`models`/`parts` tables are
+test data and inventory v2 starts empty (ADR 0006, "Actualización 2026-09-25").
 
 ```bash
 pnpm ts-node -r tsconfig-paths/register scripts/migrate-sqlite.ts ./inventory.db --dry-run

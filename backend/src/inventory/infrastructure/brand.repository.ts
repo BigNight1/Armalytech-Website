@@ -4,21 +4,12 @@ import { Model, Types } from 'mongoose';
 import { Brand } from '../domain/brand.entity';
 import { BrandRepository } from '../domain/brand-repository.port';
 import { BrandDocument, BrandModel } from './schemas/brand.schema';
-import {
-  InventoryModelDocument,
-  InventoryModelSchemaClass,
-} from './schemas/model.schema';
-import { PartDocument, PartModel } from './schemas/part.schema';
 
 @Injectable()
 export class MongooseBrandRepository implements BrandRepository {
   constructor(
     @InjectModel(BrandModel.name)
     private readonly brandModel: Model<BrandDocument>,
-    @InjectModel(InventoryModelSchemaClass.name)
-    private readonly modelModel: Model<InventoryModelDocument>,
-    @InjectModel(PartModel.name)
-    private readonly partModel: Model<PartDocument>,
   ) {}
 
   async findAll(): Promise<Brand[]> {
@@ -32,6 +23,15 @@ export class MongooseBrandRepository implements BrandRepository {
     }
     const doc = await this.brandModel.findById(id).exec();
     return doc ? this.toEntity(doc) : null;
+  }
+
+  async findByIds(ids: string[]): Promise<Brand[]> {
+    const validIds = ids.filter((id) => Types.ObjectId.isValid(id));
+    if (validIds.length === 0) {
+      return [];
+    }
+    const docs = await this.brandModel.find({ _id: { $in: validIds } }).exec();
+    return docs.map((doc) => this.toEntity(doc));
   }
 
   async findByNameCaseInsensitive(name: string): Promise<Brand | null> {
@@ -63,20 +63,11 @@ export class MongooseBrandRepository implements BrandRepository {
     return doc ? this.toEntity(doc) : null;
   }
 
-  async deleteCascade(id: string): Promise<boolean> {
+  async delete(id: string): Promise<boolean> {
     if (!Types.ObjectId.isValid(id)) {
       return false;
     }
-    const brandId = new Types.ObjectId(id);
-    const models = await this.modelModel.find({ brandId }).select('_id').exec();
-    const modelIds = models.map((m) => m._id);
-
-    if (modelIds.length > 0) {
-      await this.partModel.deleteMany({ modelId: { $in: modelIds } }).exec();
-      await this.modelModel.deleteMany({ brandId }).exec();
-    }
-
-    const result = await this.brandModel.deleteOne({ _id: brandId }).exec();
+    const result = await this.brandModel.deleteOne({ _id: id }).exec();
     return result.deletedCount > 0;
   }
 

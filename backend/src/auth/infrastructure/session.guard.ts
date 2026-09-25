@@ -41,13 +41,9 @@ export class SessionGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
-    const signedCookies = (
-      request as Request & { signedCookies?: Record<string, string | false> }
-    ).signedCookies;
     const cookies = request.cookies as Record<string, string> | undefined;
 
-    const raw =
-      signedCookies?.[SESSION_COOKIE_NAME] || cookies?.[SESSION_COOKIE_NAME];
+    const raw = cookies?.[SESSION_COOKIE_NAME];
 
     if (!raw || typeof raw !== 'string') {
       throw new UnauthorizedException('Authentication required');

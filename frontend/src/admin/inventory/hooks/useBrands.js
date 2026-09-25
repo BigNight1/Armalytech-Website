@@ -2,14 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '../api/inventoryApi.js';
 import { inventoryKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
+import { useQueryErrorToast } from '../../shared/lib/useQueryErrorToast.js';
 
-/**
- * Brand list + CRUD (ADR 0009/0010: server is the source of truth).
- * TanStack Query (T14) replaces the manual fetch/refetch dance; mutations
- * invalidate `inventoryKeys.brands()` so every consumer refreshes together.
- * `createBrand`/`updateBrand`/`deleteBrand` still throw on failure so the
- * caller (a modal) can keep its form open.
- */
+const IN_USE_MESSAGE = 'No se puede eliminar: hay celulares o productos que la usan';
+
+/** Brands catalog (list + create/rename/delete). */
 export function useBrands() {
   const { notify } = useToast();
   const queryClient = useQueryClient();
@@ -19,26 +16,31 @@ export function useBrands() {
     queryFn: inventoryApi.listBrands,
   });
 
-  if (query.error) {
-    notify(query.error.message ?? 'No se pudieron cargar las marcas', { type: 'error' });
-  }
+  useQueryErrorToast(query.error, 'No se pudieron cargar las marcas');
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: inventoryKeys.brands() });
+  // Brand names are denormalized into products (`brand.name`) and phones
+  // (joined client-side), so a rename must refresh both.
+  const invalidate = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.brands() }),
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.phones() }),
+      queryClient.invalidateQueries({ queryKey: [...inventoryKeys.all, 'products'] }),
+    ]);
 
   const createMutation = useMutation({
     mutationFn: (name) => inventoryApi.createBrand(name),
-    onSuccess: async (brand) => {
+    onSuccess: async (created) => {
       await invalidate();
-      notify(`Marca "${brand.name}" creada`, { type: 'success' });
+      notify(`Marca "${created.name}" creada`, { type: 'success' });
     },
     onError: (err) => notify(err.message ?? 'No se pudo crear la marca', { type: 'error' }),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, name }) => inventoryApi.updateBrand(id, name),
-    onSuccess: async (brand) => {
+    onSuccess: async () => {
       await invalidate();
-      notify(`Marca "${brand.name}" actualizada`, { type: 'success' });
+      notify('Marca actualizada', { type: 'success' });
     },
     onError: (err) => notify(err.message ?? 'No se pudo actualizar la marca', { type: 'error' }),
   });
@@ -49,14 +51,15 @@ export function useBrands() {
       await invalidate();
       notify('Marca eliminada', { type: 'success' });
     },
-    onError: (err) => notify(err.message ?? 'No se pudo eliminar la marca', { type: 'error' }),
+    onError: (err) =>
+      notify(err.status === 409 ? IN_USE_MESSAGE : (err.message ?? 'No se pudo eliminar la marca'), {
+        type: 'error',
+      }),
   });
 
   return {
     brands: query.data ?? [],
     isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
     createBrand: (name) => createMutation.mutateAsync(name),
     updateBrand: (id, name) => updateMutation.mutateAsync({ id, name }),
     deleteBrand: (id) => deleteMutation.mutateAsync(id),

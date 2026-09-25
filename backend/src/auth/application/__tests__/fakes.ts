@@ -1,4 +1,4 @@
-import { User, UserRole } from '../../domain/user.entity';
+import { User } from '../../domain/user.entity';
 import {
   CreateUserInput,
   UpdateUserInput,

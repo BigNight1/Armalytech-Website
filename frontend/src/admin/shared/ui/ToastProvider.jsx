@@ -25,7 +25,13 @@ export function ToastProvider({ children }) {
   const notify = useCallback(
     (message, { type = 'info', duration = DEFAULT_DURATION_MS } = {}) => {
       const id = ++idRef.current;
-      setToasts((current) => [...current, { id, message, type }]);
+      // Skip a message that is already on screen (e.g. several queries
+      // failing with the same error).
+      setToasts((current) =>
+        current.some((toast) => toast.message === message && toast.type === type)
+          ? current
+          : [...current, { id, message, type }],
+      );
       if (duration > 0) {
         setTimeout(() => dismiss(id), duration);
       }

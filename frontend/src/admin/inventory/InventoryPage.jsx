@@ -1,228 +1,266 @@
 import { useMemo, useState } from 'react';
+import { useCategories } from './hooks/useCategories.js';
 import { useBrands } from './hooks/useBrands.js';
-import { useModels } from './hooks/useModels.js';
-import { useParts } from './hooks/useParts.js';
-import { useInventorySearch } from './hooks/useInventorySearch.js';
+import { usePhones } from './hooks/usePhones.js';
+import { useProducts } from './hooks/useProducts.js';
+import { useProductMovements } from './hooks/useProductMovements.js';
 import { useDelayedFlag } from '../shared/lib/useDelayedFlag.js';
-import BrandSidebar from './components/BrandSidebar.jsx';
-import ModelGrid from './components/ModelGrid.jsx';
-import PartTable from './components/PartTable.jsx';
-import SearchResults from './components/SearchResults.jsx';
-import NameFormModal from './components/NameFormModal.jsx';
-import PartFormModal from './components/PartFormModal.jsx';
-import { Input, ConfirmDialog } from '../shared/ui/index.js';
+import CategoryChips from './components/CategoryChips.jsx';
+import ProductTable from './components/ProductTable.jsx';
+import ProductFormModal from './components/ProductFormModal.jsx';
+import MovementsModal from './components/MovementsModal.jsx';
+import CatalogTab from './components/CatalogTab.jsx';
+import { Button, ConfirmDialog, EmptyState, Input, SkeletonTable } from '../shared/ui/index.js';
 
-/** What kind of "delete this" confirmation is pending, if any. */
-function useConfirmDelete() {
-  const [pending, setPending] = useState(null); // { kind: 'brand'|'model'|'part', item }
-  return {
-    pending,
-    ask: (kind, item) => setPending({ kind, item }),
-    cancel: () => setPending(null),
-  };
+/** Groups an already-fetched page of products by category, preserving first-seen order. */
+function groupByCategory(products) {
+  const order = [];
+  const byCategory = new Map();
+  for (const product of products) {
+    const key = product.category.id;
+    if (!byCategory.has(key)) {
+      byCategory.set(key, { categoryId: key, categoryName: product.category.name, products: [] });
+      order.push(key);
+    }
+    byCategory.get(key).products.push(product);
+  }
+  return order.map((key) => byCategory.get(key));
 }
 
-/** Container for the Inventario section: brands -> models -> parts, plus search. */
+const TABS = [
+  { key: 'productos', label: 'Productos' },
+  { key: 'catalogo', label: 'Catálogo' },
+];
+
+/** Container for the Inventario section: product catalog + brand/phone/category management. */
 export default function InventoryPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBrandId, setSelectedBrandId] = useState(null);
-  const [selectedModelId, setSelectedModelId] = useState(null);
+  const [tab, setTab] = useState('productos');
+  const [productModal, setProductModal] = useState(null); // { mode: 'create'|'edit', product? }
+  const [movementsProduct, setMovementsProduct] = useState(null);
+  const [pendingArchive, setPendingArchive] = useState(null);
+  const [phoneBrandFilter, setPhoneBrandFilter] = useState('');
 
-  const [brandModal, setBrandModal] = useState(null); // { mode: 'create'|'edit', brand? }
-  const [modelModal, setModelModal] = useState(null);
-  const [partModal, setPartModal] = useState(null);
+  const categories = useCategories();
+  const brands = useBrands();
+  const phones = usePhones();
+  const products = useProducts();
+  const movements = useProductMovements(movementsProduct?.id);
 
-  const { brands, isLoading: brandsLoading, createBrand, updateBrand, deleteBrand } = useBrands();
-  const { models, isLoading: modelsLoading, createModel, updateModel, deleteModel } = useModels(selectedBrandId);
-  const {
-    parts,
-    isLoading: partsLoading,
-    createPart,
-    updatePart,
-    deletePart,
-    adjustQuantity,
-  } = useParts(selectedModelId);
-  const { results: searchResults, isLoading: searchLoading } = useInventorySearch(searchQuery);
-
-  // T14: only show loading placeholders once a fetch has been pending a
-  // noticeable while, so fast cache-hit navigation never flashes a skeleton.
-  const showBrandsLoading = useDelayedFlag(brandsLoading);
-  const showModelsLoading = useDelayedFlag(modelsLoading);
-  const showPartsLoading = useDelayedFlag(partsLoading);
-  const showSearchLoading = useDelayedFlag(searchLoading);
-
-  const confirmDelete = useConfirmDelete();
-
-  const selectedBrand = useMemo(
-    () => brands.find((brand) => brand.id === selectedBrandId) ?? null,
-    [brands, selectedBrandId],
-  );
-  const selectedModel = useMemo(
-    () => models.find((model) => model.id === selectedModelId) ?? null,
-    [models, selectedModelId],
+  // The backend returns bare `{id, brandId, name}` for phones; join brand
+  // names client-side (the catalog is small) for display everywhere.
+  const phonesWithBrand = useMemo(
+    () =>
+      phones.phones.map((phone) => ({
+        ...phone,
+        brandName: brands.brands.find((brand) => brand.id === phone.brandId)?.name ?? '',
+      })),
+    [phones.phones, brands.brands],
   );
 
-  const isSearching = searchQuery.trim().length > 0;
+  const filteredCatalogPhones = useMemo(
+    () => (phoneBrandFilter ? phonesWithBrand.filter((phone) => phone.brandId === phoneBrandFilter) : phonesWithBrand),
+    [phonesWithBrand, phoneBrandFilter],
+  );
 
-  const handleSelectBrand = (brandId) => {
-    setSelectedBrandId(brandId);
-    setSelectedModelId(null);
-  };
+  const showProductsLoading = useDelayedFlag(products.isLoading);
+  const hasProducts = products.items.length > 0;
+  const hasSearchText = products.searchInput.trim().length > 0;
+  const hasActiveFilters = Boolean(products.categoryId) || products.lowStock || products.includeArchived;
+  const groups = products.matchedPhones.length > 0 ? groupByCategory(products.items) : null;
+  const totalPages = Math.max(1, Math.ceil(products.total / products.pageSize));
+  const totalMovementPages = Math.max(1, Math.ceil(movements.total / movements.pageSize));
 
-  const handleSelectSearchResult = (result) => {
-    // The search result carries brandName/modelName (not brandId — brand
-    // names are unique per the backend), so resolve it against the already
-    // loaded brand list before jumping the brand/model selection there.
-    setSearchQuery('');
-    const brand = brands.find((candidate) => candidate.name === result.brandName);
-    setSelectedBrandId(brand?.id ?? null);
-    setSelectedModelId(result.modelId);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!confirmDelete.pending) return;
-    const { kind, item } = confirmDelete.pending;
-    try {
-      if (kind === 'brand') {
-        await deleteBrand(item.id);
-        if (selectedBrandId === item.id) handleSelectBrand(null);
-      } else if (kind === 'model') {
-        await deleteModel(item.id);
-        if (selectedModelId === item.id) setSelectedModelId(null);
-      } else if (kind === 'part') {
-        await deletePart(item.id);
-      }
-    } finally {
-      confirmDelete.cancel();
+  async function handleSubmitProduct(payload) {
+    if (productModal?.mode === 'edit') {
+      await products.updateProduct(productModal.product.id, payload);
+    } else {
+      await products.createProduct(payload);
     }
-  };
+  }
 
-  const deleteMessages = {
-    brand: (brand) => `Se eliminará la marca "${brand.name}" y todos sus modelos y repuestos.`,
-    model: (model) => `Se eliminará el modelo "${model.name}" y todos sus repuestos.`,
-    part: (part) => `Se eliminará el repuesto "${part.name}".`,
-  };
+  async function handleConfirmArchive() {
+    if (!pendingArchive) return;
+    try {
+      await products.archiveProduct(pendingArchive.id);
+    } finally {
+      setPendingArchive(null);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-brand-ink">Inventario</h1>
-        <div className="w-full max-w-xs">
-          <Input
-            name="inventory-search"
-            placeholder="Buscar repuesto, modelo o marca..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
-        </div>
+        {tab === 'productos' && <Button onClick={() => setProductModal({ mode: 'create' })}>+ Producto</Button>}
       </div>
 
-      {isSearching ? (
-        <SearchResults
-          query={searchQuery}
-          results={searchResults}
-          isLoading={showSearchLoading}
-          onSelectResult={handleSelectSearchResult}
-        />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
-          <BrandSidebar
-            brands={brands}
-            isLoading={showBrandsLoading}
-            selectedBrandId={selectedBrandId}
-            onSelectBrand={handleSelectBrand}
-            onAddBrand={() => setBrandModal({ mode: 'create' })}
-            onEditBrand={(brand) => setBrandModal({ mode: 'edit', brand })}
-            onDeleteBrand={(brand) => confirmDelete.ask('brand', brand)}
-          />
+      <div className="flex gap-2 border-b border-slate-700">
+        {TABS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => setTab(item.key)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+              tab === item.key ? 'border-brand-orange text-brand-ink' : 'border-transparent text-slate-400 hover:text-brand-ink'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
 
-          <div className="flex flex-col gap-6">
-            {selectedBrandId ? (
-              <>
-                <ModelGrid
-                  brandName={selectedBrand?.name}
-                  models={models}
-                  isLoading={showModelsLoading}
-                  selectedModelId={selectedModelId}
-                  onSelectModel={setSelectedModelId}
-                  onAddModel={() => setModelModal({ mode: 'create' })}
-                  onEditModel={(model) => setModelModal({ mode: 'edit', model })}
-                  onDeleteModel={(model) => confirmDelete.ask('model', model)}
-                />
-
-                {selectedModelId && (
-                  <PartTable
-                    modelName={selectedModel?.name}
-                    parts={parts}
-                    isLoading={showPartsLoading}
-                    onUpdatePart={updatePart}
-                    onAdjustQuantity={adjustQuantity}
-                    onDeletePart={(part) => confirmDelete.ask('part', part)}
-                    onAddPart={() => setPartModal({ mode: 'create' })}
-                  />
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-slate-400">Selecciona una marca para ver sus modelos.</p>
-            )}
+      {tab === 'productos' ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
+            <div className="w-full max-w-md">
+              <Input
+                name="product-search"
+                placeholder="Buscar por celular (ej. A54) o producto..."
+                value={products.searchInput}
+                onChange={(e) => products.setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <CategoryChips
+                categories={categories.categories}
+                selectedId={products.categoryId}
+                onSelect={products.setCategoryId}
+                lowStock={products.lowStock}
+                onToggleLowStock={products.setLowStock}
+              />
+              <button
+                type="button"
+                onClick={() => products.setIncludeArchived(!products.includeArchived)}
+                className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  products.includeArchived
+                    ? 'border-slate-400 bg-slate-700 text-brand-ink'
+                    : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500'
+                }`}
+              >
+                Archivados
+              </button>
+            </div>
           </div>
+
+          {products.matchedPhones.length > 0 && (
+            <p className="text-sm text-slate-300">
+              Compatibles con{' '}
+              <span className="font-medium text-brand-ink">
+                {products.matchedPhones.map((phone) => `${phone.brandName} ${phone.name}`).join(', ')}
+              </span>
+            </p>
+          )}
+
+          {showProductsLoading ? (
+            <SkeletonTable rows={6} columns={8} />
+          ) : hasProducts ? (
+            <>
+              <ProductTable
+                products={products.items}
+                groups={groups}
+                onEdit={(product) => setProductModal({ mode: 'edit', product })}
+                onMovements={setMovementsProduct}
+                onArchive={setPendingArchive}
+                onRestore={(product) => products.restoreProduct(product.id)}
+                onAdjust={(id, delta) => products.adjustStock(id, delta)}
+              />
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 text-sm text-slate-400">
+                  <button
+                    type="button"
+                    disabled={products.page <= 1}
+                    onClick={() => products.setPage(products.page - 1)}
+                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
+                  >
+                    Anterior
+                  </button>
+                  <span>
+                    Página {products.page} de {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={products.page >= totalPages}
+                    onClick={() => products.setPage(products.page + 1)}
+                    className="rounded-lg border border-slate-700 px-3 py-1 disabled:opacity-40"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              title={
+                hasSearchText
+                  ? `No hay productos para "${products.searchInput.trim()}"`
+                  : hasActiveFilters
+                    ? 'No hay productos con estos filtros'
+                    : 'Todavía no hay productos'
+              }
+              description={
+                hasSearchText || hasActiveFilters
+                  ? 'Prueba con otro celular, nombre de producto o quita los filtros.'
+                  : 'Crea el primer producto del inventario.'
+              }
+              action={
+                !hasSearchText && !hasActiveFilters ? (
+                  <Button onClick={() => setProductModal({ mode: 'create' })}>Nuevo producto</Button>
+                ) : undefined
+              }
+            />
+          )}
         </div>
+      ) : (
+        <CatalogTab
+          brands={brands.brands}
+          categories={categories.categories}
+          phones={filteredCatalogPhones}
+          isLoadingBrands={brands.isLoading}
+          isLoadingCategories={categories.isLoading}
+          isLoadingPhones={phones.isLoading}
+          phoneBrandFilter={phoneBrandFilter}
+          onPhoneBrandFilterChange={setPhoneBrandFilter}
+          brandActions={{ onCreate: brands.createBrand, onRename: brands.updateBrand, onDelete: brands.deleteBrand }}
+          categoryActions={{
+            onCreate: categories.createCategory,
+            onRename: categories.updateCategory,
+            onDelete: categories.deleteCategory,
+          }}
+          phoneActions={{ onCreate: phones.createPhone, onRename: phones.updatePhone, onDelete: phones.deletePhone }}
+        />
       )}
 
-      <NameFormModal
-        open={brandModal?.mode === 'create'}
-        title="Nueva marca"
-        label="Nombre de la marca"
-        placeholder="Ej: Samsung, Xiaomi..."
-        submitLabel="Crear marca"
-        onSubmit={createBrand}
-        onClose={() => setBrandModal(null)}
-      />
-      <NameFormModal
-        open={brandModal?.mode === 'edit'}
-        title="Editar marca"
-        label="Nombre de la marca"
-        initialName={brandModal?.brand?.name ?? ''}
-        submitLabel="Guardar cambios"
-        onSubmit={(name) => updateBrand(brandModal.brand.id, name)}
-        onClose={() => setBrandModal(null)}
+      <ProductFormModal
+        open={Boolean(productModal)}
+        mode={productModal?.mode}
+        product={productModal?.product ?? null}
+        categories={categories.categories}
+        brands={brands.brands}
+        phones={phonesWithBrand}
+        onCreateBrand={brands.createBrand}
+        onCreatePhone={phones.createPhone}
+        onSubmit={handleSubmitProduct}
+        onClose={() => setProductModal(null)}
       />
 
-      <NameFormModal
-        open={modelModal?.mode === 'create'}
-        title="Nuevo modelo"
-        label="Nombre del modelo"
-        placeholder="Ej: Galaxy A52"
-        submitLabel="Crear modelo"
-        onSubmit={createModel}
-        onClose={() => setModelModal(null)}
-      />
-      <NameFormModal
-        open={modelModal?.mode === 'edit'}
-        title="Editar modelo"
-        label="Nombre del modelo"
-        initialName={modelModal?.model?.name ?? ''}
-        submitLabel="Guardar cambios"
-        onSubmit={(name) => updateModel(modelModal.model.id, name)}
-        onClose={() => setModelModal(null)}
-      />
-
-      <PartFormModal
-        open={Boolean(partModal)}
-        part={null}
-        onSubmit={createPart}
-        onClose={() => setPartModal(null)}
+      <MovementsModal
+        open={Boolean(movementsProduct)}
+        product={movementsProduct}
+        movements={movements.items}
+        isLoading={movements.isLoading}
+        page={movements.page}
+        totalPages={totalMovementPages}
+        onPageChange={movements.setPage}
+        onClose={() => setMovementsProduct(null)}
       />
 
       <ConfirmDialog
-        open={Boolean(confirmDelete.pending)}
-        title="Confirmar eliminación"
-        message={
-          confirmDelete.pending ? deleteMessages[confirmDelete.pending.kind](confirmDelete.pending.item) : ''
-        }
-        confirmLabel="Eliminar"
-        onConfirm={handleConfirmDelete}
-        onCancel={confirmDelete.cancel}
+        open={Boolean(pendingArchive)}
+        title="Archivar producto"
+        message={pendingArchive ? `Se archivará "${pendingArchive.name}". Podrás restaurarlo desde "Archivados".` : ''}
+        confirmLabel="Archivar"
+        onConfirm={handleConfirmArchive}
+        onCancel={() => setPendingArchive(null)}
       />
     </div>
   );

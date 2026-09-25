@@ -19,8 +19,15 @@ export async function createTestApp(
   const mongod = await MongoMemoryServer.create();
 
   process.env.MONGODB_URI = mongod.getUri();
-  process.env.SESSION_SECRET = 'test-session-secret';
+  process.env.JWT_SECRET =
+    envOverrides.JWT_SECRET ?? 'test-jwt-secret-armalytech-e2e-tests-min32';
+  delete process.env.SESSION_SECRET;
   process.env.NODE_ENV = 'test';
+  if (envOverrides.ADMIN_EMAIL) {
+    process.env.ADMIN_EMAIL = envOverrides.ADMIN_EMAIL;
+  } else {
+    delete process.env.ADMIN_EMAIL;
+  }
   process.env.ADMIN_USERNAME = envOverrides.ADMIN_USERNAME ?? 'admin';
   process.env.ADMIN_PASSWORD = envOverrides.ADMIN_PASSWORD ?? 'test-password';
   process.env.SESSION_MAX_AGE_SECONDS = '43200';
@@ -31,7 +38,8 @@ export async function createTestApp(
 
   const app = moduleRef.createNestApplication();
   app.setGlobalPrefix('api');
-  app.use(cookieParser(process.env.SESSION_SECRET));
+  // Cookies are verified as JWTs (ADR 0021), not via cookie-parser signing.
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.init();

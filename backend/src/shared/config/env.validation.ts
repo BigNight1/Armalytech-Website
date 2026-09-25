@@ -7,6 +7,7 @@ import {
   IsString,
   validateSync,
 } from 'class-validator';
+import { resolveJwtSecret } from './secrets';
 
 class EnvironmentVariables {
   @IsOptional()
@@ -21,9 +22,12 @@ class EnvironmentVariables {
   @IsString()
   MONGODB_URI!: string;
 
-  @IsNotEmpty()
+  // Deprecated alias for JWT_SECRET, see `resolveJwtSecret`. At least one
+  // of the two must be set; enforced below rather than with @IsNotEmpty
+  // since neither is individually required.
+  @IsOptional()
   @IsString()
-  SESSION_SECRET!: string;
+  SESSION_SECRET?: string;
 
   @IsOptional()
   @IsString()
@@ -65,6 +69,17 @@ export function validate(config: Record<string, unknown>) {
 
   if (errors.length > 0) {
     throw new Error(`Invalid environment configuration: ${errors.toString()}`);
+  }
+
+  // Fails fast (throws) if neither JWT_SECRET nor SESSION_SECRET is set, or
+  // the resolved secret is too short.
+  const { usedDeprecatedAlias } = resolveJwtSecret({
+    JWT_SECRET: validatedConfig.JWT_SECRET,
+    SESSION_SECRET: validatedConfig.SESSION_SECRET,
+  });
+  if (usedDeprecatedAlias) {
+    // eslint-disable-next-line no-console
+    console.warn('SESSION_SECRET is deprecated, rename it to JWT_SECRET');
   }
 
   return validatedConfig;

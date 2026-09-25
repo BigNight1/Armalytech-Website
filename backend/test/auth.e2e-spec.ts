@@ -6,10 +6,14 @@ import { createTestApp, closeTestApp } from './test-app';
 describe('Auth (e2e)', () => {
   let app: INestApplication;
   let mongod: MongoMemoryServer;
+  // ADR 0021: login is by email, not username. Set ADMIN_EMAIL explicitly
+  // instead of relying on the ADMIN_USERNAME -> "<username>@armalytech.com"
+  // fallback, so the contract under test is unambiguous.
+  const adminEmail = 'admin@armalytech.com';
 
   beforeAll(async () => {
     ({ app, mongod } = await createTestApp({
-      ADMIN_USERNAME: 'admin',
+      ADMIN_EMAIL: adminEmail,
       ADMIN_PASSWORD: 'super-secret',
     }));
     // Bootstrap runs on onApplicationBootstrap, which `app.init()` already
@@ -29,7 +33,7 @@ describe('Auth (e2e)', () => {
   it('rejects login with wrong credentials', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ username: 'admin', password: 'wrong' });
+      .send({ email: adminEmail, password: 'wrong' });
 
     expect(res.status).toBe(401);
     expect(res.body.ok).toBe(false);
@@ -40,15 +44,15 @@ describe('Auth (e2e)', () => {
 
     const loginRes = await agent
       .post('/api/auth/login')
-      .send({ username: 'admin', password: 'super-secret' });
+      .send({ email: adminEmail, password: 'super-secret' });
 
     expect(loginRes.status).toBe(200);
-    expect(loginRes.body.data.username).toBe('admin');
+    expect(loginRes.body.data.email).toBe(adminEmail);
     expect(loginRes.headers['set-cookie']).toBeDefined();
 
     const meRes = await agent.get('/api/auth/me');
     expect(meRes.status).toBe(200);
-    expect(meRes.body.data.username).toBe('admin');
+    expect(meRes.body.data.email).toBe(adminEmail);
 
     const brandsRes = await agent.get('/api/inventory/brands');
     expect(brandsRes.status).toBe(200);

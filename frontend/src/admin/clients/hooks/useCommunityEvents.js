@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { clientsApi } from '../api/clientsApi.js';
 import { clientsKeys } from '../api/queryKeys.js';
-import { useToast } from '../../shared/ui/index.js';
+import { useQueryErrorToast } from '../../shared/lib/useQueryErrorToast.js';
 import { todayInLima } from '../../shared/lib/time.js';
 import { limaDayRangeUtc } from '../lib/format.js';
 
@@ -17,7 +17,6 @@ function defaultRange() {
 export function useCommunityEvents() {
   const [range, setRange] = useState(defaultRange);
   const [type, setType] = useState('all'); // 'all' | 'registro' | 'visita' | 'registro_rechazado'
-  const { notify } = useToast();
 
   const { from } = limaDayRangeUtc(range.from);
   const { to } = limaDayRangeUtc(range.to);
@@ -29,9 +28,7 @@ export function useCommunityEvents() {
     placeholderData: keepPreviousData,
   });
 
-  if (query.error) {
-    notify(query.error.message ?? 'No se pudo cargar la actividad', { type: 'error' });
-  }
+  useQueryErrorToast(query.error, 'No se pudo cargar la actividad');
 
   return {
     events: query.data ?? [],

@@ -16,7 +16,8 @@ export async function createNestApp(): Promise<NestExpressApplication> {
   });
 
   app.setGlobalPrefix('api');
-  app.use(cookieParser(process.env.SESSION_SECRET));
+  // Cookies are verified as JWTs (ADR 0021), not via cookie-parser signing.
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.init();

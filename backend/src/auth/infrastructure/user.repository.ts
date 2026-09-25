@@ -9,7 +9,6 @@ import {
 } from '../domain/user-repository.port';
 import { UserDocument, UserModel } from './schemas/user.schema';
 import { Admin } from '../domain/admin.entity';
-import { AdminRepository } from '../domain/admin-repository.port';
 
 @Injectable()
 export class MongooseUserRepository implements UserRepository {

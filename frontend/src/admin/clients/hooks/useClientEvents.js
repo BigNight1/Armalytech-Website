@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { clientsApi } from '../api/clientsApi.js';
 import { clientsKeys } from '../api/queryKeys.js';
-import { useToast } from '../../shared/ui/index.js';
+import { useQueryErrorToast } from '../../shared/lib/useQueryErrorToast.js';
 
 /** A single client's registro/visita/registro_rechazado history (T14: TanStack Query). */
 export function useClientEvents(clientId) {
-  const { notify } = useToast();
 
   const query = useQuery({
     queryKey: clientsKeys.events(clientId),
@@ -13,9 +12,7 @@ export function useClientEvents(clientId) {
     enabled: Boolean(clientId),
   });
 
-  if (query.error) {
-    notify(query.error.message ?? 'No se pudo cargar el historial', { type: 'error' });
-  }
+  useQueryErrorToast(query.error, 'No se pudo cargar el historial');
 
   return { events: query.data ?? [], isLoading: query.isLoading, refetch: query.refetch };
 }

@@ -9,15 +9,21 @@ export class BrandNotFoundError extends NotFoundDomainError {
   }
 }
 
-export class ModelNotFoundError extends NotFoundDomainError {
+export class PhoneNotFoundError extends NotFoundDomainError {
   constructor(id: string) {
-    super('Model', id);
+    super('Phone', id);
   }
 }
 
-export class PartNotFoundError extends NotFoundDomainError {
+export class CategoryNotFoundError extends NotFoundDomainError {
   constructor(id: string) {
-    super('Part', id);
+    super('Category', id);
+  }
+}
+
+export class ProductNotFoundError extends NotFoundDomainError {
+  constructor(id: string) {
+    super('Product', id);
   }
 }
 
@@ -27,10 +33,45 @@ export class DuplicateBrandNameError extends ConflictDomainError {
   }
 }
 
-export class InsufficientStockError extends ConflictDomainError {
-  constructor(partId: string, requested: number, available: number) {
+export class DuplicatePhoneNameError extends ConflictDomainError {
+  constructor(name: string) {
+    super(`A phone named "${name}" already exists for this brand`);
+  }
+}
+
+export class DuplicateCategoryNameError extends ConflictDomainError {
+  constructor(name: string) {
+    super(`A category named "${name}" already exists`);
+  }
+}
+
+/** No cascade (inventory v2 decision): deleting a referenced brand would silently break products and movement history. */
+export class BrandInUseError extends ConflictDomainError {
+  constructor(id: string) {
     super(
-      `Part "${partId}" has insufficient stock: requested ${requested}, available ${available}`,
+      `Brand "${id}" is referenced by a phone or a product and cannot be deleted`,
+    );
+  }
+}
+
+export class PhoneInUseError extends ConflictDomainError {
+  constructor(id: string) {
+    super(
+      `Phone "${id}" is listed as compatible by a product and cannot be deleted`,
+    );
+  }
+}
+
+export class CategoryInUseError extends ConflictDomainError {
+  constructor(id: string) {
+    super(`Category "${id}" is used by a product and cannot be deleted`);
+  }
+}
+
+export class InsufficientStockError extends ConflictDomainError {
+  constructor(productId: string, requested: number, available: number) {
+    super(
+      `Product "${productId}" has insufficient stock: requested ${requested}, available ${available}`,
     );
   }
 }

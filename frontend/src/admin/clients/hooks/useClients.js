@@ -3,6 +3,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { clientsApi } from '../api/clientsApi.js';
 import { clientsKeys } from '../api/queryKeys.js';
 import { useToast } from '../../shared/ui/index.js';
+import { useQueryErrorToast } from '../../shared/lib/useQueryErrorToast.js';
 
 const PAGE_SIZE = 20;
 
@@ -22,9 +23,7 @@ export function useClients() {
     placeholderData: keepPreviousData,
   });
 
-  if (listQuery.error) {
-    notify(listQuery.error.message ?? 'No se pudieron cargar los clientes', { type: 'error' });
-  }
+  useQueryErrorToast(listQuery.error, 'No se pudieron cargar los clientes');
 
   const updateMutation = useMutation({
     mutationFn: ({ id, changes }) => clientsApi.updateClient(id, changes),

@@ -13,4 +13,4 @@ jest.setTimeout(60_000);
 // mongodb-memory-server URI before compiling the Nest testing module, which
 // is what `MongooseModule.forRootAsync`'s factory actually reads.
 process.env.MONGODB_URI ??= 'mongodb://127.0.0.1:27017/placeholder';
-process.env.SESSION_SECRET ??= 'placeholder-session-secret';
+process.env.JWT_SECRET ??= 'placeholder-jwt-secret-for-import-time-validation';
