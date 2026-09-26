@@ -14,9 +14,11 @@ import { ListPhonesUseCase } from '../application/phone/list-phones.use-case';
 import { CreatePhoneUseCase } from '../application/phone/create-phone.use-case';
 import { UpdatePhoneUseCase } from '../application/phone/update-phone.use-case';
 import { DeletePhoneUseCase } from '../application/phone/delete-phone.use-case';
+import { ResolvePhoneUseCase } from '../application/phone/resolve-phone.use-case';
 import {
   CreatePhoneDto,
   ListPhonesQueryDto,
+  ResolvePhoneDto,
   UpdatePhoneDto,
 } from './dto/phone.dto';
 
@@ -27,7 +29,13 @@ export class PhoneController {
     private readonly createPhone: CreatePhoneUseCase,
     private readonly updatePhone: UpdatePhoneUseCase,
     private readonly deletePhone: DeletePhoneUseCase,
+    private readonly resolvePhone: ResolvePhoneUseCase,
   ) {}
+
+  @Post('resolve')
+  async resolve(@Body() dto: ResolvePhoneDto) {
+    return this.resolvePhone.execute(dto.marca, dto.modelo);
+  }
 
   @Get()
   async list(@Query() query: ListPhonesQueryDto) {

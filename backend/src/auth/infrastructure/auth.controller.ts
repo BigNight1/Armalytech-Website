@@ -77,9 +77,7 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(
-    @CurrentAdmin() session: SessionPayload,
-  ): Promise<{
+  async me(@CurrentAdmin() session: SessionPayload): Promise<{
     ok: true;
     data: {
       id: string;

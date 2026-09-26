@@ -42,12 +42,16 @@ export class FakeUserRepository implements UserRepository {
   async update(id: string, input: UpdateUserInput): Promise<User | null> {
     const user = this.users.find((u) => u.id === id);
     if (!user) return null;
-    if (input.email !== undefined) user.email = input.email.toLowerCase().trim();
-    if (input.passwordHash !== undefined) user.passwordHash = input.passwordHash;
+    if (input.email !== undefined)
+      user.email = input.email.toLowerCase().trim();
+    if (input.passwordHash !== undefined)
+      user.passwordHash = input.passwordHash;
     if (input.role !== undefined) user.role = input.role;
     if (input.active !== undefined) user.active = input.active;
-    if (input.tokenVersion !== undefined) user.tokenVersion = input.tokenVersion;
-    if (input.mustChangePassword !== undefined) user.mustChangePassword = input.mustChangePassword;
+    if (input.tokenVersion !== undefined)
+      user.tokenVersion = input.tokenVersion;
+    if (input.mustChangePassword !== undefined)
+      user.mustChangePassword = input.mustChangePassword;
     user.updatedAt = new Date();
     return user;
   }
@@ -57,8 +61,7 @@ export class FakeUserRepository implements UserRepository {
     return (
       this.users.find(
         (u) =>
-          u.email === normalized ||
-          u.email === `${normalized}@armalytech.com`,
+          u.email === normalized || u.email === `${normalized}@armalytech.com`,
       ) ?? null
     );
   }

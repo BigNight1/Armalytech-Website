@@ -34,7 +34,12 @@ import { GetCurrentAdminUseCase } from './application/get-current-admin.use-case
     { provide: APP_GUARD, useClass: SessionGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
-  exports: [USER_REPOSITORY, ADMIN_REPOSITORY, PASSWORD_HASHER, SessionTokenService],
+  exports: [
+    USER_REPOSITORY,
+    ADMIN_REPOSITORY,
+    PASSWORD_HASHER,
+    SessionTokenService,
+  ],
 })
 export class AuthModule implements OnApplicationBootstrap {
   constructor(

@@ -50,5 +50,6 @@ import { SendCommunityMessageUseCase } from './application/send-community-messag
     ClaimRewardUseCase,
     SendCommunityMessageUseCase,
   ],
+  exports: [RegisterVisitUseCase, RegisterClientUseCase, CLIENT_REPOSITORY],
 })
 export class CommunityModule {}

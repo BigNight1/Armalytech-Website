@@ -17,7 +17,8 @@ import {
 } from '../domain/community.errors';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 
-export type CommunityMessageTemplate = 'promo_20' | 'google_review' | 'reconnect';
+export type CommunityMessageTemplate =
+  'promo_20' | 'google_review' | 'reconnect';
 
 export interface SendCommunityMessageInput {
   clientId: string;
@@ -40,10 +41,14 @@ export class SendCommunityMessageUseCase {
     @Inject(COMMUNITY_NOTIFIER) private readonly notifier: CommunityNotifier,
   ) {}
 
-  async execute(input: SendCommunityMessageInput): Promise<SendCommunityMessageResult> {
+  async execute(
+    input: SendCommunityMessageInput,
+  ): Promise<SendCommunityMessageResult> {
     const validTemplates = ['promo_20', 'google_review', 'reconnect'];
     if (!validTemplates.includes(input.template)) {
-      throw new ValidationDomainError(`Invalid message template: ${input.template}`);
+      throw new ValidationDomainError(
+        `Invalid message template: ${input.template}`,
+      );
     }
 
     const client = await this.clients.findById(input.clientId);
@@ -55,7 +60,10 @@ export class SendCommunityMessageUseCase {
       throw new MarketingConsentRequiredError();
     }
 
-    const result = await this.notifier.notifyDirectMessage(client, input.template);
+    const result = await this.notifier.notifyDirectMessage(
+      client,
+      input.template,
+    );
     const occurredAt = new Date();
 
     await this.events.create({

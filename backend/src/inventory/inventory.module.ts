@@ -36,6 +36,7 @@ import { ListPhonesUseCase } from './application/phone/list-phones.use-case';
 import { CreatePhoneUseCase } from './application/phone/create-phone.use-case';
 import { UpdatePhoneUseCase } from './application/phone/update-phone.use-case';
 import { DeletePhoneUseCase } from './application/phone/delete-phone.use-case';
+import { ResolvePhoneUseCase } from './application/phone/resolve-phone.use-case';
 import { ListCategoriesUseCase } from './application/category/list-categories.use-case';
 import { CreateCategoryUseCase } from './application/category/create-category.use-case';
 import { UpdateCategoryUseCase } from './application/category/update-category.use-case';
@@ -83,6 +84,7 @@ import { ListProductMovementsUseCase } from './application/product/list-product-
     CreatePhoneUseCase,
     UpdatePhoneUseCase,
     DeletePhoneUseCase,
+    ResolvePhoneUseCase,
     ListCategoriesUseCase,
     CreateCategoryUseCase,
     UpdateCategoryUseCase,
@@ -97,6 +99,7 @@ import { ListProductMovementsUseCase } from './application/product/list-product-
     AdjustProductStockUseCase,
     ListProductMovementsUseCase,
   ],
+  exports: [PRODUCT_REPOSITORY, STOCK_MOVEMENT_REPOSITORY, ResolvePhoneUseCase],
 })
 export class InventoryModule implements OnApplicationBootstrap {
   constructor(

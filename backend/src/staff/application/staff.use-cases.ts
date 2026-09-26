@@ -37,7 +37,9 @@ export class CreateStaffUseCase {
   async execute(dto: CreateStaffDto, creatorEmail: string): Promise<User> {
     const existing = await this.userRepository.findByEmail(dto.email);
     if (existing) {
-      throw new ConflictException('Ya existe un usuario con este correo electrónico');
+      throw new ConflictException(
+        'Ya existe un usuario con este correo electrónico',
+      );
     }
 
     const passwordHash = await this.passwordHasher.hash(dto.password);

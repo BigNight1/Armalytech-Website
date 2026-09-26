@@ -7,7 +7,10 @@ describe('BootstrapAdminUseCase', () => {
     const hasher = new FakePasswordHasher();
     const useCase = new BootstrapAdminUseCase(repository, hasher);
 
-    await useCase.execute({ email: 'admin@armalytech.com', password: 'change-me' });
+    await useCase.execute({
+      email: 'admin@armalytech.com',
+      password: 'change-me',
+    });
 
     const created = await repository.findByEmail('admin@armalytech.com');
     expect(created).not.toBeNull();
@@ -25,7 +28,10 @@ describe('BootstrapAdminUseCase', () => {
     });
     const useCase = new BootstrapAdminUseCase(repository, hasher);
 
-    await useCase.execute({ email: 'admin@armalytech.com', password: 'change-me' });
+    await useCase.execute({
+      email: 'admin@armalytech.com',
+      password: 'change-me',
+    });
 
     expect(await repository.count()).toBe(1);
     expect(await repository.findByEmail('admin@armalytech.com')).toBeNull();

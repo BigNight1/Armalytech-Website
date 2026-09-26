@@ -7,7 +7,8 @@ export class WebhookCommunityNotifier implements CommunityNotifier {
   private readonly logger = new Logger(WebhookCommunityNotifier.name);
 
   async notifyRegistered(client: Client, isNewClient: boolean): Promise<void> {
-    const url = process.env.N8N_WEBHOOK_URL_REGISTRATION || process.env.N8N_WEBHOOK_URL;
+    const url =
+      process.env.N8N_WEBHOOK_URL_REGISTRATION || process.env.N8N_WEBHOOK_URL;
     if (!url) {
       this.logger.debug(
         `notifyRegistered: No n8n webhook configured for client ${client.id} (isNewClient=${isNewClient})`,
@@ -23,12 +24,15 @@ export class WebhookCommunityNotifier implements CommunityNotifier {
         occurredAt: new Date().toISOString(),
       });
     } catch (error) {
-      this.logger.warn(`Failed to dispatch registration webhook to n8n: ${(error as Error).message}`);
+      this.logger.warn(
+        `Failed to dispatch registration webhook to n8n: ${(error as Error).message}`,
+      );
     }
   }
 
   async notifyVisitThreshold(client: Client, threshold: number): Promise<void> {
-    const url = process.env.N8N_WEBHOOK_URL_VISIT_4 || process.env.N8N_WEBHOOK_URL;
+    const url =
+      process.env.N8N_WEBHOOK_URL_VISIT_4 || process.env.N8N_WEBHOOK_URL;
     const payload = {
       event: 'loyalty_visit_threshold',
       threshold,
@@ -47,9 +51,13 @@ export class WebhookCommunityNotifier implements CommunityNotifier {
 
     try {
       await this.sendWebhook(url, payload);
-      this.logger.log(`Dispatched n8n loyalty threshold webhook for client ${client.id}`);
+      this.logger.log(
+        `Dispatched n8n loyalty threshold webhook for client ${client.id}`,
+      );
     } catch (error) {
-      this.logger.warn(`Failed to dispatch loyalty threshold webhook to n8n: ${(error as Error).message}`);
+      this.logger.warn(
+        `Failed to dispatch loyalty threshold webhook to n8n: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -57,7 +65,8 @@ export class WebhookCommunityNotifier implements CommunityNotifier {
     client: Client,
     template: 'promo_20' | 'google_review' | 'reconnect',
   ): Promise<{ sent: boolean; message?: string }> {
-    const url = process.env.N8N_WEBHOOK_URL_DIRECT_MESSAGE || process.env.N8N_WEBHOOK_URL;
+    const url =
+      process.env.N8N_WEBHOOK_URL_DIRECT_MESSAGE || process.env.N8N_WEBHOOK_URL;
     const defaultMessages: Record<string, string> = {
       promo_20: `¡Hola ${client.firstName}! En ArmalyTech valoramos tu preferencia. Queremos recordarte que estás muy cerca de tu 20% de descuento en reparaciones. ¡Te esperamos pronto!`,
       google_review: `¡Hola ${client.firstName}! Gracias por confiar en el servicio técnico de ArmalyTech. Tu opinión nos ayuda muchísimo a seguir creciendo. ¿Nos regalarías una reseña rápida en Google Maps? ⭐ https://maps.google.com/?cid=armalytech`,
@@ -83,7 +92,9 @@ export class WebhookCommunityNotifier implements CommunityNotifier {
       });
       return { sent: true, message: messageText };
     } catch (error) {
-      this.logger.warn(`Failed to dispatch direct message webhook to n8n: ${(error as Error).message}`);
+      this.logger.warn(
+        `Failed to dispatch direct message webhook to n8n: ${(error as Error).message}`,
+      );
       return { sent: false, message: messageText };
     }
   }

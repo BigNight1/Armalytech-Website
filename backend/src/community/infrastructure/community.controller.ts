@@ -146,4 +146,3 @@ export class CommunityController {
     return { ok: true, data: result };
   }
 }
-

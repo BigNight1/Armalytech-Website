@@ -44,9 +44,12 @@ export class UpdateEmailUseCase {
       return user;
     }
 
-    const existingWithEmail = await this.userRepository.findByEmail(normalizedNewEmail);
+    const existingWithEmail =
+      await this.userRepository.findByEmail(normalizedNewEmail);
     if (existingWithEmail && existingWithEmail.id !== user.id) {
-      throw new ConflictException('El nuevo correo electrónico ya está registrado por otro usuario');
+      throw new ConflictException(
+        'El nuevo correo electrónico ya está registrado por otro usuario',
+      );
     }
 
     const updated = await this.userRepository.update(user.id, {
@@ -88,7 +91,9 @@ export class UpdatePasswordUseCase {
       user.passwordHash,
     );
     if (isSamePassword) {
-      throw new BadRequestException('La nueva contraseña no puede ser igual a la anterior');
+      throw new BadRequestException(
+        'La nueva contraseña no puede ser igual a la anterior',
+      );
     }
 
     const passwordHash = await this.passwordHasher.hash(dto.newPassword);

@@ -29,6 +29,18 @@ export interface UpdateProductInput {
 export interface ProductListFilter {
   q?: string;
   categoryId?: string;
+  /**
+   * Case/accent-insensitive prefix match on the category name (e.g. "pan" ->
+   * "Pantallas"), used by `GET /api/tickets/availability?categoria=`. Ignored
+   * when `categoryId` is also set.
+   */
+  categoriaText?: string;
+  /**
+   * Narrow substring match on product `name`/`model` only (unlike `q`, which
+   * also matches brand/compatible-phone), used by
+   * `GET /api/tickets/availability?q=`.
+   */
+  nameOrModel?: string;
   phoneId?: string;
   lowStock?: boolean;
   includeArchived?: boolean;

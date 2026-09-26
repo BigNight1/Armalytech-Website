@@ -33,4 +33,3 @@ export class NoopCommunityNotifier implements CommunityNotifier {
     return { sent: false, message: '' };
   }
 }
-

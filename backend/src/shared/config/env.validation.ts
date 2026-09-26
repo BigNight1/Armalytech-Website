@@ -7,7 +7,7 @@ import {
   IsString,
   validateSync,
 } from 'class-validator';
-import { resolveJwtSecret } from './secrets';
+import { resolveJwtSecret, resolveTicketSecretKey } from './secrets';
 
 class EnvironmentVariables {
   @IsOptional()
@@ -52,6 +52,13 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   DNS_SERVERS?: string;
+
+  // Required (no fallback, see resolveTicketSecretKey), but declared
+  // @IsOptional() here so the length/presence check happens once, below,
+  // with a clearer error message than class-validator's generic one.
+  @IsOptional()
+  @IsString()
+  TICKET_SECRET_KEY?: string;
 }
 
 /**
@@ -81,6 +88,13 @@ export function validate(config: Record<string, unknown>) {
     // eslint-disable-next-line no-console
     console.warn('SESSION_SECRET is deprecated, rename it to JWT_SECRET');
   }
+
+  // Fails fast if TICKET_SECRET_KEY is missing or too short (ADR 0025
+  // fix-up): device keys must never fall back to JWT_SECRET or a hardcoded
+  // value.
+  resolveTicketSecretKey({
+    TICKET_SECRET_KEY: validatedConfig.TICKET_SECRET_KEY,
+  });
 
   return validatedConfig;
 }

@@ -8,7 +8,10 @@ import {
   PasswordHasher,
   PASSWORD_HASHER,
 } from '../domain/password-hasher.port';
-import { InvalidCredentialsError, InactiveUserError } from '../domain/auth.errors';
+import {
+  InvalidCredentialsError,
+  InactiveUserError,
+} from '../domain/auth.errors';
 
 export interface LoginInput {
   email?: string;

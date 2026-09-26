@@ -29,3 +29,15 @@ export class UpdatePhoneDto {
   @MaxLength(200)
   name?: string;
 }
+
+export class ResolvePhoneDto {
+  @IsString()
+  @IsNotEmpty({ message: 'La marca es obligatoria' })
+  @MaxLength(200)
+  marca!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'El modelo es obligatorio' })
+  @MaxLength(200)
+  modelo!: string;
+}

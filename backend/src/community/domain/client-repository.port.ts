@@ -45,4 +45,3 @@ export interface ClientRepository {
     marketingConsent?: boolean,
   ): Promise<ClientSearchResult>;
 }
-

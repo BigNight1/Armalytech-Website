@@ -21,6 +21,8 @@ export async function createTestApp(
   process.env.MONGODB_URI = mongod.getUri();
   process.env.JWT_SECRET =
     envOverrides.JWT_SECRET ?? 'test-jwt-secret-armalytech-e2e-tests-min32';
+  process.env.TICKET_SECRET_KEY =
+    envOverrides.TICKET_SECRET_KEY ?? 'test-ticket-secret-armalytech-e2e-min32';
   delete process.env.SESSION_SECRET;
   process.env.NODE_ENV = 'test';
   if (envOverrides.ADMIN_EMAIL) {

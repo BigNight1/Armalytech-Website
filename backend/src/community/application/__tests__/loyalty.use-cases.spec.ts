@@ -92,7 +92,9 @@ describe('Community Loyalty & Messaging Use Cases', () => {
     expect(updated.loyaltyCycle).toBe(2);
     expect(updated.lastRewardClaimedAt).toBeDefined();
 
-    const claimEvents = events.events.filter((e) => e.type === 'premio_canjeado');
+    const claimEvents = events.events.filter(
+      (e) => e.type === 'premio_canjeado',
+    );
     expect(claimEvents).toHaveLength(1);
   });
 

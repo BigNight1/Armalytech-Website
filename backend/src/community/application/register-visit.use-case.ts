@@ -46,7 +46,9 @@ export class RegisterVisitUseCase {
       const phoneVo = PhoneNumber.of(input.phone);
       client = await this.clients.findByPhone(phoneVo.toE164());
     } else {
-      throw new ValidationDomainError('Either clientId or phone must be provided');
+      throw new ValidationDomainError(
+        'Either clientId or phone must be provided',
+      );
     }
 
     if (!client) {

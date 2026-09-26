@@ -7,6 +7,8 @@ export class UpdatePasswordDto {
 
   @IsString()
   @IsNotEmpty({ message: 'La nueva contraseña es requerida' })
-  @MinLength(8, { message: 'La nueva contraseña debe tener al menos 8 caracteres' })
+  @MinLength(8, {
+    message: 'La nueva contraseña debe tener al menos 8 caracteres',
+  })
   newPassword!: string;
 }

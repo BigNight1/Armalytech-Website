@@ -20,4 +20,3 @@ export interface Client {
   firstVisitAt?: Date | null;
   lastVisitAt?: Date | null;
 }
-

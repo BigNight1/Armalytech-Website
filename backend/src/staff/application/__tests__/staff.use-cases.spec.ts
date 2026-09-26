@@ -5,7 +5,10 @@ import {
   ToggleStaffStatusUseCase,
   ResetStaffPasswordUseCase,
 } from '../staff.use-cases';
-import { FakeUserRepository, FakePasswordHasher } from '../../../auth/application/__tests__/fakes';
+import {
+  FakeUserRepository,
+  FakePasswordHasher,
+} from '../../../auth/application/__tests__/fakes';
 
 describe('Staff Use Cases', () => {
   let repository: FakeUserRepository;
@@ -21,7 +24,10 @@ describe('Staff Use Cases', () => {
     listStaffUseCase = new ListStaffUseCase(repository);
     createStaffUseCase = new CreateStaffUseCase(repository, hasher);
     toggleStaffStatusUseCase = new ToggleStaffStatusUseCase(repository);
-    resetStaffPasswordUseCase = new ResetStaffPasswordUseCase(repository, hasher);
+    resetStaffPasswordUseCase = new ResetStaffPasswordUseCase(
+      repository,
+      hasher,
+    );
   });
 
   it('lists all staff members', async () => {
@@ -82,7 +88,10 @@ describe('Staff Use Cases', () => {
       mustChangePassword: false,
     });
 
-    const updated = await resetStaffPasswordUseCase.execute(staff.id, 'new-temp-password');
+    const updated = await resetStaffPasswordUseCase.execute(
+      staff.id,
+      'new-temp-password',
+    );
     expect(updated.mustChangePassword).toBe(true);
     expect(updated.tokenVersion).toBe(1);
   });

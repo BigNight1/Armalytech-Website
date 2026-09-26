@@ -14,3 +14,5 @@ jest.setTimeout(60_000);
 // is what `MongooseModule.forRootAsync`'s factory actually reads.
 process.env.MONGODB_URI ??= 'mongodb://127.0.0.1:27017/placeholder';
 process.env.JWT_SECRET ??= 'placeholder-jwt-secret-for-import-time-validation';
+process.env.TICKET_SECRET_KEY ??=
+  'placeholder-ticket-secret-for-import-time-validation';

@@ -1,5 +1,8 @@
 import { LoginUseCase } from './login.use-case';
-import { InvalidCredentialsError, InactiveUserError } from '../domain/auth.errors';
+import {
+  InvalidCredentialsError,
+  InactiveUserError,
+} from '../domain/auth.errors';
 import { FakeUserRepository, FakePasswordHasher } from './__tests__/fakes';
 
 describe('LoginUseCase', () => {
@@ -59,7 +62,10 @@ describe('LoginUseCase', () => {
     });
 
     await expect(
-      useCase.execute({ email: 'disabled@armalytech.com', password: 'correct-horse' }),
+      useCase.execute({
+        email: 'disabled@armalytech.com',
+        password: 'correct-horse',
+      }),
     ).rejects.toThrow(InactiveUserError);
   });
 });

@@ -32,7 +32,9 @@ export class MongooseClientRepository implements ClientRepository {
   }
 
   async upsertVisit(input: UpsertVisitInput): Promise<UpsertVisitResult> {
-    const existing = await this.clientModel.findOne({ phoneE164: input.phoneE164 }).exec();
+    const existing = await this.clientModel
+      .findOne({ phoneE164: input.phoneE164 })
+      .exec();
     if (existing) {
       existing.firstName = input.firstName;
       existing.lastName = input.lastName;
@@ -175,4 +177,3 @@ export class MongooseClientRepository implements ClientRepository {
     };
   }
 }
-

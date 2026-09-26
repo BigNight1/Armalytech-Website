@@ -1,6 +1,16 @@
-import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
-import { UpdateEmailUseCase, UpdatePasswordUseCase } from '../account.use-cases';
-import { FakeUserRepository, FakePasswordHasher } from '../../../auth/application/__tests__/fakes';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  UpdateEmailUseCase,
+  UpdatePasswordUseCase,
+} from '../account.use-cases';
+import {
+  FakeUserRepository,
+  FakePasswordHasher,
+} from '../../../auth/application/__tests__/fakes';
 
 describe('Account Use Cases', () => {
   let repository: FakeUserRepository;
@@ -88,7 +98,9 @@ describe('Account Use Cases', () => {
 
       expect(updated.mustChangePassword).toBe(false);
       expect(updated.tokenVersion).toBe(1);
-      expect(await hasher.compare('brand-new-password', updated.passwordHash)).toBe(true);
+      expect(
+        await hasher.compare('brand-new-password', updated.passwordHash),
+      ).toBe(true);
     });
 
     it('rejects if new password is identical to current password', async () => {

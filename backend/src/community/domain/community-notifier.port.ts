@@ -18,4 +18,3 @@ export interface CommunityNotifier {
     template: 'promo_20' | 'google_review' | 'reconnect',
   ): Promise<{ sent: boolean; message?: string }>;
 }
-

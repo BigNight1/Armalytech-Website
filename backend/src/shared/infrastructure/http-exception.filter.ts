@@ -23,6 +23,7 @@ interface ErrorBody {
     code: string;
     path: string;
     timestamp: string;
+    [extra: string]: unknown;
   };
 }
 
@@ -44,11 +45,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const { statusCode, message, code } = this.resolve(exception);
+    const { statusCode, message, code, extra } = this.resolve(exception);
 
     const body: ErrorBody = {
       ok: false,
       error: {
+        ...extra,
         statusCode,
         message,
         code,
@@ -64,6 +66,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     statusCode: number;
     message: string | string[];
     code: string;
+    extra?: Record<string, unknown>;
   } {
     if (exception instanceof NotFoundDomainError) {
       return {
@@ -117,10 +120,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
       if (typeof body === 'object' && body !== null) {
         const b = body as Record<string, unknown>;
+        const rest: Record<string, unknown> = { ...b };
+        delete rest.message;
+        delete rest.code;
+        delete rest.statusCode;
+        delete rest.error;
         return {
           statusCode,
           message: (b.message as string | string[]) ?? exception.message,
           code: (b.code as string) ?? this.codeFromStatus(statusCode),
+          extra: Object.keys(rest).length > 0 ? rest : undefined,
         };
       }
       return {

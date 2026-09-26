@@ -6,6 +6,7 @@
  */
 export type StockMovementType =
   | 'venta'
+  | 'venta_anulada'
   | 'ticket_salida'
   | 'ticket_devolucion'
   | 'ajuste_entrada'

@@ -11,7 +11,6 @@ export type CommunityEventType =
   | 'premio_canjeado'
   | 'mensaje_enviado';
 
-
 export interface CommunityEvent {
   id: string;
   /** Null when the event is a rejected registration with no matching client. */

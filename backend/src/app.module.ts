@@ -11,6 +11,7 @@ import { CashClosingsModule } from './cash-closings/cash-closings.module';
 import { CommunityModule } from './community/community.module';
 import { StaffModule } from './staff/staff.module';
 import { AccountModule } from './account/account.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AccountModule } from './account/account.module';
     CommunityModule,
     StaffModule,
     AccountModule,
+    TicketsModule,
   ],
   providers: [
     // Registers ThrottlerGuard globally so the `@Throttle(...)` decorators

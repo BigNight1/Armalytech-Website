@@ -66,7 +66,10 @@ export class AccountController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ ok: true; data: { message: string } }> {
     const currentUser = (req as Request & { user: User }).user;
-    const updated = await this.updatePasswordUseCase.execute(currentUser.id, dto);
+    const updated = await this.updatePasswordUseCase.execute(
+      currentUser.id,
+      dto,
+    );
 
     // Re-issue JWT cookie
     const token = await this.sessionTokenService.buildToken(updated);

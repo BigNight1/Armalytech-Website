@@ -58,6 +58,25 @@ export class MongooseProductRepository implements ProductRepository {
 
     if (filter.categoryId && Types.ObjectId.isValid(filter.categoryId)) {
       and.push({ categoryId: new Types.ObjectId(filter.categoryId) });
+    } else if (filter.categoriaText && filter.categoriaText.trim()) {
+      const key = stripAccentsLower(filter.categoriaText);
+      const categories = await this.categoryModel.find().exec();
+      const matchedIds = categories
+        .filter((c) => stripAccentsLower(c.name).startsWith(key))
+        .map((c) => c._id);
+      // No match must yield an empty result, not "filter ignored": use an
+      // id that can never match instead of an empty $in (which some drivers
+      // may otherwise reinterpret as always-true).
+      and.push({
+        categoryId: { $in: matchedIds.length > 0 ? matchedIds : [null] },
+      });
+    }
+    if (filter.nameOrModel && filter.nameOrModel.trim()) {
+      const escaped = filter.nameOrModel
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
+      and.push({ $or: [{ name: regex }, { model: regex }] });
     }
     if (filter.phoneId && Types.ObjectId.isValid(filter.phoneId)) {
       and.push({ compatiblePhoneIds: new Types.ObjectId(filter.phoneId) });
@@ -327,4 +346,9 @@ export class MongooseProductRepository implements ProductRepository {
       brandName: brandNameById.get(doc.brandId.toString()) ?? '',
     }));
   }
+}
+
+/** Lowercase, diacritics-stripped: "Pantallas" and "pantallás" compare equal. */
+function stripAccentsLower(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }

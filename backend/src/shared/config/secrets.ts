@@ -1,4 +1,5 @@
 export const MIN_JWT_SECRET_LENGTH = 32;
+export const MIN_TICKET_SECRET_LENGTH = 32;
 
 export interface ResolvedJwtSecret {
   secret: string;
@@ -36,4 +37,28 @@ export function resolveJwtSecret(env: {
   }
 
   return { secret, usedDeprecatedAlias: !jwtSecret && !!sessionSecret };
+}
+
+/**
+ * Single source of truth for the device-key encryption secret (ADR 0025).
+ * Unlike `resolveJwtSecret`, there is no deprecated alias and no fallback:
+ * a missing or too-short `TICKET_SECRET_KEY` fails the app fast on startup
+ * rather than silently deriving a predictable key from `JWT_SECRET` or a
+ * hardcoded string.
+ */
+export function resolveTicketSecretKey(env: {
+  TICKET_SECRET_KEY?: string;
+}): string {
+  const secret = env.TICKET_SECRET_KEY?.trim();
+  if (!secret) {
+    throw new Error(
+      'Missing TICKET_SECRET_KEY: set it in the environment (device-key encryption has no fallback).',
+    );
+  }
+  if (secret.length < MIN_TICKET_SECRET_LENGTH) {
+    throw new Error(
+      `TICKET_SECRET_KEY must be at least ${MIN_TICKET_SECRET_LENGTH} characters long.`,
+    );
+  }
+  return secret;
 }

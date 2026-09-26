@@ -34,10 +34,7 @@ export class MongooseUserRepository implements UserRepository {
     // Allow matching either exact email or prefix (e.g. 'armalytech' matching 'armalytech@armalytech.com')
     const doc = await this.model
       .findOne({
-        $or: [
-          { email: normalized },
-          { email: `${normalized}@armalytech.com` },
-        ],
+        $or: [{ email: normalized }, { email: `${normalized}@armalytech.com` }],
       })
       .exec();
     return doc ? this.toEntity(doc) : null;

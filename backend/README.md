@@ -51,6 +51,7 @@ See `.env.example`. Never commit `.env` (gitignored at the repo root and in
 | `SESSION_SECRET` | **Deprecated** alias for `JWT_SECRET`, kept only for the current deployment (local `.env` and Vercel still set this name). Accepted with the same length requirement, but logs a startup warning telling you to rename it. Set `JWT_SECRET` instead when you next touch the environment. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Used once, at bootstrap, to create the single admin account when the `admins` collection is empty. |
 | `SESSION_MAX_AGE_SECONDS` | Session cookie lifetime in seconds (default 12h). |
+| `TICKET_SECRET_KEY` | Encrypts/decrypts the ticket device key (`claveEquipo`, AES-256-GCM, ADR 0025). Required, at least 32 characters, long and random in production. Unlike `JWT_SECRET` there is **no fallback**: it never derives from `JWT_SECRET` or a hardcoded value, since that would let anyone reading the source decrypt stored device keys. The app refuses to start without one — add it to your local `.env`. |
 | `DNS_SERVERS` | Optional, local dev only. Comma-separated DNS servers (e.g. `8.8.8.8,1.1.1.1`) when the machine resolver refuses SRV lookups (`querySrv ECONNREFUSED` with `mongodb+srv://`). |
 
 ## Scripts
