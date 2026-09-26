@@ -19,7 +19,7 @@ export default function TicketContact() {
       </div>
       <div className="flex flex-col gap-2 py-7 pl-0 md:pl-8 border-t md:border-t-0 md:border-l-2 border-[var(--tk-divider)] mt-6 md:mt-0 pt-6 md:pt-7">
         <h3 className="text-xl md:text-2xl font-extrabold mb-1">Recoge en tienda</h3>
-        <p className="text-base leading-relaxed">Av. San Borja Norte 1234, San Borja — Lima</p>
+        <p className="text-base leading-relaxed">Av. San Luis 1859, San Borja · MultiMercado San Borja — Lima</p>
         <p className="text-base leading-relaxed">Lun a Sáb · 10:00 a. m. – 8:00 p. m.</p>
         <p className="text-sm text-[var(--tk-muted)] mt-1">Presenta este enlace o tu DNI al recoger el equipo.</p>
       </div>

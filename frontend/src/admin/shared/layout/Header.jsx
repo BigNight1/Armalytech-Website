@@ -9,8 +9,10 @@ import { useTheme } from '../theme/ThemeProvider.jsx';
 // breadcrumb.jsx) for anything past the section itself.
 export const SECTION_LABELS = {
   inventario: 'Inventario',
+  tickets: 'Tickets',
   historial: 'Historial de caja',
   clientes: 'Clientes',
+  tecnicos: 'Técnicos',
   personal: 'Personal',
   cuenta: 'Mi cuenta',
 };

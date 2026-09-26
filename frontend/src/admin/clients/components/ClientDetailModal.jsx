@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input, Modal, Spinner } from '../../shared/ui/index.js';
 import ConsentBadge from './ConsentBadge.jsx';
 import LoyaltyStamps from './LoyaltyStamps.jsx';
-import {
-  EVENT_TYPE_LABELS,
-  REJECT_REASON_LABELS,
-  formatLimaShort,
-  formatPhone,
-} from '../lib/format.js';
+import ClientTicketsTab from './ClientTicketsTab.jsx';
+import { EVENT_TYPE_LABELS, REJECT_REASON_LABELS, formatLimaShort, formatPhone } from '../lib/format.js';
 import { clientsApi } from '../api/clientsApi.js';
+import { useClientTickets } from '../hooks/useClientTickets.js';
 
 const CHANNEL_LABELS = { qr: 'QR', nfc: 'NFC', manual: 'Manual' };
+
+const TABS = [
+  { id: 'fidelizacion', label: 'Fidelización' },
+  { id: 'historial', label: 'Historial de servicios' },
+];
 
 const MESSAGE_CLASSES = {
   success: 'border-t-2 border-ink bg-surface text-ink',
@@ -39,10 +42,14 @@ export default function ClientDetailModal({
   onClientUpdated,
   onClose,
 }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: '', lastName: '', marketingConsent: false });
   const [isSaving, setIsSaving] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState(null);
+  const [tab, setTab] = useState('fidelizacion');
+
+  const ticketsState = useClientTickets(client?.id);
 
   useEffect(() => {
     if (client) {
@@ -52,10 +59,19 @@ export default function ClientDetailModal({
         marketingConsent: client.marketingConsent,
       });
       setActionMessage(null);
+      setTab('fidelizacion');
     }
   }, [client]);
 
   if (!client) return null;
+
+  function handleSelectTicket(ticket) {
+    // TicketsPage doesn't read a `?ticket=` query param yet (out of this
+    // task's scope, `frontend/src/admin/tickets/**`) — navigating opens the
+    // list filtered to nothing extra for now; see the C3 report for the
+    // needed follow-up in that folder.
+    navigate(`/admin/tickets?ticket=${ticket.id}`);
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -183,6 +199,34 @@ export default function ClientDetailModal({
       onClose={onClose}
     >
       <div className="flex flex-col gap-5">
+        {/* Fidelización / Historial de servicios tabs (design: Tickets.dc.html
+            "Detalle del cliente · pestaña Historial de servicios") */}
+        <div className="flex gap-7 border-b-2 border-line">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTab(item.id)}
+              className={`-mb-0.5 border-b-[3px] py-2.5 text-[15px] transition-colors ${
+                tab === item.id ? 'border-accent font-bold text-ink' : 'border-transparent font-semibold text-muted hover:text-ink'
+              }`}
+            >
+              {item.label}
+              {item.id === 'historial' && (
+                <span className="ml-1.5 font-medium text-muted">({ticketsState.tickets.length})</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'historial' ? (
+          <ClientTicketsTab
+            tickets={ticketsState.tickets}
+            isLoading={ticketsState.isLoading}
+            onSelectTicket={handleSelectTicket}
+          />
+        ) : (
+          <>
         {/* Loyalty program */}
         <section className="flex flex-col gap-3.5">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -306,6 +350,8 @@ export default function ClientDetailModal({
             </ul>
           )}
         </section>
+          </>
+        )}
       </div>
     </Modal>
   );

@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         // the proxy to the admin-panel prefixes only. This prefix list
         // duplicates vercel.ts's BACKEND_PREFIXES (kept separate to avoid a
         // shared build-time import between the two configs).
-        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets)': {
+        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales)': {
           target: backendUrl,
           changeOrigin: true,
         },

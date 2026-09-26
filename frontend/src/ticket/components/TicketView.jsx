@@ -49,7 +49,10 @@ export default function TicketView({ ticket, demoSelector }) {
         <TicketContact />
 
         <p className="text-sm text-[var(--tk-muted)]">
-          Enlace privado del ticket {codigo} · armalytech.com/ticket/{codigo}
+          Enlace privado del ticket {codigo} ·{' '}
+          {typeof window !== 'undefined'
+            ? `${window.location.host}${window.location.pathname}`
+            : `armalytech.com/ticket/${ticket.publicToken || ticket.token || ''}`}
         </p>
       </div>
     </>

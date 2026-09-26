@@ -7,13 +7,18 @@
 
 const API_BASE_URL = '/api';
 
-/** Error shape mirroring the backend's `HttpExceptionFilter` error body. */
+/**
+ * Error shape mirroring the backend's `HttpExceptionFilter` error body.
+ * `details` keeps the full parsed error body so callers can read
+ * endpoint-specific fields (e.g. `faltantes` on a 409 `insufficient_stock`).
+ */
 export class ApiError extends Error {
-  constructor({ status, code, message }) {
+  constructor({ status, code, message, details = null }) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -59,6 +64,7 @@ async function request(path, { method = 'GET', body, headers, skipUnauthorizedHa
       status: response.status,
       code: errorBody?.code ?? 'unknown_error',
       message: normalizeMessage(errorBody?.message),
+      details: errorBody ?? null,
     });
 
     if (response.status === 401 && !skipUnauthorizedHandler && unauthorizedHandler) {

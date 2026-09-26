@@ -14,6 +14,8 @@ import { queryClient } from './shared/api/queryClient.js';
 // load code for the other two. The sidebar prefetches the chunk on
 // hover/focus (see Sidebar.jsx) so the click itself feels instant.
 const InventoryPage = lazy(() => import('./inventory/InventoryPage.jsx'));
+const TicketsPage = lazy(() => import('./tickets/TicketsPage.jsx'));
+const TechniciansPage = lazy(() => import('./tickets/TechniciansPage.jsx'));
 const CashClosingsPage = lazy(() => import('./cash-closings/CashClosingsPage.jsx'));
 const ClientsPage = lazy(() => import('./clients/ClientsPage.jsx'));
 const StaffPage = lazy(() => import('./staff/StaffPage.jsx'));
@@ -60,6 +62,14 @@ export default function AdminRoutes() {
                     }
                   />
                   <Route
+                    path="tickets"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <TicketsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
                     path="historial"
                     element={
                       <Suspense fallback={<SectionSkeleton />}>
@@ -72,6 +82,14 @@ export default function AdminRoutes() {
                     element={
                       <Suspense fallback={<SectionSkeleton />}>
                         <ClientsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="tecnicos"
+                    element={
+                      <Suspense fallback={<SectionSkeleton />}>
+                        <TechniciansPage />
                       </Suspense>
                     }
                   />

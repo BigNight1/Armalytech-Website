@@ -7,6 +7,8 @@ export function formatPEN(amount) {
   return `S/ ${safeValue.toFixed(2)}`;
 }
 
+export const formatPen = formatPEN;
+
 /** `"S/ 1,250.50" -> 1250.5`. Strips currency symbols/thousands separators. */
 export function parseMoney(value) {
   if (typeof value === 'number') {

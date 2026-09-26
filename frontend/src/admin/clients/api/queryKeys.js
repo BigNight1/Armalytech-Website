@@ -4,6 +4,7 @@ export const clientsKeys = {
   list: ({ q, page, limit, consent }) => [...clientsKeys.all, 'list', { q, page, limit, consent }],
   detail: (id) => [...clientsKeys.all, 'detail', id],
   events: (id) => [...clientsKeys.all, 'events', id],
+  tickets: (id) => [...clientsKeys.all, 'tickets', id],
   communityEvents: ({ from, to, type }) => [...clientsKeys.all, 'community-events', { from, to, type }],
   stats: () => [...clientsKeys.all, 'stats'],
 };

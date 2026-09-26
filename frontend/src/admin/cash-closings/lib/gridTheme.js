@@ -112,14 +112,21 @@ export function buildGetGroupDetails(theme) {
 
 /**
  * Row-level overrides: a bold/surface-tinted look for the synthetic totals
- * row (design's "Total" row under the data), a subtle red tint while a row
- * is in `error` (T15 save-status indicator) — in that priority order.
+ * row (design's "Total" row under the data), the same surface tint (bolder,
+ * design-matched) for a locked ticket-cobro row (T-C3 — muted further when
+ * annulled), a subtle red tint while a manual row is in `error` (T15
+ * save-status indicator) — in that priority order.
  */
 export function buildRowThemeOverride(theme) {
   const t = getThemeTokens(theme);
-  return function rowThemeOverride(status, { isTotals = false } = {}) {
+  return function rowThemeOverride(status, { isTotals = false, isLocked = false, isAnnulled = false } = {}) {
     if (isTotals) {
       return { bgCell: t.surface, baseFontStyle: '800 14px', textDark: t.ink };
+    }
+    if (isLocked) {
+      return isAnnulled
+        ? { bgCell: t.surface, textDark: t.muted }
+        : { bgCell: t.surface, baseFontStyle: '700 14px', textDark: t.ink };
     }
     if (status === 'error') {
       return { bgCell: t.dangerBg };

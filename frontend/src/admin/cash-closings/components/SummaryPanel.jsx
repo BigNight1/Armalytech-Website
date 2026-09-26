@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react';
 import ResumenBlock from './ResumenBlock.jsx';
 import { formatPEN } from '../../shared/lib/money.js';
 import { Skeleton } from '../../shared/ui/index.js';
@@ -16,7 +17,7 @@ const TABS = [
  * the design's Historial aside: tab switcher, title + date range, an
  * accent-filled "Ingreso neto" highlight, then Efectivo / Yape breakdowns.
  */
-export default function SummaryPanel({ activeTab, onTabChange, totals, title, range, isLoading }) {
+export default function SummaryPanel({ activeTab, onTabChange, totals, title, range, isLoading, cobrosSummary }) {
   return (
     <aside className="flex flex-col gap-[18px] self-start border-t-2 border-ink pt-4">
       <div className="grid grid-cols-3 divide-x divide-line border border-line">
@@ -69,6 +70,36 @@ export default function SummaryPanel({ activeTab, onTabChange, totals, title, ra
             expense={totals.yapeExpense}
             total={totals.totalYape}
           />
+
+          {cobrosSummary?.ticketsCount > 0 && (
+            <div className="flex flex-col gap-1 border-t-2 border-line pt-2.5 text-[15px]">
+              <div className="flex justify-between">
+                <span className="flex items-center gap-2">
+                  <Lock size={15} className="text-accent-ink" />
+                  Cobros de tickets
+                </span>
+                <span className="tabular-nums font-bold text-ink">{formatPEN(cobrosSummary.ticketsTotal)}</span>
+              </div>
+              <span className="text-sm text-muted">
+                {cobrosSummary.ticketsCount} {cobrosSummary.ticketsCount === 1 ? 'fila' : 'filas'} · incluidas en los totales
+              </span>
+            </div>
+          )}
+
+          {cobrosSummary?.salesCount > 0 && (
+            <div className="flex flex-col gap-1 border-t-2 border-line pt-2.5 text-[15px]">
+              <div className="flex justify-between">
+                <span className="flex items-center gap-2">
+                  <Lock size={15} className="text-accent-ink" />
+                  Ventas del día
+                </span>
+                <span className="tabular-nums font-bold text-ink">{formatPEN(cobrosSummary.salesTotal)}</span>
+              </div>
+              <span className="text-sm text-muted">
+                {cobrosSummary.salesCount} {cobrosSummary.salesCount === 1 ? 'venta' : 'ventas'} · incluidas en los totales
+              </span>
+            </div>
+          )}
         </>
       )}
     </aside>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DataEditor, GridCellKind } from "@glideapps/glide-data-grid";
-import { Plus } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
 import "@glideapps/glide-data-grid/dist/index.css";
 import "./cashClosingsGrid.css";
 import { formatPEN } from "../../shared/lib/money.js";
@@ -13,6 +13,7 @@ import {
   saveColumnLayout,
 } from "../lib/columnLayout.js";
 import { buildGridTheme, buildGetGroupDetails, buildRowThemeOverride } from "../lib/gridTheme.js";
+import { buildCobroDetail, cobroAmountFor } from "../lib/cobroRows.js";
 
 const SAVE_DEBOUNCE_MS = 400;
 const ROW_HEIGHT = 36;
@@ -60,6 +61,9 @@ export default function CashClosingsGrid({
   rows,
   rowStatus,
   totals,
+  cobros = [],
+  isOwner = false,
+  onAnularRequest,
   onCellChange,
   onCellCommit,
   onAddRow,
@@ -82,7 +86,15 @@ export default function CashClosingsGrid({
   const theGridTheme = useMemo(() => buildGridTheme(theme), [theme]);
   const getGroupDetails = useMemo(() => buildGetGroupDetails(theme), [theme]);
   const rowThemeOverride = useMemo(() => buildRowThemeOverride(theme), [theme]);
-  const totalsRowIndex = rows.length;
+
+  // Locked ticket-cobro rows (T-C3) are appended after the manual rows and
+  // before the synthetic totals row — sorted so the grid reads chronologically.
+  const cobroRows = useMemo(
+    () => [...cobros].sort((a, b) => new Date(a.fecha) - new Date(b.fecha)),
+    [cobros],
+  );
+  const manualRowCount = rows.length;
+  const totalsRowIndex = manualRowCount + cobroRows.length;
 
   // Debounce saves so a paste/fill touching many cells triggers one save per
   // row instead of one PUT per keystroke/cell.
@@ -162,6 +174,60 @@ export default function CashClosingsGrid({
         };
       }
 
+      // Locked ticket-cobro row (T-C3) — read-only, never sent to the
+      // cash-closings save API; the "actions" cell doubles as the
+      // lock marker and (owner-only, non-annulled) the "Anular cobro" trigger.
+      if (row >= manualRowCount) {
+        const cobro = cobroRows[row - manualRowCount];
+        if (!cobro) {
+          return { kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false, readonly: true };
+        }
+
+        if (column.kind === "actions") {
+          const clickable = isOwner && !cobro.anulado;
+          return {
+            kind: GridCellKind.Text,
+            data: "",
+            displayData: "🔒",
+            allowOverlay: false,
+            readonly: true,
+            contentAlign: "center",
+            cursor: clickable ? "pointer" : "not-allowed",
+            themeOverride: { textDark: isDark ? "#fdba74" : "#c2410c" },
+          };
+        }
+
+        if (column.id === "incomeDetail") {
+          const detail = buildCobroDetail(cobro);
+          return {
+            kind: GridCellKind.Text,
+            data: detail,
+            displayData: detail,
+            allowOverlay: false,
+            readonly: true,
+            ...(cobro.anulado ? {} : { themeOverride: { textDark: isDark ? "#fdba74" : "#c2410c" } }),
+          };
+        }
+
+        if (column.id === "expenseDetail") {
+          return { kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false, readonly: true };
+        }
+
+        if (column.kind === "money") {
+          const amount = cobroAmountFor(cobro, column.id);
+          return {
+            kind: GridCellKind.Number,
+            data: amount === "" ? undefined : amount,
+            displayData: amount === "" ? "" : formatPEN(amount),
+            allowOverlay: false,
+            readonly: true,
+            contentAlign: "right",
+          };
+        }
+
+        return { kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false, readonly: true };
+      }
+
       const dataRow = rows[row];
       if (!dataRow) {
         return {
@@ -239,7 +305,7 @@ export default function CashClosingsGrid({
         allowOverlay: true,
       };
     },
-    [columns, rows, rowStatus, totals, totalsRowIndex],
+    [columns, rows, rowStatus, totals, totalsRowIndex, manualRowCount, cobroRows, isOwner, isDark],
   );
 
   const applyEdit = useCallback(
@@ -343,12 +409,23 @@ export default function CashClosingsGrid({
 
   const onCellClicked = useCallback(
     ([col, row]) => {
-      if (columns[col]?.kind === "actions" && rows[row]) {
+      if (columns[col]?.kind !== "actions") return;
+
+      // Locked ticket-cobro row: the marker is the "Anular cobro" trigger,
+      // owner-only and never for an already-annulled cobro.
+      if (row >= manualRowCount && row < totalsRowIndex) {
+        if (!isOwner) return;
+        const cobro = cobroRows[row - manualRowCount];
+        if (cobro && !cobro.anulado) onAnularRequest?.(cobro);
+        return;
+      }
+
+      if (rows[row]) {
         if (rowStatus[rows[row].rowIndex] === "saving") return;
         setPendingDeleteRow(rows[row].rowIndex);
       }
     },
-    [columns, rows, rowStatus],
+    [columns, rows, rowStatus, manualRowCount, totalsRowIndex, cobroRows, isOwner, onAnularRequest],
   );
 
   const confirmDelete = useCallback(() => {
@@ -357,11 +434,15 @@ export default function CashClosingsGrid({
   }, [pendingDeleteRow, onDeleteRow]);
 
   const getRowThemeOverride = useCallback(
-    (row) =>
-      row === totalsRowIndex
-        ? rowThemeOverride(undefined, { isTotals: true })
-        : rowThemeOverride(rowStatus[rows[row]?.rowIndex]),
-    [rows, rowStatus, rowThemeOverride, totalsRowIndex],
+    (row) => {
+      if (row === totalsRowIndex) return rowThemeOverride(undefined, { isTotals: true });
+      if (row >= manualRowCount) {
+        const cobro = cobroRows[row - manualRowCount];
+        return rowThemeOverride(undefined, { isLocked: true, isAnnulled: cobro?.anulado });
+      }
+      return rowThemeOverride(rowStatus[rows[row]?.rowIndex]);
+    },
+    [rows, rowStatus, rowThemeOverride, totalsRowIndex, manualRowCount, cobroRows],
   );
 
   const gridColumns = useMemo(
@@ -376,13 +457,14 @@ export default function CashClosingsGrid({
     [columns],
   );
 
-  // Fit the content (group band + header + data rows + the synthetic totals
-  // row) so short days don't leave an empty block under the grid; long days
-  // scroll inside it. Adding rows is now the external "+ Agregar fila"
-  // button below (design), not Glide's own trailing/sticky row — the design
-  // places a real "Total" row last inside the grid instead.
+  // Fit the content (group band + header + data rows + the locked cobro
+  // rows + the synthetic totals row) so short days don't leave an empty
+  // block under the grid; long days scroll inside it. Adding rows is now
+  // the external "+ Agregar fila" button below (design), not Glide's own
+  // trailing/sticky row — the design places a real "Total" row last inside
+  // the grid instead.
   const gridHeight = Math.min(
-    GROUP_HEADER_HEIGHT + HEADER_HEIGHT + (rows.length + 1) * ROW_HEIGHT + 2,
+    GROUP_HEADER_HEIGHT + HEADER_HEIGHT + (totalsRowIndex + 1) * ROW_HEIGHT + 2,
     MAX_GRID_HEIGHT,
   );
 
@@ -399,7 +481,7 @@ export default function CashClosingsGrid({
           <DataEditor
             getCellContent={getCellContent}
             columns={gridColumns}
-            rows={rows.length + 1}
+            rows={totalsRowIndex + 1}
             width={containerWidth}
             height={gridHeight}
             rowHeight={ROW_HEIGHT}
@@ -437,6 +519,14 @@ export default function CashClosingsGrid({
         </Button>
         <span className="text-sm text-muted">
           Tab, Enter o flechas para moverte · pega directo desde Excel
+        </span>
+      </div>
+
+      <div className="flex items-start gap-2.5 bg-surface p-3 text-[15px] leading-normal">
+        <Lock size={18} className="mt-0.5 flex-none text-accent-ink" />
+        <span>
+          Las filas con candado vienen de tickets: se crean solas al cobrar un adelanto o un saldo y no se editan
+          aquí. Para corregirlas, abre el ticket.
         </span>
       </div>
 

@@ -41,3 +41,21 @@ export function todayInLima(instant = new Date()) {
   const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   return `${byType.year}-${byType.month}-${byType.day}`;
 }
+
+/** `23/09/2026 14:05` in Lima time, for table cells / detail views. */
+export function formatLimaShort(isoOrDate) {
+  if (!isoOrDate) return '—';
+  const date = new Date(isoOrDate);
+  if (Number.isNaN(date.getTime())) return '—';
+  const formatter = new Intl.DateTimeFormat('es-PE', {
+    timeZone: LIMA_TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  return formatter.format(date);
+}
+

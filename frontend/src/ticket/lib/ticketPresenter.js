@@ -139,7 +139,7 @@ function buildInfoCells(ticket) {
 
   const nombreCliente = [cliente?.nombre, cliente?.apellido].filter(Boolean).join(' ').trim() || '—';
   const equipoTexto =
-    [equipo?.marca, equipo?.celular].filter(Boolean).join(' ') + (equipo?.color ? ` · ${equipo.color}` : '');
+    [equipo?.marca, equipo?.modelo || equipo?.celular].filter(Boolean).join(' ') + (equipo?.color ? ` · ${equipo.color}` : '');
 
   let entregaLabel = 'Entrega estimada';
   let entregaValor = formatFecha(entregaEstimada) ?? 'Por confirmar';

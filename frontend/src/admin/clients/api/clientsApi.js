@@ -26,6 +26,9 @@ export const clientsApi = {
 
   getClientEvents: (id) => httpClient.get(`/community/clients/${id}/events`),
 
+  /** Ficha 360°'s "Historial de servicios" tab (T-C3): `[{ id, codigo, titulo, estado, equipo, precioTotal, saldo, fechaIngreso }]`. */
+  getClientTickets: (id) => httpClient.get(`/community/clients/${id}/tickets`),
+
   listEvents: ({ from, to, type } = {}) =>
     httpClient.get(`/community/events${buildQuery({ from, to, type })}`),
 

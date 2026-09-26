@@ -154,3 +154,9 @@
 .admin-shell .admin-table tbody tr:hover {
   background: var(--admin-row-hover);
 }
+
+/* Reset global website landing page section padding inside admin */
+.admin-shell section {
+  padding: 0;
+}
+

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronsUpDown, History, LogOut, Moon, Package, Settings, User, UserCog, Users } from 'lucide-react';
+import { ChevronsUpDown, HardHat, History, LogOut, Moon, Package, Settings, User, UserCog, Users, Wrench } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth.js';
 import { useTheme } from '../theme/ThemeProvider.jsx';
 import { getDisplayName, getInitials, getRoleLabel } from '../lib/userDisplay.js';
 import { prefetchInventory } from '../../inventory/api/prefetch.js';
+import { prefetchTickets, prefetchTechnicians } from '../../tickets/api/prefetch.js';
 import { prefetchCashClosings } from '../../cash-closings/api/prefetch.js';
 import { prefetchClients } from '../../clients/api/prefetch.js';
 import { prefetchStaff } from '../../staff/api/prefetch.js';
@@ -21,8 +22,15 @@ const OPERATION_ITEMS = [
     prefetchChunk: () => import('../../inventory/InventoryPage.jsx'),
   },
   {
+    to: '/admin/tickets',
+    label: 'Tickets / Taller',
+    icon: Wrench,
+    prefetchData: prefetchTickets,
+    prefetchChunk: () => import('../../tickets/TicketsPage.jsx'),
+  },
+  {
     to: '/admin/historial',
-    label: 'Historial de caja',
+    label: 'Historial del día',
     icon: History,
     prefetchData: prefetchCashClosings,
     prefetchChunk: () => import('../../cash-closings/CashClosingsPage.jsx'),
@@ -138,6 +146,22 @@ export default function Sidebar({ onNavigate }) {
               }}
               onNavigate={onNavigate}
               onPrefetch={handlePrefetch({ prefetchData: prefetchStaff, prefetchChunk: () => import('../../staff/StaffPage.jsx') })}
+            />
+            <NavItem
+              item={{
+                to: '/admin/tecnicos',
+                label: 'Técnicos',
+                icon: HardHat,
+                prefetchData: prefetchTechnicians,
+                prefetchChunk: () => import('../../tickets/TechniciansPage.jsx'),
+                badge: (
+                  <span className="ml-auto border border-side-divider px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-side-ink">
+                    Owner
+                  </span>
+                ),
+              }}
+              onNavigate={onNavigate}
+              onPrefetch={handlePrefetch({ prefetchData: prefetchTechnicians, prefetchChunk: () => import('../../tickets/TechniciansPage.jsx') })}
             />
           </>
         )}

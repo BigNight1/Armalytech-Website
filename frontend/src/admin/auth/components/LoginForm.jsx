@@ -70,6 +70,7 @@ export default function LoginForm({ onSubmit, submitting, error }) {
       <button
         type="submit"
         disabled={submitting}
+        aria-label="Ingresar al panel"
         className="flex min-h-[54px] w-full items-center justify-between border border-accent bg-accent px-[18px] text-[17px] font-bold text-on-accent transition-colors hover:bg-accent-600 active:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-45"
       >
         <span>{submitting ? 'Ingresando…' : 'Ingresar'}</span>

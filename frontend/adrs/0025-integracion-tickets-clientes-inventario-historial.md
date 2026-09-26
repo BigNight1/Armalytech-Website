@@ -130,3 +130,25 @@ inventario v2), el ADR 0007 y el código ya construido. Donde difieran, manda es
     `{ nuevoEstado, cobro?: { monto, metodo } }` (el cobro del saldo va con `entregado`);
     `GET|POST|PATCH /api/technicians`; `POST /api/tickets/:id/reveal-clave` (auditado) devuelve la clave
     descifrada.
+
+## Actualización (2026-09-26): ventas en el Historial y formulario de ticket
+
+Pedido del cliente del negocio. Complementa la actualización anterior.
+
+1. **Registrar venta desde el Historial de caja.** Misma pantalla `/admin/historial`: botón "Registrar
+   venta" que abre un panel lateral con buscador de productos por texto (nombre, marca, modelo,
+   categoría), cantidad (tope = stock), precio unitario (por defecto `precioVenta`, editable para
+   descuentos), total y método (efectivo | yape). Al guardar: descuento atómico de stock (409 si no
+   alcanza), movimiento de stock tipo `venta`, y un cobro `{ origen: venta, tipo: venta, monto, metodo,
+   items: [{ productoId, nombre, cantidad, precioUnitario, costoUnitario }] }`. La venta aparece en la
+   grilla como fila bloqueada "Venta · 2× Cargador Samsung 25W" y el resumen muestra "Ventas del día".
+   Anular una venta (solo owner, con motivo) la marca anulada y devuelve los productos al stock con
+   movimiento `venta_anulada`.
+2. **Equipo escrito a mano con normalización.** Marca y modelo se escriben libremente con sugerencias
+   del catálogo. Se normaliza sin distinguir mayúsculas, tildes ni espacios ("SaMsung" → "Samsung";
+   "a53" / "galaxy a53" → el modelo existente). Si no existe, se crea en el catálogo con formato
+   título. El ticket guarda `marcaId`/`celularId` resueltos y el texto normalizado.
+3. **Orden del formulario de ticket:** 1 Cliente → 2 Equipo → 3 Precio y cierre → 4 Piezas.
+4. **Búsqueda de piezas escribiendo.** Categoría con autocompletado ("pan" → Pantallas) y productos de
+   esa categoría compatibles con el modelo del paso 2, filtrables por texto. Mantiene disponibilidad y
+   "Reservada para".
