@@ -36,7 +36,14 @@ export class MongooseClientRepository implements ClientRepository {
     if (existing) {
       existing.firstName = input.firstName;
       existing.lastName = input.lastName;
-      existing.marketingConsent = input.marketingConsent;
+      // Consent never downgrades on a repeat submission (2026-09-25): only
+      // upgrade a previously-declined consent to approved, and record the
+      // new consent date when that happens; an already-approved consent (and
+      // its original audit date) is left untouched.
+      if (!existing.marketingConsent && input.marketingConsent) {
+        existing.marketingConsent = true;
+        existing.consentAt = input.occurredAt;
+      }
       const saved = await existing.save();
       return { client: this.toEntity(saved), wasNew: false };
     }

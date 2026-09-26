@@ -37,6 +37,7 @@ Phase 1 (one agent) builds the shared foundation; phase 2 agents work in paralle
 - [x] R2c — Historial (grid theme light/dark, summary panel). Route: delegated (parallel).
 - [x] R2d — Clientes + Personal (tables, modals). Route: delegated (parallel).
 - [x] R3 — Public ticket page `/ticket/:code` (UI, ADR states/code, dev preview fixture). Route: delegated.
+- [x] R5 — Public client registration `/registrar/usuario` redesign (design folder `design/Rediseño de registro de usuario/`, board `/registrar/usuario`, logic `regScreen()/regScreens()`): 4 states (form, errors, success, already registered). User decisions 2026-09-25: marketing consent becomes OPTIONAL (register anyway with consent "Descartó"; backend + ADR 0015 update); replace the "BAJA" line with "Puedes pedir que dejemos de escribirte cuando quieras." (opt-out will be handled by an AI later); "boleta" → "comprobante"; links from the public site (Instagram https://instagram.com/armalytech, TikTok https://tiktok.com/@armalytech, WhatsApp +51 924 548 268, services = home `#services` section). Route: delegated.
 - [ ] R4 — Visual QA against the design (desktop + mobile, light + dark) and fixes. Route: inline/delegated.
 
 ## Progress / evidence
@@ -65,6 +66,8 @@ Phase 1 (one agent) builds the shared foundation; phase 2 agents work in paralle
 - R3 (public ticket) and R4a (shared fixes: `:where()` headings, Input `size`, Modal `size` + drawer variant, ConfirmDialog icon, migrate overlays, move "Cambiar contraseña" to Configuración) launched in parallel (disjoint files).
 
 - R3 done (uncommitted): `frontend/src/ticket/` (TicketPage, presenter, components, DEV-only `?demo=<estado>` fixtures, page-scoped light tokens), lazy route `/ticket/:token` in App.jsx with the real site NavBar/Footer (design board shows the same content). Assumed contract `GET /api/tickets/public/:token` → `{ codigo, estado, cliente{nombre,apellido}, equipo{marca,celular,color?}, titulo, precioTotal, adelanto, fechaIngreso, entregaEstimada?, historialEstados[] }`, 404 not_found. Mapping: tracker Pendiente←pendiente/aprobado, Trabajando←trabajando, Listo←listo/entregado; cancelado/abandonado → closed banner. Omitted the design's "Nota del técnico" because the orchestrator's brief forbade technician notes — OPEN for the user: add a customer-facing note field (separate from internal notes) or leave it out. Agent checked 1440/375 in the browser; lint clean, build pass.
+
+- R5 done (uncommitted): consent optional in RegisterClientUseCase (only numero_invalido rejects), repeat registration never downgrades approved consent (declined→approved upgrade only), no visit counted on register; messaging still gated by consent. ADR 0015 updated. RegisterPage rebuilt (LoyaltyCard, RegisterForm, RegisterResult; live +51 formatting; copy changes; real links; "Ver nuestros servicios" → Link to "/" with state scrollTo services). Orchestrator check: backend pnpm test 108/108, test:e2e 48/48 (community fixed); frontend lint clean, build pass. Not browser-verified: success/duplicate screens (running backend is a stale non-watch build; needs restart). No test client persisted. Backend eslint shows repo-wide prettier CRLF noise (core.autocrlf) — pre-existing.
 
 ## Next step
 Wait for R4a, then R4 visual QA in the browser (desktop + 375px, light + dark) against the design.

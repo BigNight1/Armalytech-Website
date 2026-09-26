@@ -4,7 +4,6 @@ import {
   FakeCommunityEventRepository,
   FakeCommunityNotifier,
 } from './__tests__/fakes';
-import { MarketingConsentRequiredError } from '../domain/community.errors';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 
 describe('RegisterClientUseCase', () => {
@@ -78,20 +77,59 @@ describe('RegisterClientUseCase', () => {
     expect(clients.clients).toHaveLength(0);
   });
 
-  it('rejects and logs a submission without marketing consent', async () => {
-    await expect(
-      useCase.execute({
-        firstName: 'Juana',
-        lastName: 'Perez',
-        phone: '965728013',
-        marketingConsent: false,
-        channel: 'qr',
-      }),
-    ).rejects.toThrow(MarketingConsentRequiredError);
+  it('registers a client who declines marketing consent (2026-09-25: consent is optional)', async () => {
+    const result = await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: false,
+      channel: 'qr',
+    });
 
+    expect(result.isNewClient).toBe(true);
+    expect(result.client.marketingConsent).toBe(false);
     expect(events.events).toHaveLength(1);
-    expect(events.events[0].type).toBe('registro_rechazado');
-    expect(events.events[0].rejectReason).toBe('sin_consentimiento');
-    expect(clients.clients).toHaveLength(0);
+    expect(events.events[0].type).toBe('registro');
+    expect(clients.clients).toHaveLength(1);
+  });
+
+  it('upgrades a declined consent to approved on repeat submission', async () => {
+    await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: false,
+      channel: 'qr',
+    });
+
+    const second = await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: true,
+      channel: 'qr',
+    });
+
+    expect(second.client.marketingConsent).toBe(true);
+  });
+
+  it('never downgrades an already-approved consent on repeat submission', async () => {
+    await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: true,
+      channel: 'qr',
+    });
+
+    const second = await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: false,
+      channel: 'qr',
+    });
+
+    expect(second.client.marketingConsent).toBe(true);
   });
 });

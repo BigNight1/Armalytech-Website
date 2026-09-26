@@ -39,7 +39,9 @@ describe('Community (e2e)', () => {
     expect(res.body.data.isNewClient).toBe(true);
     expect(res.body.data.client.phoneE164).toBe('51965728013');
     expect(res.body.data.client.channel).toBe('nfc');
-    expect(res.body.data.visitCount).toBe(1);
+    // Only the technician's "+1 Visita" (registerVisit) increments visitCount;
+    // registration itself never counts as a visit (loyalty rule, ADR 0013).
+    expect(res.body.data.visitCount).toBe(0);
   });
 
   it('counts a repeat submission as a visit, not a new client', async () => {
@@ -60,7 +62,8 @@ describe('Community (e2e)', () => {
 
     expect(second.status).toBe(201);
     expect(second.body.data.isNewClient).toBe(false);
-    expect(second.body.data.visitCount).toBe(2);
+    // Repeat registration recognizes the client but does not add a visit.
+    expect(second.body.data.visitCount).toBe(0);
   });
 
   it('rejects an invalid phone number with 422 and logs the rejection', async () => {
@@ -82,7 +85,7 @@ describe('Community (e2e)', () => {
     expect(events.body.data[0].rejectReason).toBe('numero_invalido');
   });
 
-  it('rejects a registration without marketing consent', async () => {
+  it('registers a client who declines marketing consent (2026-09-25: consent is optional)', async () => {
     const anon = request(app.getHttpServer());
     const res = await anon.post('/api/community/register').send({
       firstName: 'Sin',
@@ -91,7 +94,35 @@ describe('Community (e2e)', () => {
       marketingConsent: false,
     });
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(201);
+    expect(res.body.data.isNewClient).toBe(true);
+    expect(res.body.data.client.marketingConsent).toBe(false);
+  });
+
+  it('upgrades a declined consent to approved on repeat registration, never the reverse', async () => {
+    const anon = request(app.getHttpServer());
+    await anon.post('/api/community/register').send({
+      firstName: 'Mario',
+      lastName: 'Rios',
+      phone: '922333444',
+      marketingConsent: false,
+    });
+
+    const upgraded = await anon.post('/api/community/register').send({
+      firstName: 'Mario',
+      lastName: 'Rios',
+      phone: '922333444',
+      marketingConsent: true,
+    });
+    expect(upgraded.body.data.client.marketingConsent).toBe(true);
+
+    const stillApproved = await anon.post('/api/community/register').send({
+      firstName: 'Mario',
+      lastName: 'Rios',
+      phone: '922333444',
+      marketingConsent: false,
+    });
+    expect(stillApproved.body.data.client.marketingConsent).toBe(true);
   });
 
   it('lists, searches, fetches, and updates clients from the admin panel', async () => {

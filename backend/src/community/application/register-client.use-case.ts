@@ -13,7 +13,6 @@ import {
   CommunityNotifier,
   COMMUNITY_NOTIFIER,
 } from '../domain/community-notifier.port';
-import { MarketingConsentRequiredError } from '../domain/community.errors';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 
 export interface RegisterClientInput {
@@ -30,10 +29,14 @@ export interface RegisterClientResult {
 }
 
 /**
- * Public registration use case (ADR 0012-0015): a repeat submission of an
- * already-known phone number counts as a visit, not a new client (ADR 0013).
- * Every outcome — new registration, repeat visit, or rejection — is recorded
- * as a `CommunityEvent` (ADR 0018).
+ * Public registration use case (ADR 0012-0015, updated 2026-09-25): marketing
+ * consent is optional — a decline no longer rejects the registration, it just
+ * registers (or recognizes) the client with `marketingConsent: false`. A
+ * repeat submission of an already-known phone number counts as a visit, not a
+ * new client (ADR 0013), and never downgrades a previously-approved consent
+ * (`ClientRepository.upsertVisit` owns that rule). Every outcome — new
+ * registration or repeat registration — is recorded as a `CommunityEvent`
+ * (ADR 0018); an invalid phone number is still rejected and logged.
  */
 @Injectable()
 export class RegisterClientUseCase {
@@ -62,18 +65,6 @@ export class RegisterClientUseCase {
       throw error;
     }
 
-    if (input.marketingConsent !== true) {
-      await this.events.create({
-        clientId: null,
-        phoneE164: phoneNumber.toE164(),
-        type: 'registro_rechazado',
-        rejectReason: 'sin_consentimiento',
-        channel: input.channel,
-        occurredAt,
-      });
-      throw new MarketingConsentRequiredError();
-    }
-
     if (!input.firstName?.trim() || !input.lastName?.trim()) {
       throw new ValidationDomainError('First and last name are required');
     }
@@ -82,7 +73,7 @@ export class RegisterClientUseCase {
       firstName: input.firstName.trim(),
       lastName: input.lastName.trim(),
       phoneE164: phoneNumber.toE164(),
-      marketingConsent: true,
+      marketingConsent: input.marketingConsent === true,
       channel: input.channel,
       occurredAt,
     });

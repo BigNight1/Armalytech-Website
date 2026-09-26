@@ -34,7 +34,12 @@ export class FakeClientRepository implements ClientRepository {
     if (existing) {
       existing.firstName = input.firstName;
       existing.lastName = input.lastName;
-      existing.marketingConsent = input.marketingConsent;
+      // Mirrors MongooseClientRepository: never downgrade approved consent,
+      // only upgrade declined -> approved (and refresh the consent date).
+      if (!existing.marketingConsent && input.marketingConsent) {
+        existing.marketingConsent = true;
+        existing.consentAt = input.occurredAt;
+      }
       return { client: existing, wasNew: false };
     }
 

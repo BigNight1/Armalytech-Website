@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&family=Open+Sans:wght@300..800&display=swap">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#fff}
+  a{color:#ff5a2a;text-decoration:none}
+  a:hover{color:#e54e1f}
+  @keyframes at-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#fff">
+
+  <div style="background:#111827;color:#fff;border-bottom:1px solid rgba(55,65,81,.5)">
+    <div style="max-width:1280px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+      <a href="tel:+51924548268" style="font-size:14px;color:#d1d5db;text-decoration:underline" style-hover="color:#fff">+51 924548268</a>
+      <div style="display:flex;align-items:center;gap:16px">
+        <a href="#" aria-label="Instagram" style="opacity:.9;display:flex" style-hover="opacity:1"><img src="public/redes_sociales/instagram.svg" alt="Instagram" style="height:20px;width:20px;object-fit:contain;filter:invert(1)"></a>
+        <a href="#" aria-label="TikTok" style="opacity:.9;display:flex" style-hover="opacity:1"><img src="public/redes_sociales/tik-tok.svg" alt="TikTok" style="height:20px;width:20px;object-fit:contain;filter:invert(1)"></a>
+        <a href="#" aria-label="WhatsApp" style="opacity:.9;display:flex" style-hover="opacity:1"><img src="public/redes_sociales/whatsapp.svg" alt="WhatsApp" style="height:20px;width:20px;object-fit:contain;filter:invert(1)"></a>
+      </div>
+    </div>
+  </div>
+
+  <nav style="background:#111827;border-bottom:1px solid rgba(55,65,81,.5);width:100%">
+    <div style="max-width:1280px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+      <a href="#" style="display:flex;align-items:center;flex-shrink:0"><img src="public/logoarmalytech.webp" alt="ArmalyTech" style="height:40px;border-radius:9999px"></a>
+      <ul style="display:flex;flex-wrap:wrap;align-items:center;gap:32px;list-style:none;font-weight:500">
+        <li><a href="#" style="color:#d1d5db" style-hover="color:#fff">Nosotros</a></li>
+        <li><a href="#" style="color:#d1d5db" style-hover="color:#fff">Precios</a></li>
+        <li><a href="#" style="color:#d1d5db" style-hover="color:#fff">Servicios</a></li>
+        <li><a href="#" style="color:#d1d5db" style-hover="color:#fff">Contacto</a></li>
+      </ul>
+      <a href="#" style="display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:8px;background:#f97316;color:#fff;font-weight:500;flex-shrink:0" style-hover="background:#ea580c">Solicitar cotización</a>
+    </div>
+  </nav>
+
+  <div style="position:relative;background:linear-gradient(180deg,#111827 0%,#1f2937 100%);padding:32px 0;overflow:hidden">
+    <div style="position:relative;z-index:1;padding:16px 0">
+      <div style="max-width:1160px;margin:0 auto;padding:0 16px;text-align:center">
+        <h1 style="font-size:clamp(2.25rem,4vw,3rem);font-weight:600;color:#fff;margin:0 0 16px;line-height:1.2">Estado de tu reparación<span style="color:#ff5a2a">.</span></h1>
+        <nav style="font-size:13px;color:#9ca3af" aria-label="Breadcrumb">
+          <a href="#" style="color:#9ca3af" style-hover="color:#fff">Inicio</a>
+          <span style="margin:0 8px">→</span>
+          <a href="#" style="color:#9ca3af" style-hover="color:#fff">Mi ticket</a>
+          <span style="margin:0 8px">→</span>
+          <span style="color:#ff5a2a;font-weight:500">{{ codigo }}</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:14px 16px">
+    <p style="max-width:1160px;margin:0 auto;font-size:15px;line-height:1.5;color:#6b7280;text-align:center">
+      <span style="font-weight:600;color:#ff5a2a">Enlace privado.</span> Guarda esta página: se actualiza sola cuando tu equipo cambia de estado. No necesitas contraseña.
+    </p>
+  </div>
+
+  <main style="max-width:1000px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:32px">
+
+    <sc-if value="{{ mostrarSelector }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;border:1px dashed #cbd5e1;border-radius:12px;background:#f8fafc">
+        <span style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8;margin-right:4px">Demo · ver estado</span>
+        <button type="button" onClick="{{ verPendiente }}" style="{{ btnPendiente }}">Pendiente</button>
+        <button type="button" onClick="{{ verTrabajando }}" style="{{ btnTrabajando }}">Trabajando</button>
+        <button type="button" onClick="{{ verFinalizado }}" style="{{ btnFinalizado }}">Finalizado</button>
+      </div>
+    </sc-if>
+
+    <section style="border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+      <div style="{{ cabeceraEstilo }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px">
+          <div style="min-width:0">
+            <p style="font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#ff5a2a;margin:0 0 8px">Ticket {{ codigo }}</p>
+            <h2 style="font-family:'Nunito',sans-serif;font-size:clamp(26px,3vw,36px);font-weight:600;line-height:1.1;color:#fff;margin:0 0 10px">{{ tituloEstado }}<span style="color:#ff5a2a">.</span></h2>
+            <p style="font-size:15px;line-height:1.6;color:rgba(255,255,255,.75);margin:0;max-width:46ch">{{ subtituloEstado }}</p>
+          </div>
+          <div style="{{ chipEstilo }}">
+            <span style="{{ puntoEstilo }}"></span>
+            {{ etiquetaEstado }}
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1px;background:#e5e7eb;border-bottom:1px solid #e5e7eb;align-content:start">
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">Cliente</p>
+          <p style="font-size:15px;font-weight:600;color:#111827;margin:0">Andrea Salazar</p>
+        </div>
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">Equipo</p>
+          <p style="font-size:15px;font-weight:600;color:#111827;margin:0">iPhone 12 · Negro</p>
+        </div>
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">Servicio</p>
+          <p style="font-size:15px;font-weight:600;color:#111827;margin:0">Cambio de pantalla</p>
+        </div>
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">Ingreso</p>
+          <p style="font-size:15px;font-weight:600;color:#111827;margin:0">08 set · 10:24 a. m.</p>
+        </div>
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">{{ etiquetaEntrega }}</p>
+          <p style="{{ entregaEstilo }}">{{ valorEntrega }}</p>
+        </div>
+        <div style="background:#fff;padding:20px 24px">
+          <p style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 6px">Costo acordado</p>
+          <p style="font-size:15px;font-weight:600;color:#111827;margin:0">S/ 189.00</p>
+        </div>
+      </div>
+
+      <div style="padding:32px 24px">
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px">
+          <sc-for list="{{ pasos }}" as="paso" hint-placeholder-count="3">
+            <li style="display:grid;grid-template-columns:56px 1fr;gap:16px">
+              <div style="display:flex;flex-direction:column;align-items:center">
+                <div style="{{ paso.circulo }}">
+                  <img src="{{ paso.icono }}" alt="" style="{{ paso.iconoEstilo }}">
+                </div>
+                <div style="{{ paso.linea }}"></div>
+              </div>
+              <div style="padding-bottom:28px;min-width:0">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:6px">
+                  <h3 style="{{ paso.tituloEstilo }}">{{ paso.titulo }}</h3>
+                  <span style="{{ paso.marcaEstilo }}">{{ paso.marca }}</span>
+                </div>
+                <p style="{{ paso.descEstilo }}">{{ paso.desc }}</p>
+              </div>
+            </li>
+          </sc-for>
+        </ul>
+      </div>
+    </section>
+
+    <sc-if value="{{ hayNota }}" hint-placeholder-val="{{ true }}">
+      <section style="{{ notaEstilo }}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:36px;height:36px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">JM</div>
+          <div style="min-width:0">
+            <p style="font-size:14px;font-weight:600;color:#111827;margin:0">Jhon M. · Técnico asignado</p>
+            <p style="font-size:12px;color:#6b7280;margin:0">{{ notaFecha }}</p>
+          </div>
+        </div>
+        <p style="font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:{{ notaAcento }};margin:0 0 8px">{{ notaTitulo }}</p>
+        <p style="font-size:15px;line-height:1.7;color:#374151;margin:0">{{ notaTexto }}</p>
+      </section>
+    </sc-if>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div style="border:1px solid #e5e7eb;border-radius:16px;padding:24px">
+        <h3 style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:600;color:#111827;margin:0 0 8px">¿Dudas con tu reparación?</h3>
+        <p style="font-size:14px;line-height:1.6;color:#6b7280;margin:0 0 18px">Responde este mismo enlace por WhatsApp y te contestamos con el ticket a la vista.</p>
+        <a href="https://api.whatsapp.com/send/?phone=%2B51924548268" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#111;color:#fff;padding:14px 32px;border-radius:8px;font-weight:600;font-size:16px" style-hover="background:#000">Consultar por WhatsApp</a>
+      </div>
+      <div style="border:1px solid #e5e7eb;border-radius:16px;padding:24px;background:#f8fafc">
+        <h3 style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:600;color:#111827;margin:0 0 8px">Recoge en tienda</h3>
+        <p style="font-size:14px;line-height:1.6;color:#6b7280;margin:0 0 6px">Av. San Borja Norte 1234, San Borja — Lima</p>
+        <p style="font-size:14px;line-height:1.6;color:#6b7280;margin:0 0 18px">Lun a Sáb · 10:00 a. m. – 8:00 p. m.</p>
+        <p style="font-size:13px;color:#9ca3af;margin:0">Presenta este enlace o tu DNI al recoger el equipo.</p>
+      </div>
+    </section>
+
+    <p style="font-size:13px;color:#9ca3af;text-align:center;margin:0">Enlace privado del ticket {{ codigo }} · armalytech.com/ticket/{{ codigo }}</p>
+  </main>
+
+  <footer style="background:#080b0f;border-top:1px solid rgba(255,255,255,.06);padding:clamp(2.5rem,6vw,4rem) clamp(1rem,4vw,2rem) clamp(1.5rem,3vw,2rem)">
+    <div style="max-width:1150px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(2rem,3vw,2.5rem);padding-bottom:clamp(1.5rem,3vw,2rem);border-bottom:1px solid rgba(255,255,255,.06)">
+        <div style="max-width:20rem">
+          <a href="#" style="display:inline-block;margin-bottom:16px"><img src="public/logoarmalytech.webp" alt="ArmalyTech" style="height:40px;border-radius:9999px"></a>
+          <p style="font-size:.9rem;line-height:1.55;color:rgba(255,255,255,.6);margin:0 0 20px">Reparación de celulares y equipos tecnológicos en Lima. Calidad y garantía en cada servicio.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="#" aria-label="Instagram" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:#ff5a2a;border-radius:8px" style-hover="background:#e54e1f"><img src="public/redes_sociales/instagram.svg" alt="" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1)"></a>
+            <a href="#" aria-label="TikTok" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:#ff5a2a;border-radius:8px" style-hover="background:#e54e1f"><img src="public/redes_sociales/tik-tok.svg" alt="" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1)"></a>
+            <a href="#" aria-label="WhatsApp" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:#ff5a2a;border-radius:8px" style-hover="background:#e54e1f"><img src="public/redes_sociales/whatsapp.svg" alt="" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1)"></a>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:.9rem;font-weight:600;color:#fff;margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid #ff5a2a;display:inline-block">Enlaces útiles</h3>
+          <ul style="list-style:none;margin:0;padding:0">
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Nosotros</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Servicios</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Precios</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Redes</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="font-size:.9rem;font-weight:600;color:#fff;margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid #ff5a2a;display:inline-block">Servicios</h3>
+          <ul style="list-style:none;margin:0;padding:0">
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Cambio de pantalla</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Cambio de batería</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Puerto de carga</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Daño por agua</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="font-size:.9rem;font-weight:600;color:#fff;margin:0 0 16px;padding-bottom:8px;border-bottom:2px solid #ff5a2a;display:inline-block">Soporte</h3>
+          <ul style="list-style:none;margin:0;padding:0">
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Garantía</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Términos</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Ayuda</a></li>
+            <li style="margin-bottom:8px"><a href="#" style="font-size:.9rem;color:rgba(255,255,255,.65)" style-hover="color:#ff5a2a">Contacto</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="padding-top:clamp(1rem,2vw,1.5rem);text-align:center">
+        <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin:0">© 2026 ArmalyTech. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pendiente&quot;,&quot;trabajando&quot;,&quot;finalizado&quot;],&quot;default&quot;:&quot;trabajando&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;codigo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;AT-2X9K4M&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mostrarSelector&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+class Component extends DCLogic {
+  state = { estado: null };
+
+  get estado() {
+    return this.state.estado || this.props.estado || "trabajando";
+  }
+
+  chip(activo) {
+    const base = "display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:9999px;font-size:14px;font-weight:600;flex-shrink:0;";
+    return base + activo;
+  }
+
+  botón(nombre) {
+    const on = this.estado === nombre;
+    return "padding:8px 16px;border-radius:9999px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid " +
+      (on ? "#111827" : "#cbd5e1") + ";background:" + (on ? "#111827" : "#fff") + ";color:" + (on ? "#fff" : "#475569");
+  }
+
+  renderVals() {
+    const e = this.estado;
+    const set = (v) => () => this.setState({ estado: v });
+
+    const naranja = "#ff5a2a";
+    const verde = "#16a34a";
+
+    const cabecera = {
+      pendiente: "linear-gradient(160deg,#0b0f14 0%,#0f1620 50%,#0b0f14 100%)",
+      trabajando: "linear-gradient(160deg,#0b0f14 0%,#191016 50%,#0b0f14 100%)",
+      finalizado: "linear-gradient(160deg,#0b0f14 0%,#0d1712 50%,#0b0f14 100%)"
+    }[e];
+
+    const titulo = {
+      pendiente: "Recibimos tu equipo",
+      trabajando: "Tu equipo está en reparación",
+      finalizado: "Tu equipo está listo"
+    }[e];
+
+    const subtitulo = {
+      pendiente: "Está registrado y en cola de diagnóstico. Te avisamos apenas un técnico lo tome.",
+      trabajando: "Un técnico está trabajando en el cambio de pantalla. Esta página se actualiza sola.",
+      finalizado: "Reparación terminada y probada. Puedes recogerlo en tienda cuando quieras."
+    }[e];
+
+    const etiqueta = { pendiente: "Pendiente", trabajando: "Trabajando", finalizado: "Finalizado" }[e];
+
+    const chipEstilo = {
+      pendiente: this.chip("background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.16)"),
+      trabajando: this.chip("background:rgba(255,90,42,.16);color:#ffb094;border:1px solid rgba(255,90,42,.45)"),
+      finalizado: this.chip("background:rgba(22,163,74,.16);color:#86efac;border:1px solid rgba(22,163,74,.45)")
+    }[e];
+
+    const puntoColor = { pendiente: "#9ca3af", trabajando: naranja, finalizado: verde }[e];
+    const puntoEstilo = "width:9px;height:9px;border-radius:9999px;flex-shrink:0;background:" + puntoColor +
+      (e === "trabajando" ? ";animation:at-pulse 1.4s ease-in-out infinite" : "");
+
+    const idx = { pendiente: 0, trabajando: 1, finalizado: 2 }[e];
+    const defs = [
+      { titulo: "Pendiente", icono: "public/trabajamos/primero.svg",
+        desc: "Equipo recibido, registrado y guardado con tu ticket. En cola para diagnóstico.",
+        marcas: ["08 set · 10:24 a. m.", "08 set · 10:24 a. m.", "08 set · 10:24 a. m."] },
+      { titulo: "Trabajando", icono: "public/trabajamos/segundo.svg",
+        desc: "El técnico desmonta el equipo, coloca la pantalla nueva y prueba táctil, sensores y cámara frontal.",
+        marcas: ["En espera", "En curso", "09 set · 09:10 a. m."] },
+      { titulo: "Finalizado", icono: "public/trabajamos/tercero.svg",
+        desc: "Reparación probada y lista para recoger, con 90 días de garantía sobre el repuesto.",
+        marcas: ["En espera", "En espera", "09 set · 04:35 p. m."] }
+    ];
+
+    const pasos = defs.map((d, i) => {
+      const fin = e === "finalizado";
+      const hecho = i < idx || (fin && i === idx), activo = i === idx && !fin;
+      const color = hecho ? verde : activo ? naranja : "#cbd5e1";
+      return {
+        titulo: d.titulo,
+        desc: d.desc,
+        icono: d.icono,
+        marca: d.marcas[idx],
+        circulo: "width:56px;height:56px;border-radius:9999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid " +
+          color + ";background:" + (activo ? "rgba(255,90,42,.08)" : hecho ? "rgba(22,163,74,.08)" : "#f8fafc"),
+        iconoEstilo: "width:32px;height:32px;object-fit:contain;opacity:" + (hecho || activo ? "1" : ".35") +
+          (hecho || activo ? "" : ";filter:grayscale(1)"),
+        linea: i === 2 ? "display:none" : "flex:1;width:2px;min-height:28px;background:" + (hecho ? verde : "#e5e7eb"),
+        tituloEstilo: "font-family:'Nunito',sans-serif;font-size:20px;font-weight:600;line-height:1.15;margin:0;color:" +
+          (hecho || activo ? "#111827" : "#9ca3af"),
+        marcaEstilo: "font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:9999px;color:" +
+          (activo ? naranja : hecho ? verde : "#94a3b8") + ";background:" +
+          (activo ? "rgba(255,90,42,.1)" : hecho ? "rgba(22,163,74,.1)" : "#f1f5f9"),
+        descEstilo: "font-size:15px;line-height:1.65;max-width:60ch;margin:0;color:" + (hecho || activo ? "#4b5563" : "#9ca3af")
+      };
+    });
+
+    const nota = {
+      pendiente: null,
+      trabajando: {
+        titulo: "Hubo una complicación",
+        acento: naranja,
+        fecha: "09 set · 11:42 a. m.",
+        texto: "Al abrir el equipo encontramos el marco ligeramente doblado por el golpe, así que hay que enderezarlo antes de montar la pantalla nueva. Esto suma medio día de trabajo, sin costo extra para ti. Nueva entrega estimada: mañana 10 de setiembre por la tarde.",
+        estilo: "border:1px solid rgba(255,90,42,.35);border-left:4px solid " + naranja + ";border-radius:16px;padding:24px;background:#fff7f4"
+      },
+      finalizado: {
+        titulo: "Nota del técnico",
+        acento: verde,
+        fecha: "09 set · 04:35 p. m.",
+        texto: "Pantalla original cambiada y probada: táctil, True Tone, sensor de proximidad y cámara frontal funcionando. Enderezamos el marco sin costo. Tu equipo te espera en tienda con 90 días de garantía.",
+        estilo: "border:1px solid rgba(22,163,74,.3);border-left:4px solid " + verde + ";border-radius:16px;padding:24px;background:#f2fbf5"
+      }
+    }[e];
+
+    return {
+      codigo: this.props.codigo ?? "AT-2X9K4M",
+      mostrarSelector: this.props.mostrarSelector ?? true,
+      cabeceraEstilo: "padding:32px 24px;background:" + cabecera,
+      tituloEstado: titulo,
+      subtituloEstado: subtitulo,
+      etiquetaEstado: etiqueta,
+      chipEstilo, puntoEstilo, pasos,
+      etiquetaEntrega: e === "finalizado" ? "Listo desde" : "Entrega estimada",
+      valorEntrega: { pendiente: "09 set · fin del día", trabajando: "10 set · por la tarde", finalizado: "09 set · 04:35 p. m." }[e],
+      entregaEstilo: "font-size:15px;font-weight:600;margin:0;color:" + (e === "pendiente" ? "#111827" : e === "trabajando" ? naranja : verde),
+      hayNota: !!nota,
+      notaTitulo: nota && nota.titulo,
+      notaTexto: nota && nota.texto,
+      notaFecha: nota && nota.fecha,
+      notaAcento: nota && nota.acento,
+      notaEstilo: nota && nota.estilo,
+      verPendiente: set("pendiente"),
+      verTrabajando: set("trabajando"),
+      verFinalizado: set("finalizado"),
+      btnPendiente: this.botón("pendiente"),
+      btnTrabajando: this.botón("trabajando"),
+      btnFinalizado: this.botón("finalizado")
+    };
+  }
+}
+</script>
+</body>
+</html>

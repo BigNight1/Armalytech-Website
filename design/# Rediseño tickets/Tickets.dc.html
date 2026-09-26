@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-4f88adac-ccf9-4434-bae3-42bfb4042a46/styles.css">
+<script src="_ds/modernist-4f88adac-ccf9-4434-bae3-42bfb4042a46/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#d6dbe2}
+a{color:#c2410c;text-decoration:none}
+a:hover{color:#ea580c}
+@keyframes tk-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</helmet>
+<div style="padding:72px;display:flex;flex-direction:column;gap:56px;font-family:var(--font-body);width:3100px">
+
+  <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;border-bottom:2px solid #0f172a;padding-bottom:24px;color:#0f172a">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:1250px">
+      <span style="font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#c2410c;font-weight:700">ArmalyTech · Módulo de Tickets</span>
+      <h1 style="margin:0;font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1">Tickets: bandeja, alta, detalle y comprobante</h1>
+      <p style="margin:0;font-size:17px;line-height:1.55;color:#475569;text-wrap:pretty">Mismo sistema que el <a href="Panel%20Admin%20Redise%C3%B1o.dc.html" style="color:#c2410c;font-weight:700">rediseño del panel</a>. Estados: Pendiente → Aprobado → Trabajando → Listo → Entregado, más Cancelado y Abandonado. Las etiquetas usan solo colores de marca y se distinguen por su forma: borde, borde naranja, tinte, relleno naranja y relleno azul marino. La pantalla 01 es interactiva: filtra, busca, abre un ticket, avanza su estado y crea uno nuevo.</p>
+    </div>
+    <button type="button" onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:#0f172a;color:#e2e8f0;border:0;font:700 15px var(--font-body);cursor:pointer;flex:none" style-hover="background:#1e293b">
+      <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+      <span>{{ themeLabel }}</span>
+    </button>
+  </header>
+
+  <div style="{{ themeVars }}">
+  <div style="display:flex;flex-wrap:wrap;gap:88px 72px;align-items:flex-start">
+  <sc-for list="{{ screens }}" as="s" hint-placeholder-count="14">
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <span style="font-size:15px;font-weight:800;color:#fff;background:#0f172a;padding:4px 9px">{{ s.num }}</span>
+        <span style="font-size:24px;font-weight:600;color:#0f172a;font-family:ui-monospace,Menlo,monospace">{{ s.route }}</span>
+        <span style="font-size:15px;color:#475569">{{ s.cap }}</span>
+      </div>
+      <div style="width:1440px;height:900px;position:relative;overflow:hidden;display:flex;background:var(--color-bg);color:var(--color-text);box-shadow:0 30px 60px rgba(15,23,42,.18)">
+
+        <aside style="width:264px;flex:none;display:flex;flex-direction:column;background:var(--side-bg);color:#e2e8f0;position:relative">
+          <div style="height:76px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:2px solid rgba(226,232,240,.12)">
+            <img src="assets/Armalytech_logo.png" alt="ArmalyTech" style="width:38px;height:38px;object-fit:contain">
+            <div style="display:flex;flex-direction:column;line-height:1.15">
+              <span style="font-size:18px;font-weight:800;color:#fff">ArmalyTech</span>
+              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fdba74;font-weight:600">Panel</span>
+            </div>
+          </div>
+          <nav style="flex:1;display:flex;flex-direction:column;gap:2px;padding:20px 12px">
+            <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;font-weight:600;padding:0 12px 8px">Operación</span>
+            <a href="#" style="{{ s.navTk }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M13 5v2M13 17v2M13 11v2"></path></svg>
+              <span>Tickets</span>
+              <span style="margin-left:auto;min-width:26px;height:22px;padding:0 7px;display:flex;align-items:center;justify-content:center;background:#f97316;color:#0f172a;font-size:13px;font-weight:800">{{ activeCount }}</span>
+            </a>
+            <a href="#" style="{{ s.navInv }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path></svg>
+              <span>Inventario</span>
+            </a>
+            <a href="#" style="{{ s.navHis }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+              <span>Historial de caja</span>
+            </a>
+            <a href="#" style="{{ s.navCli }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <span>Clientes</span>
+            </a>
+            <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;font-weight:600;padding:24px 12px 8px">Administración</span>
+            <a href="#" style="{{ s.navPer }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+              <span>Personal</span>
+            </a>
+            <a href="#" style="{{ s.navTec }}" style-hover="background:rgba(226,232,240,.08)">
+              <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+              <span>Técnicos</span>
+              <span style="margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border:1px solid rgba(226,232,240,.25);color:#cbd5e1">Owner</span>
+            </a>
+          </nav>
+          <sc-if value="{{ s.menuOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:12px;right:12px;bottom:88px;background:var(--side-pop);border:1px solid rgba(226,232,240,.2);box-shadow:0 18px 44px rgba(2,6,23,.5);z-index:5">
+              <div style="padding:14px 16px;border-bottom:2px solid rgba(226,232,240,.12);display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:15px;font-weight:700;color:#fff">Jhon M.</span>
+                <span style="font-size:14px;color:#94a3b8">jhon@armalytech.com</span>
+              </div>
+              <div style="display:flex;flex-direction:column;padding:6px 0">
+                <button type="button" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">Perfil</button>
+                <button type="button" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">Configuración</button>
+                <button type="button" onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">{{ themeLabel }}</button>
+              </div>
+              <button type="button" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;background:transparent;border:0;border-top:2px solid rgba(226,232,240,.12);color:#fca5a5;font:600 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(239,68,68,.14)">Cerrar sesión</button>
+            </div>
+          </sc-if>
+          <button type="button" onClick="{{ s.toggleMenu }}" style="height:80px;display:flex;align-items:center;gap:12px;padding:0 16px 0 20px;background:transparent;border:0;border-top:2px solid rgba(226,232,240,.12);color:#e2e8f0;cursor:pointer;text-align:left;font-family:var(--font-body)" style-hover="background:rgba(226,232,240,.06)">
+            <span style="width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;background:#f97316;color:#0f172a;font-size:15px;font-weight:800">JM</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:15px;font-weight:700;color:#fff">Jhon M.</span>
+              <span style="font-size:13px;color:#94a3b8">Principal · Owner</span>
+            </span>
+            <svg width="17" height="17" viewBox="0 0 24 24" style="flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+          </button>
+        </aside>
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <header style="height:76px;flex:none;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:2px solid var(--color-divider)">
+            <div style="display:flex;align-items:center;gap:10px;font-size:15px">
+              <span style="color:var(--muted)">Panel</span><span style="color:var(--muted)">/</span><span style="font-weight:700">{{ s.crumb }}</span>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:20px">
+              <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2">
+                <span style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:600">{{ clockTime }}</span>
+                <span style="font-size:13px;text-transform:capitalize;color:var(--muted)">{{ clockDate }} · Lima</span>
+              </div>
+              <button type="button" onClick="{{ toggleTheme }}" aria-label="Cambiar tema" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)">
+                <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+              </button>
+            </div>
+          </header>
+
+          <main style="flex:1;min-height:0;overflow:auto;padding:24px 40px;display:flex;flex-direction:column;gap:16px">
+
+            <sc-if value="{{ s.isBandeja }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Operación</span>
+                  <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Tickets</h1>
+                </div>
+                <button type="button" onClick="{{ s.openNew }}" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;gap:10px;font-size:15px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5v14"></path></svg>
+                  <span>Nuevo ticket</span>
+                </button>
+              </div>
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="position:relative;flex:1;max-width:520px">
+                  <svg width="17" height="17" viewBox="0 0 24 24" style="position:absolute;left:12px;top:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                  <input class="input" placeholder="Celular, código (AT-000148), nombre, modelo o IMEI" value="{{ s.q }}" onChange="{{ s.onQ }}" style="min-height:44px;padding-left:38px;font-size:15px">
+                </div>
+                <button type="button" onClick="{{ s.toggleAband }}" style="margin-left:auto;display:flex;align-items:center;gap:10px;height:44px;padding:0 4px;background:transparent;border:0;color:var(--color-text);font:600 15px var(--font-body);cursor:pointer">
+                  <span style="{{ s.abandTrack }}"><span style="{{ s.abandKnob }}"></span></span>
+                  <span>Mostrar abandonados</span>
+                  <span style="font-size:14px;color:var(--muted)">{{ s.abandCount }}</span>
+                </button>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <sc-for list="{{ s.chips }}" as="c" hint-placeholder-count="7">
+                  <button type="button" onClick="{{ c.select }}" style="{{ c.style }}"><span>{{ c.label }}</span><span style="{{ c.countStyle }}">{{ c.count }}</span></button>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ s.hasRows }}" hint-placeholder-val="{{ true }}">
+                <div style="border-top:2px solid var(--color-text)">
+                  <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                    <thead>
+                      <tr>
+                        <th style="padding-left:0;font-size:13px">Código</th><th style="font-size:13px">Cliente</th><th style="font-size:13px">Equipo</th><th style="font-size:13px">Título</th><th style="font-size:13px">Estado</th><th style="font-size:13px">Técnico</th><th style="font-size:13px">Ingreso</th><th style="font-size:13px;text-align:right">Total</th><th style="font-size:13px;text-align:right">Saldo</th><th style="padding-right:0"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ s.rows }}" as="t" hint-placeholder-count="9">
+                        <tr onClick="{{ t.open }}" style="{{ t.rowStyle }}">
+                          <td style="padding:7px 8px 7px 0;font-family:ui-monospace,Menlo,monospace;font-size:14px;font-weight:700;white-space:nowrap">{{ t.code }}</td>
+                          <td><div style="font-weight:700;white-space:nowrap">{{ t.name }}</div><div style="font-size:14px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums">{{ t.phone }}</div></td>
+                          <td style="white-space:nowrap">{{ t.device }}</td>
+                          <td style="max-width:230px;line-height:1.3">{{ t.title }}</td>
+                          <td><span style="{{ t.tagStyle }}"><span style="{{ t.dotStyle }}"></span>{{ t.stLabel }}</span></td>
+                          <td style="white-space:nowrap">{{ t.tech }}</td>
+                          <td style="white-space:nowrap;color:var(--muted)">{{ t.date }}</td>
+                          <td style="text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">{{ t.total }}</td>
+                          <td style="{{ t.saldoStyle }}">{{ t.saldo }}</td>
+                          <td style="padding-right:0;text-align:right"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.5"><path d="m9 18 6-6-6-6"></path></svg></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;border-top:2px solid var(--color-text);padding:40px 0">
+                  <span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;background:var(--color-surface);color:var(--ink-accent)"><svg width="34" height="34" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M13 5v2M13 17v2M13 11v2"></path></svg></span>
+                  <h2 style="margin:0;font-size:30px;font-weight:800;letter-spacing:-.01em">Todavía no hay tickets</h2>
+                  <p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted);max-width:560px">Cuando recibas un equipo en el mostrador, créale un ticket. El cliente recibe por WhatsApp un link para seguir su reparación.</p>
+                  <button type="button" class="btn btn-primary" style="min-height:48px;padding:0 20px;color:#0f172a;font-size:16px;gap:10px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M5 12h14M12 5v14"></path></svg>
+                    <span>Crear el primer ticket</span>
+                  </button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isNoRes }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;border-top:2px solid var(--color-text);padding:40px 0">
+                  <span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;background:var(--color-surface);color:var(--muted)"><svg width="34" height="34" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3M8 11h6"></path></svg></span>
+                  <h2 style="margin:0;font-size:30px;font-weight:800;letter-spacing:-.01em">Sin resultados para «{{ s.q }}»</h2>
+                  <p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted);max-width:600px">Ningún ticket coincide con ese celular, código, nombre, modelo o IMEI en el filtro «Todos». Revisa lo que escribiste o incluye los abandonados.</p>
+                  <div style="display:flex;gap:8px">
+                    <button type="button" class="btn btn-secondary" style="min-height:46px;font-size:15px">Limpiar búsqueda</button>
+                    <button type="button" class="btn btn-secondary" style="min-height:46px;font-size:15px">Incluir abandonados</button>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ s.isTec }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;max-width:680px">
+                <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Administración</span>
+                <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Técnicos</h1>
+                <p style="margin:6px 0 0;font-size:16px;color:var(--muted)">Nombres para asignar en los tickets. Los técnicos no entran al panel.</p>
+              </div>
+              <div style="display:flex;max-width:560px">
+                <input class="input" placeholder="Nombre y apellido del técnico" value="{{ techIn }}" onChange="{{ onTechIn }}" style="min-height:46px;font-size:15px;border-right:0">
+                <button type="button" onClick="{{ addTech }}" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;font-size:15px;white-space:nowrap">Agregar técnico</button>
+              </div>
+              <div style="border-top:2px solid var(--color-text);max-width:900px">
+                <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                  <thead><tr><th style="padding-left:0;font-size:13px">Técnico</th><th style="font-size:13px">Estado</th><th style="font-size:13px">Tickets en curso</th><th style="font-size:13px">Desde</th><th style="font-size:13px;text-align:right;padding-right:0">Acción</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ techs }}" as="m" hint-placeholder-count="2">
+                      <tr style="{{ m.rowStyle }}">
+                        <td style="padding:14px 8px 14px 0"><div style="display:flex;align-items:center;gap:12px"><span style="width:38px;height:38px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--color-surface);border:1px solid var(--color-divider);font-size:14px;font-weight:800">{{ m.initials }}</span><span style="font-weight:700">{{ m.name }}</span></div></td>
+                        <td><span style="display:inline-flex;align-items:center;gap:8px;font-weight:600"><span style="{{ m.dot }}"></span>{{ m.status }}</span></td>
+                        <td><span style="font-weight:800;font-variant-numeric:tabular-nums">{{ m.count }}</span> <span style="color:var(--muted)">{{ m.codes }}</span></td>
+                        <td style="color:var(--muted)">{{ m.since }}</td>
+                        <td style="text-align:right;padding-right:0"><button type="button" onClick="{{ m.toggle }}" style="{{ m.btnStyle }}">{{ m.btnLabel }}</button></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <p style="margin:0;font-size:15px;color:var(--muted);max-width:760px">Un técnico desactivado deja de aparecer al crear tickets. Sus tickets en curso siguen asignados hasta que los cambies.</p>
+            </sc-if>
+
+            <sc-if value="{{ s.isCli }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Fidelización</span>
+                <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Clientes</h1>
+              </div>
+              <div style="border-top:2px solid var(--color-text)">
+                <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                  <thead><tr><th style="padding-left:0;font-size:13px">Cliente</th><th style="font-size:13px">Número</th><th style="font-size:13px">Sellos</th><th style="font-size:13px">Visitas</th><th style="font-size:13px">Última visita</th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ cliRows }}" as="c" hint-placeholder-count="5">
+                      <tr style="{{ c.rowStyle }}"><td style="padding:12px 8px 12px 0;font-weight:700">{{ c.name }}</td><td style="font-variant-numeric:tabular-nums">{{ c.phone }}</td><td>{{ c.stamps }}</td><td>{{ c.visits }}</td><td style="color:var(--muted)">{{ c.last }}</td></tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ s.isCaja }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Cierre de día</span>
+                  <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Historial de caja</h1>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 16px;border:1px solid var(--color-divider);font-size:15px;font-weight:600;text-transform:capitalize">
+                  <span>{{ clockDate }}</span>
+                  <span style="padding:3px 8px;background:var(--color-accent);color:#0f172a;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Hoy</span>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;flex:1;min-height:0">
+                <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+                  <div style="border:2px solid var(--color-text);font-size:15px">
+                    <div style="display:grid;grid-template-columns:44px 1fr 1fr 2fr 1fr 1fr 1.5fr 104px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:800">
+                      <div></div>
+                      <div style="grid-column:span 3;padding:8px 12px;background:var(--color-accent);color:#0f172a">Ingresos</div>
+                      <div style="grid-column:span 3;padding:8px 12px;background:var(--color-text);color:var(--color-bg)">Gastos</div>
+                      <div></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:44px 1fr 1fr 2fr 1fr 1fr 1.5fr 104px;font-size:13px;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:2px solid var(--color-text);background:var(--color-surface)">
+                      <div style="padding:10px 0;text-align:center;border-right:1px solid var(--color-divider)">#</div>
+                      <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Efectivo</div>
+                      <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Yape</div>
+                      <div style="padding:10px 12px;border-right:2px solid var(--color-text)">Detalle</div>
+                      <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Efectivo</div>
+                      <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Yape</div>
+                      <div style="padding:10px 12px;border-right:1px solid var(--color-divider)">Detalle</div>
+                      <div style="padding:10px 12px">Estado</div>
+                    </div>
+                    <sc-for list="{{ cajaRows }}" as="r" hint-placeholder-count="7">
+                      <div style="{{ r.rowStyle }}">
+                        <div style="padding:11px 0;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--color-divider);font-size:14px;color:var(--muted)">
+                          <sc-if value="{{ r.locked }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;color:var(--ink-accent)"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></sc-if>
+                          <sc-if value="{{ r.free }}" hint-placeholder-val="{{ true }}"><span>{{ r.n }}</span></sc-if>
+                        </div>
+                        <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ci }}</div>
+                        <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.yi }}</div>
+                        <div style="{{ r.diStyle }}">{{ r.di }}</div>
+                        <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ce }}</div>
+                        <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ye }}</div>
+                        <div style="padding:11px 12px;border-right:1px solid var(--color-divider);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.de }}</div>
+                        <div style="{{ r.statusStyle }}">{{ r.status }}</div>
+                      </div>
+                    </sc-for>
+                    <div style="display:grid;grid-template-columns:44px 1fr 1fr 2fr 1fr 1fr 1.5fr 104px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--color-surface);border-top:2px solid var(--color-text)">
+                      <div style="border-right:1px solid var(--color-divider)"></div>
+                      <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">155.00</div>
+                      <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">170.00</div>
+                      <div style="padding:12px;border-right:2px solid var(--color-text);font-size:13px;letter-spacing:.1em;text-transform:uppercase">Total</div>
+                      <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">25.00</div>
+                      <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">0.00</div>
+                      <div style="border-right:1px solid var(--color-divider)"></div>
+                      <div></div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--color-surface);font-size:15px;line-height:1.5">
+                    <svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:2px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ink-accent)"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span>Las filas con candado vienen de tickets: se crean solas al cobrar un adelanto o un saldo y no se editan aquí. Para corregirlas, abre el ticket.</span>
+                  </div>
+                </div>
+                <aside style="display:flex;flex-direction:column;gap:18px;align-self:start;border-top:2px solid var(--color-text);padding-top:16px">
+                  <h3 style="margin:0;font-size:22px;font-weight:800">Resumen del día</h3>
+                  <div style="display:flex;flex-direction:column;background:var(--color-accent);color:#0f172a;padding:18px">
+                    <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:800">Ingreso neto</span>
+                    <span style="font-size:42px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1">S/ 300.00</span>
+                    <span style="font-size:15px;font-weight:600">Bruto S/ 325.00</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;border-top:2px solid var(--color-divider);padding-top:10px;font-size:15px">
+                    <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Efectivo</span><span style="font-weight:700;font-variant-numeric:tabular-nums">S/ 130.00</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Yape / Plin</span><span style="font-weight:700;font-variant-numeric:tabular-nums">S/ 170.00</span></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:4px;border-top:2px solid var(--color-divider);padding-top:10px;font-size:15px">
+                    <div style="display:flex;justify-content:space-between"><span style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;color:var(--ink-accent)"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Cobros de tickets</span><span style="font-weight:700;font-variant-numeric:tabular-nums">S/ 120.00</span></div>
+                    <span style="font-size:14px;color:var(--muted)">2 filas · incluidas en los totales</span>
+                  </div>
+                </aside>
+              </div>
+            </sc-if>
+          </main>
+        </div>
+
+        <sc-if value="{{ s.showNew }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ s.closeNew }}" style="position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:rgba(2,6,23,.5)">
+            <div onClick="{{ stop }}" style="width:640px;height:100%;background:var(--color-bg);color:var(--color-text);border-left:4px solid var(--color-accent);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)">
+              <div style="height:80px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Tickets · nuevo</span>
+                  <h2 style="margin:0;font-size:26px;font-weight:800">Nuevo ticket</h2>
+                </div>
+                <button type="button" onClick="{{ s.closeNew }}" aria-label="Cerrar" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--color-divider);border-bottom:2px solid var(--color-divider)">
+                <sc-for list="{{ s.steps }}" as="st" hint-placeholder-count="4">
+                  <div style="{{ st.style }}"><span style="font-size:13px;font-weight:800">{{ st.num }}</span><span>{{ st.label }}</span></div>
+                </sc-for>
+              </div>
+              <div style="flex:1;overflow:auto;padding:4px 28px 28px;display:flex;flex-direction:column;gap:26px">
+
+                <sc-if value="{{ s.b1 }}" hint-placeholder-val="{{ true }}">
+                  <section style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:baseline;gap:10px;padding-top:18px"><span style="font-size:14px;font-weight:800;color:var(--ink-accent)">01</span><h3 style="margin:0;font-size:20px;font-weight:800">Cliente</h3></div>
+                    <div class="field">
+                      <label style="font-size:14px;color:var(--muted)">Teléfono del cliente</label>
+                      <div style="display:flex;align-items:stretch;border:1px solid var(--color-divider);background:var(--color-bg)">
+                        <span style="display:flex;align-items:center;padding:0 12px;font-size:16px;font-weight:700;background:var(--color-surface);border-right:1px solid var(--color-divider)">+51</span>
+                        <input value="{{ s.nPhone }}" readOnly="{{ ro }}" style="flex:1;min-width:0;height:48px;border:0;background:transparent;color:var(--color-text);font:600 17px var(--font-body);padding:0 12px;outline:none;letter-spacing:.04em;font-variant-numeric:tabular-nums">
+                        <span style="{{ s.nPhoneTag }}">{{ s.nPhoneTagLabel }}</span>
+                      </div>
+                    </div>
+                    <sc-if value="{{ s.cliExiste }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--color-surface)">
+                        <span style="width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--color-text);color:var(--color-bg);font-size:16px;font-weight:800">AS</span>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:17px;font-weight:800">Andrea Salazar</span><span style="font-size:14px;color:var(--muted)">4 visitas · última el 25 set</span></div>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                          <div style="display:flex;gap:3px">
+                            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:#0f172a;font-size:12px;font-weight:800">✓</span>
+                            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:#0f172a;font-size:12px;font-weight:800">✓</span>
+                            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:#0f172a;font-size:12px;font-weight:800">✓</span>
+                            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:#0f172a;font-size:12px;font-weight:800">✓</span>
+                            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--color-accent);color:var(--ink-accent);font-size:12px;font-weight:800">5</span>
+                          </div>
+                          <span style="font-size:14px;font-weight:800;color:var(--ink-accent)">4/5 · ¡a 1 visita del 20%!</span>
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-top:2px solid var(--color-accent);background:color-mix(in srgb,var(--color-accent) 12%,transparent)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ink-accent)"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:6px;font-size:15px">
+                          <span style="font-weight:800">Tiene un ticket en curso</span>
+                          <span style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,monospace;font-weight:700">AT-000148</span><span>Reparación de pantalla A53</span><span style="{{ tagTrab }}"><span style="{{ dotTrab }}"></span>Trabajando</span></span>
+                        </div>
+                        <a href="#" style="font-size:15px;font-weight:700;white-space:nowrap">Ver ticket</a>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ s.cliNuevo }}" hint-placeholder-val="{{ false }}">
+                      <p style="margin:0;font-size:15px;line-height:1.5;color:var(--muted)">No encontramos este número. Completa sus datos y lo creamos junto con el ticket.</p>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="field"><label style="font-size:14px;color:var(--muted)">Nombre</label><input class="input" value="Andrés" readOnly="{{ ro }}" style="min-height:46px;font-size:15px"></div>
+                        <div class="field"><label style="font-size:14px;color:var(--muted)">Apellido</label><input class="input" value="Vega" readOnly="{{ ro }}" style="min-height:46px;font-size:15px"></div>
+                      </div>
+                      <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer"><input type="checkbox" checked="{{ false }}" onChange="{{ noop }}" style="accent-color:#f97316;width:18px;height:18px"><span>Acepta promociones por WhatsApp</span></label>
+                    </sc-if>
+                  </section>
+                </sc-if>
+
+                <sc-if value="{{ s.b2 }}" hint-placeholder-val="{{ true }}">
+                  <section style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:baseline;gap:10px;border-top:2px solid var(--color-text);padding-top:14px"><span style="font-size:14px;font-weight:800;color:var(--ink-accent)">02</span><h3 style="margin:0;font-size:20px;font-weight:800">Equipo y problema</h3></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Marca</label><select class="input" style="min-height:46px;font-size:15px"><option>Samsung</option><option>Apple</option><option>Xiaomi</option><option>Motorola</option></select></div>
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Modelo</label><select class="input" style="min-height:46px;font-size:15px"><option>Galaxy A53</option><option>Galaxy A54</option><option>Galaxy A14</option></select></div>
+                      <button type="button" class="btn btn-secondary" style="min-height:46px;font-size:15px;white-space:nowrap">+ Agregar celular</button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:12px">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Color</label><input class="input" value="Negro" readOnly="{{ ro }}" style="min-height:46px;font-size:15px"></div>
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">IMEI (opcional)</label><input class="input" value="352098114023371" readOnly="{{ ro }}" style="min-height:46px;font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:.03em"></div>
+                    </div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Falla reportada</label><textarea class="input" readOnly="{{ ro }}" value="Pantalla rota tras una caída; el táctil no responde en la parte inferior." style="min-height:72px;font-size:15px;line-height:1.5;padding:10px 12px;resize:none;font-family:var(--font-body)"></textarea></div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Estado de ingreso</label><input class="input" value="Tapa trasera rajada, sin chip y sin funda" readOnly="{{ ro }}" style="min-height:46px;font-size:15px"></div>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <span style="font-size:14px;color:var(--muted)">Clave del equipo</span>
+                      <div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--color-divider)">
+                        <sc-for list="{{ s.claveOpts }}" as="o" hint-placeholder-count="4">
+                          <button type="button" onClick="{{ o.select }}" style="{{ o.style }}">{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ s.clavePatron }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:24px;align-items:center;padding:16px;background:var(--color-surface)">
+                          <div style="display:grid;grid-template-columns:repeat(3,52px);gap:14px">
+                            <sc-for list="{{ patronDots }}" as="d" hint-placeholder-count="9">
+                              <button type="button" onClick="{{ d.click }}" style="{{ d.style }}">{{ d.label }}</button>
+                            </sc-for>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:8px;font-size:15px">
+                            <span style="font-weight:700">Toca los puntos en el orden del patrón.</span>
+                            <span style="color:var(--muted)">Orden: <strong style="color:var(--color-text);font-variant-numeric:tabular-nums">{{ patronTxt }}</strong></span>
+                            <button type="button" onClick="{{ clearPatron }}" class="btn btn-secondary" style="min-height:38px;font-size:14px;align-self:flex-start">Borrar patrón</button>
+                          </div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ s.clavePin }}" hint-placeholder-val="{{ false }}">
+                        <input class="input" value="4821" readOnly="{{ ro }}" inputMode="numeric" style="min-height:48px;font-size:20px;font-weight:700;letter-spacing:.3em;font-family:ui-monospace,Menlo,monospace;max-width:220px">
+                      </sc-if>
+                      <sc-if value="{{ s.claveTxt }}" hint-placeholder-val="{{ false }}">
+                        <input class="input" placeholder="Contraseña del equipo" style="min-height:48px;font-size:16px;font-family:ui-monospace,Menlo,monospace">
+                      </sc-if>
+                      <sc-if value="{{ s.claveNone }}" hint-placeholder-val="{{ false }}">
+                        <p style="margin:0;font-size:15px;color:var(--muted)">El equipo no tiene bloqueo.</p>
+                      </sc-if>
+                      <span style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)"><svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Se guarda cifrada y se borra al entregar.</span>
+                    </div>
+                  </section>
+                </sc-if>
+
+                <sc-if value="{{ s.b3 }}" hint-placeholder-val="{{ true }}">
+                  <section style="display:flex;flex-direction:column;gap:14px">
+                    <div style="{{ s.b3Head }}"><span style="font-size:14px;font-weight:800;color:var(--ink-accent)">03</span><h3 style="margin:0;font-size:20px;font-weight:800">Piezas</h3></div>
+                    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:12px">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Categoría</label>
+                        <select class="input" value="{{ nt.cat }}" onChange="{{ nt.onCat }}" style="min-height:46px;font-size:15px"><option value="Pantallas">Pantallas</option><option value="Micas">Micas</option><option value="Zócalos">Zócalos</option><option value="Baterías">Baterías</option></select>
+                      </div>
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Modelo</label><input class="input" value="A53" readOnly="{{ ro }}" style="min-height:46px;font-size:15px"></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;border-top:2px solid var(--color-text)">
+                      <sc-for list="{{ nt.results }}" as="r" hint-placeholder-count="3">
+                        <div style="{{ r.rowStyle }}">
+                          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                            <span style="font-weight:700">{{ r.name }}</span>
+                            <span style="{{ r.metaStyle }}">{{ r.meta }}</span>
+                          </div>
+                          <span style="font-size:14px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums">{{ r.cost }}</span>
+                          <sc-if value="{{ r.blocked }}" hint-placeholder-val="{{ false }}">
+                            <span style="display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px dashed var(--color-divider);font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect width="18" height="11" x="3" y="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>{{ r.blockLabel }}</span>
+                          </sc-if>
+                          <sc-if value="{{ r.free }}" hint-placeholder-val="{{ true }}">
+                            <button type="button" onClick="{{ r.add }}" style="{{ r.addStyle }}">{{ r.addLabel }}</button>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;color:var(--muted)">Piezas del ticket</span>
+                      <sc-for list="{{ nt.piezas }}" as="p" hint-placeholder-count="1">
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--color-text)">
+                          <span style="flex:1;font-weight:700">{{ p.name }}</span>
+                          <span style="font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--color-divider)">Planificada</span>
+                          <div style="display:flex;align-items:center;border:1px solid var(--color-divider)">
+                            <button type="button" onClick="{{ p.dec }}" aria-label="Restar" style="width:30px;height:30px;background:transparent;border:0;color:var(--color-text);cursor:pointer;font:700 16px var(--font-body)">−</button>
+                            <span style="width:32px;text-align:center;font-weight:800;line-height:30px;border-left:1px solid var(--color-divider);border-right:1px solid var(--color-divider)">{{ p.qty }}</span>
+                            <button type="button" onClick="{{ p.inc }}" aria-label="Sumar" style="width:30px;height:30px;background:transparent;border:0;color:var(--color-text);cursor:pointer;font:700 16px var(--font-body)">+</button>
+                          </div>
+                          <button type="button" onClick="{{ p.remove }}" aria-label="Quitar" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--muted);cursor:pointer" style-hover="color:var(--danger-ink)"><svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ nt.noPiezas }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:var(--muted)">Sin piezas. Agrégalas desde la lista de arriba.</span></sc-if>
+                      <span style="font-size:14px;color:var(--muted)">Se descuentan del stock al aprobar el ticket.</span>
+                    </div>
+                  </section>
+                </sc-if>
+
+                <sc-if value="{{ s.b4 }}" hint-placeholder-val="{{ true }}">
+                  <section style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:baseline;gap:10px;border-top:2px solid var(--color-text);padding-top:14px"><span style="font-size:14px;font-weight:800;color:var(--ink-accent)">04</span><h3 style="margin:0;font-size:20px;font-weight:800">Precio y cierre</h3></div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Título · se genera solo, puedes editarlo</label><input class="input" value="{{ nt.titulo }}" onChange="{{ nt.onTitulo }}" style="min-height:46px;font-size:16px;font-weight:700"></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Precio total acordado</label>
+                        <div style="display:flex;border:1px solid var(--color-divider)"><span style="display:flex;align-items:center;padding:0 12px;font-weight:700;background:var(--color-surface);border-right:1px solid var(--color-divider)">S/</span><input type="number" value="{{ nt.precio }}" onChange="{{ nt.onPrecio }}" style="flex:1;min-width:0;height:46px;border:0;background:transparent;color:var(--color-text);font:800 18px var(--font-body);padding:0 12px;outline:none"></div>
+                      </div>
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Técnico</label>
+                        <select class="input" value="{{ nt.tecnico }}" onChange="{{ nt.onTecnico }}" style="min-height:48px;font-size:15px">
+                          <sc-for list="{{ nt.techOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o }}">{{ o }}</option></sc-for>
+                        </select>
+                      </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Adelanto</label>
+                        <div style="display:flex;border:1px solid var(--color-divider)"><span style="display:flex;align-items:center;padding:0 12px;font-weight:700;background:var(--color-surface);border-right:1px solid var(--color-divider)">S/</span><input type="number" value="{{ nt.adel }}" onChange="{{ nt.onAdel }}" style="flex:1;min-width:0;height:46px;border:0;background:transparent;color:var(--color-text);font:700 17px var(--font-body);padding:0 12px;outline:none"></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--color-divider);margin-top:6px">
+                          <sc-for list="{{ nt.metOpts }}" as="o" hint-placeholder-count="2"><button type="button" onClick="{{ o.select }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:4px;padding:14px;background:var(--color-surface);height:100%;justify-content:center">
+                        <span style="font-size:14px;color:var(--muted)">Saldo por cobrar al entregar</span>
+                        <span style="font-size:32px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums">{{ nt.saldo }}</span>
+                      </div>
+                    </div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Nota para el cliente (opcional)</label><textarea class="input" placeholder="Se muestra en su link de seguimiento." style="min-height:64px;font-size:15px;padding:10px 12px;resize:none;font-family:var(--font-body)"></textarea></div>
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--color-divider);font-size:15px">
+                      <span style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;background:var(--color-text);color:var(--color-bg)">Solo panel</span>
+                      <span>Costo de piezas <strong style="font-variant-numeric:tabular-nums">{{ nt.costo }}</strong></span>
+                      <span style="color:var(--muted)">·</span>
+                      <span>Ganancia <strong style="{{ nt.ganStyle }}">{{ nt.ganancia }}</strong></span>
+                    </div>
+                  </section>
+                </sc-if>
+              </div>
+              <div style="flex:none;display:flex;align-items:center;gap:10px;padding:16px 28px;border-top:2px solid var(--color-text)">
+                <div style="display:flex;flex-direction:column;line-height:1.25">
+                  <span style="font-size:14px;color:var(--muted)">Total {{ nt.total }}</span>
+                  <span style="font-size:17px;font-weight:800">Saldo {{ nt.saldo }}</span>
+                </div>
+                <button type="button" onClick="{{ s.closeNew }}" class="btn btn-secondary" style="margin-left:auto;min-height:48px;font-size:15px">Cancelar</button>
+                <button type="button" onClick="{{ s.createNew }}" class="btn btn-primary" style="min-height:48px;padding:0 22px;color:#0f172a;font-size:16px">Crear ticket</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.showDet }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ s.closeDet }}" style="position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:rgba(2,6,23,.5)">
+            <div onClick="{{ stop }}" style="width:640px;height:100%;background:var(--color-bg);color:var(--color-text);border-left:4px solid var(--color-accent);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)">
+              <div style="flex:none;padding:20px 28px 18px;display:flex;flex-direction:column;gap:12px;border-bottom:2px solid var(--color-divider)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700;color:var(--ink-accent)">{{ s.det.code }}</span>
+                  <span style="{{ s.det.tagStyle }}"><span style="{{ s.det.dotStyle }}"></span>{{ s.det.stLabel }}</span>
+                  <button type="button" onClick="{{ s.closeDet }}" aria-label="Cerrar" style="margin-left:auto;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <h2 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-.01em;line-height:1.1">{{ s.det.title }}</h2>
+                <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;font-size:15px">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Cliente</span><span style="font-weight:700">{{ s.det.name }}</span><span style="font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums">{{ s.det.phone }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Equipo</span><span style="font-weight:700">{{ s.det.device }}</span><span style="font-size:14px;color:var(--muted)">{{ s.det.imei }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Técnico</span><span style="font-weight:700">{{ s.det.tech }}</span></div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <sc-if value="{{ s.det.hasPrimary }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ s.det.primary }}" class="btn btn-primary" style="min-height:46px;padding:0 20px;color:#0f172a;font-size:16px;gap:10px"><span>{{ s.det.primaryLabel }}</span><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+                  </sc-if>
+                  <sc-if value="{{ s.det.canCancel }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ s.det.cancel }}" style="min-height:46px;padding:0 16px;background:transparent;border:1px solid var(--danger);color:var(--danger-ink);font:700 15px var(--font-body);cursor:pointer" style-hover="background:var(--danger-bg)">Cancelar ticket</button>
+                  </sc-if>
+                </div>
+              </div>
+              <div style="flex:1;overflow:auto;padding:20px 28px 24px;display:flex;flex-direction:column;gap:22px">
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--color-divider)">
+                  <sc-for list="{{ s.det.timeline }}" as="st" hint-placeholder-count="5">
+                    <div style="{{ st.cell }}"><div style="{{ st.bar }}"></div><span style="{{ st.labelStyle }}">{{ st.label }}</span><span style="font-size:13px;color:var(--muted)">{{ st.date }}</span><span style="font-size:13px;color:var(--muted)">{{ st.who }}</span></div>
+                  </sc-for>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--color-text)">
+                  <div style="padding:12px 14px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Total acordado</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.det.total }}</span></div>
+                  <div style="padding:12px 14px;border-left:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Adelanto</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.det.adel }}</span><span style="font-size:14px;color:var(--muted)">{{ s.det.adelMet }}</span></div>
+                  <div style="padding:12px 14px;border-left:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px;background:var(--color-surface)"><span style="font-size:13px;color:var(--muted)">{{ s.det.saldoLabel }}</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink-accent)">{{ s.det.saldo }}</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;border:1px dashed var(--color-divider);font-size:15px">
+                  <span style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;background:var(--color-text);color:var(--color-bg)">Solo panel</span>
+                  <span>Costo de piezas <strong>{{ s.det.costo }}</strong></span><span style="color:var(--muted)">·</span><span>Ganancia <strong>{{ s.det.ganancia }}</strong></span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:15px;line-height:1.5">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted)">Falla reportada</span><span>{{ s.det.falla }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--muted)">Estado de ingreso</span><span>{{ s.det.ingreso }}</span></div>
+                </div>
+                <section style="display:flex;flex-direction:column;border-top:2px solid var(--color-text);padding-top:12px">
+                  <h3 style="margin:0 0 6px;font-size:18px;font-weight:800">Piezas</h3>
+                  <sc-for list="{{ s.det.piezas }}" as="p" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:15px">
+                      <span style="flex:1;font-weight:700">{{ p.name }} <span style="font-weight:500;color:var(--muted)">× {{ p.qty }}</span></span>
+                      <span style="font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums">{{ p.cost }}</span>
+                      <span style="{{ p.tagStyle }}">{{ p.tagLabel }}</span>
+                    </div>
+                  </sc-for>
+                </section>
+                <section style="display:flex;flex-direction:column;gap:10px;border-top:2px solid var(--color-text);padding-top:12px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <h3 style="margin:0;font-size:18px;font-weight:800">Clave del equipo</h3>
+                    <span style="font-size:13px;font-weight:700;padding:2px 8px;border:1px solid var(--color-divider)">{{ s.det.claveTipo }}</span>
+                    <sc-if value="{{ s.det.canToggleClave }}" hint-placeholder-val="{{ true }}">
+                      <button type="button" onClick="{{ s.det.toggleClave }}" class="btn btn-secondary" style="margin-left:auto;min-height:36px;font-size:14px;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span>{{ s.det.claveBtn }}</span></button>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ s.det.claveHidden }}" hint-placeholder-val="{{ true }}"><span style="font-size:22px;letter-spacing:.3em;color:var(--muted)">••••••</span></sc-if>
+                  <sc-if value="{{ s.det.claveShowPat }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:grid;grid-template-columns:repeat(3,34px);gap:10px">
+                      <sc-for list="{{ s.det.patDots }}" as="d" hint-placeholder-count="9"><span style="{{ d.style }}">{{ d.label }}</span></sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ s.det.claveShowTxt }}" hint-placeholder-val="{{ false }}"><span style="font-size:22px;font-weight:700;letter-spacing:.2em;font-family:ui-monospace,Menlo,monospace">{{ s.det.claveVal }}</span></sc-if>
+                  <span style="font-size:14px;color:var(--muted)">{{ s.det.claveNote }}</span>
+                </section>
+                <section style="display:flex;flex-direction:column;gap:10px;border-top:2px solid var(--color-text);padding-top:12px">
+                  <div style="display:flex;align-items:center;gap:10px"><h3 style="margin:0;font-size:18px;font-weight:800">Notas internas</h3><span style="font-size:13px;color:var(--muted)">Solo panel</span></div>
+                  <sc-for list="{{ s.det.notas }}" as="n" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:3px;padding:10px 12px;background:var(--color-surface);font-size:15px;line-height:1.5">
+                      <span style="font-size:13px;color:var(--muted)"><strong style="color:var(--color-text)">{{ n.who }}</strong> · {{ n.date }}</span>
+                      <span>{{ n.text }}</span>
+                    </div>
+                  </sc-for>
+                  <div style="display:flex">
+                    <input class="input" placeholder="Escribe una nota para el equipo…" value="{{ notaIn }}" onChange="{{ onNotaIn }}" style="min-height:44px;font-size:15px;border-right:0">
+                    <button type="button" onClick="{{ s.det.addNota }}" class="btn btn-secondary" style="min-height:44px;font-size:15px;white-space:nowrap">Agregar nota</button>
+                  </div>
+                </section>
+                <section style="display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--color-text);padding-top:12px">
+                  <div style="display:flex;align-items:center;gap:10px"><h3 style="margin:0;font-size:18px;font-weight:800">Nota para el cliente</h3><span style="font-size:13px;color:var(--muted)">Visible en su link</span></div>
+                  <p style="margin:0;padding:12px 14px;border-top:3px solid var(--color-accent);background:var(--color-surface);font-size:15px;line-height:1.55">{{ s.det.notaCli }}</p>
+                </section>
+              </div>
+              <div style="flex:none;display:flex;align-items:center;gap:8px;padding:14px 28px;border-top:2px solid var(--color-text)">
+                <a href="https://api.whatsapp.com/send/?phone=%2B51924548268" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="min-height:46px;font-size:15px;gap:10px"><img src="assets/redes/whatsapp.svg" alt="" style="width:18px;height:18px"><span>Enviar por WhatsApp</span></a>
+                <button type="button" onClick="{{ s.det.openComp }}" class="btn btn-secondary" style="min-height:46px;font-size:15px">Ver comprobante</button>
+                <span style="margin-left:auto;font-size:13px;color:var(--muted);font-family:ui-monospace,Menlo,monospace">armalytech.com/t/{{ s.det.token }}</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.dlgAprobar }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.6)">
+            <div style="width:520px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--color-accent);box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">{{ s.det.code }}</span>
+                <h2 style="margin:0;font-size:26px;font-weight:800">Aprobar ticket</h2>
+                <p style="margin:0;font-size:16px;line-height:1.55;color:var(--muted)">El cliente aprobó el precio de {{ s.det.total }}. Al aprobar se descuentan estas piezas del stock:</p>
+              </div>
+              <div style="display:flex;flex-direction:column;border-top:2px solid var(--color-text)">
+                <sc-for list="{{ s.det.planned }}" as="p" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--color-divider);font-size:15px"><span style="flex:1;font-weight:700">{{ p.name }} × {{ p.qty }}</span><span style="font-variant-numeric:tabular-nums">{{ p.stockTxt }}</span></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px">
+                <button type="button" onClick="{{ s.closeDlg }}" class="btn btn-secondary" style="min-height:46px;font-size:15px">Cancelar</button>
+                <button type="button" onClick="{{ s.det.confirmAprobar }}" class="btn btn-primary" style="min-height:46px;padding:0 20px;color:#0f172a;font-size:15px">Aprobar y descontar</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.dlgErr }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.6)">
+            <div style="width:520px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--danger);box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <span style="width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--danger-bg);color:var(--danger-ink)"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4M12 17h.01"></path></svg></span>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <h2 style="margin:0;font-size:26px;font-weight:800">No se pudo aprobar {{ s.det.code }}</h2>
+                  <p style="margin:0;font-size:17px;line-height:1.5;color:var(--danger-ink);font-weight:700">Falta 1 Pantalla A53 OLED</p>
+                  <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">El stock bajó a 0 después de crear el ticket. El ticket sigue en Pendiente: repón el stock o cambia la pieza.</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--danger-bg);font-size:15px">
+                <span style="flex:1;font-weight:700">Pantalla Samsung A53 OLED</span><span>Necesitas <strong>1</strong></span><span>Hay <strong style="color:var(--danger-ink)">0</strong></span>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px">
+                <button type="button" onClick="{{ s.closeDlg }}" class="btn btn-secondary" style="min-height:46px;font-size:15px">Cerrar</button>
+                <button type="button" onClick="{{ s.closeDlg }}" class="btn btn-primary" style="min-height:46px;padding:0 20px;color:#0f172a;font-size:15px">Cambiar pieza</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.dlgEntregar }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.6)">
+            <div style="width:520px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--color-accent);box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">{{ s.det.code }} · {{ s.det.name }}</span>
+                <h2 style="margin:0;font-size:26px;font-weight:800">Entregar y cobrar saldo</h2>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;border:2px solid var(--color-text)">
+                <div style="padding:12px 14px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Total</span><span style="font-size:18px;font-weight:800">{{ s.det.total }}</span></div>
+                <div style="padding:12px 14px;border-left:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;color:var(--muted)">Adelanto · {{ s.det.adelMet }}</span><span style="font-size:18px;font-weight:800">{{ s.det.adel }}</span></div>
+                <div style="padding:12px 14px;border-left:1px solid var(--color-divider);display:flex;flex-direction:column;gap:2px;background:var(--color-accent);color:#0f172a"><span style="font-size:13px;font-weight:700">Saldo a cobrar</span><span style="font-size:24px;font-weight:800">{{ s.det.saldo }}</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
+                <div class="field"><label style="font-size:14px;color:var(--muted)">Monto cobrado</label>
+                  <div style="display:flex;border:1px solid var(--color-divider)"><span style="display:flex;align-items:center;padding:0 12px;font-weight:700;background:var(--color-surface);border-right:1px solid var(--color-divider)">S/</span><input value="{{ s.det.saldoNum }}" readOnly="{{ ro }}" style="flex:1;min-width:0;height:46px;border:0;background:transparent;color:var(--color-text);font:800 18px var(--font-body);padding:0 12px;outline:none"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--color-divider)">
+                  <sc-for list="{{ entMetOpts }}" as="o" hint-placeholder-count="2"><button type="button" onClick="{{ o.select }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+                </div>
+              </div>
+              <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Se registra en Historial de caja como «Saldo {{ s.det.code }}» y la clave del equipo se borra.</p>
+              <div style="display:flex;justify-content:flex-end;gap:8px">
+                <button type="button" onClick="{{ s.closeDlg }}" class="btn btn-secondary" style="min-height:46px;font-size:15px">Cancelar</button>
+                <button type="button" onClick="{{ s.det.confirmEntregar }}" class="btn btn-primary" style="min-height:46px;padding:0 20px;color:#0f172a;font-size:15px">Cobrar y entregar</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.dlgComp }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.6)">
+            <div style="width:500px;max-height:860px;display:flex;flex-direction:column;background:#fff;color:#0f172a;box-shadow:0 24px 60px rgba(2,6,23,.5)">
+              <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 12px 24px;background:#0f172a;color:#e2e8f0">
+                <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#fdba74">Comprobante de servicio</span>
+                <button type="button" onClick="{{ s.closeDlg }}" aria-label="Cerrar" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(226,232,240,.3);color:#e2e8f0;cursor:pointer"><svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+              </div>
+              <div style="flex:1;overflow:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <img src="assets/Armalytech_logo.png" alt="ArmalyTech" style="width:44px;height:44px;object-fit:contain">
+                  <div style="display:flex;flex-direction:column;line-height:1.35"><span style="font-size:18px;font-weight:800">ArmalyTech</span><span style="font-size:13px;color:#475569">Av. San Borja Norte 1234, San Borja — Lima</span><span style="font-size:13px;color:#475569">WhatsApp +51 924 548 268</span></div>
+                </div>
+                <div style="border-top:2px solid #0f172a;padding-top:12px;display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:24px;font-weight:800;letter-spacing:.02em">TICKET {{ s.det.code }}</span>
+                  <span style="font-size:16px;font-weight:700">{{ s.det.title }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:14px;line-height:1.4">
+                  <div style="display:flex;flex-direction:column"><span style="color:#475569">Cliente</span><span style="font-weight:700">{{ s.det.name }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="color:#475569">Equipo</span><span style="font-weight:700">{{ s.det.device }}</span></div>
+                  <div style="display:flex;flex-direction:column;grid-column:span 2"><span style="color:#475569">Falla</span><span style="font-weight:700">{{ s.det.falla }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="color:#475569">Ingreso</span><span style="font-weight:700">{{ s.det.ingresoFecha }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="color:#475569">Entrega</span><span style="font-weight:700">{{ s.det.entregaFecha }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="color:#475569">Técnico</span><span style="font-weight:700">{{ s.det.tech }}</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;border-top:2px solid #0f172a;font-size:15px">
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span style="font-weight:700">{{ s.det.title }}</span><span style="font-weight:800;font-variant-numeric:tabular-nums">{{ s.det.total }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span>Adelanto · {{ s.det.adelMet }}</span><span style="font-variant-numeric:tabular-nums">{{ s.det.adel }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:2px solid #0f172a"><span>Saldo · {{ s.det.saldoMet }}</span><span style="font-variant-numeric:tabular-nums">{{ s.det.saldoPagado }}</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0"><span style="font-weight:800">Estado</span><span style="font-weight:800;color:#c2410c">Pagado</span></div>
+                </div>
+                <div style="padding:12px 14px;background:#f1f5f9;font-size:14px;line-height:1.5"><strong>Garantía:</strong> 30 días sobre la pieza cambiada. No cubre golpes, humedad ni equipos abiertos por terceros.</div>
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="width:96px;height:96px;flex:none;display:flex;align-items:center;justify-content:center;border:2px dashed rgba(15,23,42,.35);font-size:13px;font-weight:800;color:#475569">QR</div>
+                  <div style="display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.4"><span style="font-weight:700">Sigue tu reparación</span><span style="font-family:ui-monospace,Menlo,monospace;color:#475569">armalytech.com/t/{{ s.det.token }}</span></div>
+                </div>
+                <p style="margin:0;padding-top:10px;border-top:1px solid rgba(15,23,42,.15);font-size:13px;color:#475569">Comprobante de servicio, no es boleta SUNAT.</p>
+              </div>
+              <div style="flex:none;display:flex;gap:8px;padding:14px 28px;border-top:2px solid #0f172a">
+                <a href="https://api.whatsapp.com/send/?phone=%2B51924548268" target="_blank" rel="noopener noreferrer" style="min-height:46px;display:flex;align-items:center;gap:10px;padding:0 18px;background:#f97316;color:#0f172a;font:800 15px var(--font-body);text-decoration:none"><img src="assets/redes/whatsapp.svg" alt="" style="width:18px;height:18px;filter:brightness(0)"><span>Enviar por WhatsApp</span></a>
+                <button type="button" onClick="{{ s.closeDlg }}" style="min-height:46px;padding:0 18px;background:transparent;border:1px solid rgba(15,23,42,.3);color:#0f172a;font:700 15px var(--font-body);cursor:pointer">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ s.showCliDrawer }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:rgba(2,6,23,.5)">
+            <div style="width:640px;height:100%;background:var(--color-bg);color:var(--color-text);border-left:4px solid var(--color-accent);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)">
+              <div style="flex:none;display:flex;align-items:center;gap:16px;padding:20px 28px">
+                <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--color-text);color:var(--color-bg);font-size:20px;font-weight:800">AS</span>
+                <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Detalle del cliente</span><h2 style="margin:0;font-size:26px;font-weight:800">Andrea Salazar</h2><span style="font-size:15px;color:var(--muted)">+51 987 654 321 · QR</span></div>
+              </div>
+              <div style="display:flex;gap:28px;padding:0 28px;border-bottom:2px solid var(--color-divider)">
+                <button type="button" onClick="{{ setCliFid }}" style="{{ tabFid }}">Fidelización</button>
+                <button type="button" onClick="{{ setCliHist }}" style="{{ tabHist }}">Historial de servicios <span style="color:var(--muted);font-weight:500">3</span></button>
+              </div>
+              <div style="flex:1;overflow:auto;padding:20px 28px">
+                <sc-if value="{{ cliHist }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column;border-top:2px solid var(--color-text)">
+                    <sc-for list="{{ cliTickets }}" as="h" hint-placeholder-count="3">
+                      <button type="button" style="display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:14px 0;background:transparent;border:0;border-bottom:1px solid var(--color-divider);color:var(--color-text);text-align:left;cursor:pointer;font-family:var(--font-body)" style-hover="background:var(--row-hover)">
+                        <span style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700">{{ h.code }}</span><span style="{{ h.tagStyle }}"><span style="{{ h.dotStyle }}"></span>{{ h.stLabel }}</span></span>
+                        <span style="font-size:17px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums">{{ h.total }}</span>
+                        <span style="font-size:15px"><strong>{{ h.title }}</strong> · {{ h.device }}</span>
+                        <span style="font-size:14px;color:var(--muted);text-align:right;white-space:nowrap">{{ h.date }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <p style="margin:14px 0 0;font-size:14px;color:var(--muted)">Toca un ticket para abrir su detalle.</p>
+                </sc-if>
+                <sc-if value="{{ cliFid }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+                    <div style="height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--color-accent);color:#0f172a"><span style="font-size:22px;font-weight:800">✓</span><span style="font-size:13px;font-weight:600">Visita 1</span></div>
+                    <div style="height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--color-accent);color:#0f172a"><span style="font-size:22px;font-weight:800">✓</span><span style="font-size:13px;font-weight:600">Visita 2</span></div>
+                    <div style="height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--color-accent);color:#0f172a"><span style="font-size:22px;font-weight:800">✓</span><span style="font-size:13px;font-weight:600">Visita 3</span></div>
+                    <div style="height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--color-accent);color:#0f172a"><span style="font-size:22px;font-weight:800">✓</span><span style="font-size:13px;font-weight:600">Visita 4</span></div>
+                    <div style="height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--color-accent);color:var(--ink-accent)"><span style="font-size:22px;font-weight:800">5</span><span style="font-size:13px;font-weight:600">20%</span></div>
+                  </div>
+                  <p style="margin:14px 0 0;font-size:15px;color:var(--muted)">4/5 sellos. En su próxima visita gana 20% de descuento.</p>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-for>
+  </div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="font-size:15px;font-weight:800;color:#fff;background:#0f172a;padding:4px 9px">15</span>
+      <span style="font-size:24px;font-weight:600;color:#0f172a;font-family:ui-monospace,Menlo,monospace">WhatsApp del cliente</span>
+      <span style="font-size:15px;color:#475569">Lo que recibe al crear el ticket · enviado por el sistema (n8n + WhatsApp Business)</span>
+    </div>
+    <div style="display:flex;gap:48px;align-items:flex-start">
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-size:15px;font-weight:700;color:#0f172a">Chat</span>
+        <div style="width:390px;height:844px;display:flex;flex-direction:column;background:#e7e5e4;border:10px solid #020617;box-shadow:0 30px 60px rgba(15,23,42,.25);font-family:var(--font-body);color:#0f172a;overflow:hidden">
+          <div style="flex:none;height:68px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0f172a;color:#fff">
+            <svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>
+            <span style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><img src="assets/Armalytech_logo.png" alt="" style="width:30px;height:30px;object-fit:contain"></span>
+            <div style="display:flex;flex-direction:column;line-height:1.2">
+              <span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px">ArmalyTech <svg width="15" height="15" viewBox="0 0 24 24" style="fill:#f97316;stroke:#0f172a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 3 3 5-6" style="fill:none"></path></svg></span>
+              <span style="font-size:13px;color:#cbd5e1">Cuenta de empresa</span>
+            </div>
+          </div>
+          <div style="flex:1;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;gap:10px">
+            <span style="align-self:center;font-size:13px;font-weight:600;padding:4px 10px;background:#fff;color:#475569">Hoy</span>
+            <div style="align-self:flex-start;width:318px;background:#fff;box-shadow:0 1px 1px rgba(15,23,42,.12);display:flex;flex-direction:column">
+              <div style="margin:6px;display:flex;align-items:center;gap:12px;padding:12px;background:#f1f5f9">
+                <span style="width:40px;height:48px;flex:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;background:#dc2626;color:#fff;font-size:11px;font-weight:800">PDF</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Comprobante-AT-000148.pdf</span>
+                  <span style="font-size:13px;color:#475569">1 página · PDF · 86 kB</span>
+                </div>
+              </div>
+              <div style="padding:6px 12px 4px;font-size:15px;line-height:1.5;display:flex;flex-direction:column;gap:8px">
+                <span>Hola <strong>Andrea</strong>, recibimos tu <strong>Galaxy A53</strong> en ArmalyTech.</span>
+                <span><strong>Ticket:</strong> AT-000148<br><strong>Servicio:</strong> Reparación de pantalla A53<br><strong>Total acordado:</strong> S/ 250.00<br><strong>Adelanto:</strong> S/ 100.00 (Yape)<br><strong>Saldo al recoger:</strong> S/ 150.00</span>
+                <span>Te adjuntamos tu comprobante. Desde el botón de abajo puedes ver el estado de tu reparación en cualquier momento.</span>
+              </div>
+              <span style="align-self:flex-end;padding:0 10px 8px;font-size:12px;color:#64748b">10:26 a. m.</span>
+              <a href="#" style="display:flex;align-items:center;justify-content:center;gap:8px;height:46px;border-top:1px solid rgba(15,23,42,.12);color:#c2410c;font:700 15px var(--font-body);text-decoration:none" style-hover="background:#fff7ed">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                <span>Ver mi reparación</span>
+              </a>
+            </div>
+            <div style="align-self:flex-start;max-width:318px;padding:8px 12px;background:#fff;box-shadow:0 1px 1px rgba(15,23,42,.12);font-size:14px;line-height:1.45;color:#475569">Responde a este chat si tienes dudas. Horario: lun a sáb, 10:00 a. m. – 8:00 p. m.<span style="display:block;text-align:right;font-size:12px;color:#64748b;margin-top:2px">10:26 a. m.</span></div>
+          </div>
+          <div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f5f5f4">
+            <span style="flex:1;height:44px;display:flex;align-items:center;padding:0 14px;background:#fff;font-size:15px;color:#94a3b8">Mensaje</span>
+            <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-size:15px;font-weight:700;color:#0f172a">Al abrir el PDF</span>
+        <div style="width:390px;height:844px;display:flex;flex-direction:column;background:#334155;border:10px solid #020617;box-shadow:0 30px 60px rgba(15,23,42,.25);font-family:var(--font-body);overflow:hidden">
+          <div style="flex:none;height:56px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0f172a;color:#fff">
+            <svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>
+            <span style="flex:1;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Comprobante-AT-000148.pdf</span>
+            <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"></path></svg>
+          </div>
+          <div style="flex:1;overflow:auto;padding:14px">
+            <div style="background:#fff;color:#0f172a;padding:20px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 20px rgba(0,0,0,.35)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <img src="assets/Armalytech_logo.png" alt="" style="width:36px;height:36px;object-fit:contain">
+                <div style="display:flex;flex-direction:column;line-height:1.35"><span style="font-size:16px;font-weight:800">ArmalyTech</span><span style="font-size:11px;color:#475569">Av. San Borja Norte 1234, San Borja — Lima</span><span style="font-size:11px;color:#475569">WhatsApp +51 924 548 268</span></div>
+              </div>
+              <div style="border-top:2px solid #0f172a;padding-top:10px;display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:20px;font-weight:800;letter-spacing:.02em">TICKET AT-000148</span>
+                <span style="font-size:14px;font-weight:700">Reparación de pantalla A53</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:12px;line-height:1.35">
+                <div style="display:flex;flex-direction:column"><span style="color:#475569">Cliente</span><span style="font-weight:700">Andrea Salazar</span></div>
+                <div style="display:flex;flex-direction:column"><span style="color:#475569">Equipo</span><span style="font-weight:700">Galaxy A53 · Negro</span></div>
+                <div style="display:flex;flex-direction:column;grid-column:span 2"><span style="color:#475569">Falla</span><span style="font-weight:700">Pantalla rota tras una caída; el táctil no responde en la parte inferior.</span></div>
+                <div style="display:flex;flex-direction:column"><span style="color:#475569">Ingreso</span><span style="font-weight:700">23 set · 10:24 a. m.</span></div>
+                <div style="display:flex;flex-direction:column"><span style="color:#475569">Entrega</span><span style="font-weight:700">Pendiente</span></div>
+                <div style="display:flex;flex-direction:column"><span style="color:#475569">Técnico</span><span style="font-weight:700">Martin Armas</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;border-top:2px solid #0f172a;font-size:13px">
+                <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span style="font-weight:700">Reparación de pantalla A53</span><span style="font-weight:800">S/ 250.00</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span>Adelanto · Yape</span><span>S/ 100.00</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:2px solid #0f172a"><span>Saldo · al recoger</span><span style="font-weight:800">S/ 150.00</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0"><span style="font-weight:800">Estado</span><span style="font-weight:800;color:#c2410c">Saldo pendiente</span></div>
+              </div>
+              <div style="padding:10px 12px;background:#f1f5f9;font-size:12px;line-height:1.45"><strong>Garantía:</strong> 30 días sobre la pieza cambiada. No cubre golpes, humedad ni equipos abiertos por terceros.</div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:76px;height:76px;flex:none;display:flex;align-items:center;justify-content:center;border:2px dashed rgba(15,23,42,.35);font-size:12px;font-weight:800;color:#475569">QR</div>
+                <div style="display:flex;flex-direction:column;gap:2px;font-size:12px;line-height:1.4"><span style="font-weight:700">Sigue tu reparación</span><span style="font-family:ui-monospace,Menlo,monospace;color:#475569">armalytech.com/t/k7Q2mX9p</span></div>
+              </div>
+              <p style="margin:0;padding-top:8px;border-top:1px solid rgba(15,23,42,.15);font-size:11px;color:#475569">Comprobante de servicio, no es boleta SUNAT.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;max-width:460px;padding-top:36px;color:#0f172a">
+        <h3 style="margin:0;font-size:24px;font-weight:800">Cómo se envía</h3>
+        <div style="display:flex;flex-direction:column;border-top:2px solid #0f172a;font-size:16px;line-height:1.5">
+          <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span style="font-weight:800;color:#c2410c;width:24px;flex:none">01</span><span>Al tocar «Crear ticket», el sistema genera el PDF del comprobante con el saldo pendiente y el link /t/ con token.</span></div>
+          <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span style="font-weight:800;color:#c2410c;width:24px;flex:none">02</span><span>n8n manda la plantilla de WhatsApp con el PDF arriba, el resumen y el botón «Ver mi reparación».</span></div>
+          <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(15,23,42,.15)"><span style="font-weight:800;color:#c2410c;width:24px;flex:none">03</span><span>El envío queda en el historial del cliente. Si falla, el detalle del ticket muestra «No enviado · Reintentar».</span></div>
+        </div>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#475569">WhatsApp Business exige que Meta apruebe la plantilla antes de usarla, porque el cliente todavía no escribió primero. Nombre sugerido: <strong style="color:#0f172a">ticket_creado</strong>, con el PDF como encabezado y un botón de enlace.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;temaInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claro&quot;,&quot;oscuro&quot;],&quot;default&quot;:&quot;claro&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    dark: null, now: new Date(), menu: null,
+    fst: 'todos', q: '', aband: false,
+    liveDet: null, liveNew: false, liveDlg: null, st: {},
+    clave: {}, patron: [0, 3, 6, 7, 8], cat: 'Pantallas',
+    piezas: [{ id: 'oled', qty: 1 }], titulo: 'Reparación de pantalla A53', precio: '250', adel: '100', met: 'yape', tecnico: 'Martin Armas',
+    showClave: {}, notas: {}, notaIn: '', entMet: 'efectivo',
+    techs: [{ id: 't1', name: 'Martin Armas', active: true, since: 'Mar 2026' }, { id: 't2', name: 'Kevin Armas', active: true, since: 'Jun 2026' }], techIn: '',
+    cliTab: 'hist'
+  };
+
+  componentDidMount() { this.t = setInterval(() => this.setState({ now: new Date() }), 1000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  get dark() { return this.state.dark ?? (this.props.temaInicial === 'oscuro'); }
+
+  vars(dark) {
+    const ramp = '--color-accent:#f97316;--color-accent-100:#ffedd5;--color-accent-300:#fdba74;--color-accent-600:#ea580c;--color-accent-700:#c2410c;';
+    return ramp + (dark
+      ? '--color-bg:#0f172a;--color-surface:#1e293b;--color-text:#e2e8f0;--color-divider:rgba(226,232,240,.2);--muted:#94a3b8;--ink-accent:#fdba74;--side-bg:#020617;--side-pop:#0f172a;--danger:#ef4444;--danger-ink:#fca5a5;--danger-bg:rgba(239,68,68,.14);--row-hover:rgba(226,232,240,.06);--shadow-lg:0 0 0 1px rgba(226,232,240,.08),0 18px 44px rgba(0,0,0,.55)'
+      : '--color-bg:#f8fafc;--color-surface:#eef2f7;--color-text:#0f172a;--color-divider:rgba(15,23,42,.2);--muted:#475569;--ink-accent:#c2410c;--side-bg:#0f172a;--side-pop:#1e293b;--danger:#dc2626;--danger-ink:#b91c1c;--danger-bg:#fef2f2;--row-hover:rgba(15,23,42,.05);--shadow-lg:0 16px 40px rgba(15,23,42,.2)');
+  }
+
+  money(n) { return 'S/ ' + (Number(n) || 0).toFixed(2); }
+  hm() { return new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date()); }
+
+  tag(st) {
+    const base = 'display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 10px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;';
+    const dot = 'width:8px;height:8px;flex:none;';
+    const M = {
+      pendiente: ['Pendiente', 'border:1px solid var(--color-text);color:var(--color-text)', 'border:2px solid var(--muted)'],
+      aprobado: ['Aprobado', 'border:1px solid var(--color-accent);color:var(--ink-accent)', 'background:var(--color-accent)'],
+      trabajando: ['Trabajando', 'background:color-mix(in srgb,var(--color-accent) 20%,transparent);color:var(--ink-accent)', 'background:var(--color-accent);animation:tk-pulse 1.4s ease-in-out infinite'],
+      listo: ['Listo', 'background:var(--color-accent);color:#0f172a', 'background:#0f172a'],
+      entregado: ['Entregado', 'background:var(--color-text);color:var(--color-bg)', 'background:var(--color-accent)'],
+      cancelado: ['Cancelado', 'border:1px dashed var(--color-divider);color:var(--muted);text-decoration:line-through', 'background:var(--muted)'],
+      abandonado: ['Abandonado', 'background:var(--color-surface);color:var(--muted)', 'border:1px solid var(--muted)']
+    }[st];
+    return { label: M[0], style: base + M[1], dot: dot + M[2] };
+  }
+
+  cat() {
+    return {
+      Pantallas: [
+        { id: 'oled', name: 'Pantalla Samsung A53 OLED', cost: 120, stock: 4, plan: '1 planificada en AT-000150', disp: 3 },
+        { id: 'incell', name: 'Pantalla Samsung A53 Incell', cost: 70, stock: 2, disp: 2 },
+        { id: 'marco', name: 'Pantalla A53 original con marco', cost: 210, stock: 1, disp: 0, block: 'Reservada', blockMeta: 'Stock 1 · Reservada para AT-000149 (Carlos Huamán)' }
+      ],
+      Micas: [{ id: 'mica', name: 'Mica templada 9D A53', cost: 3, stock: 25, disp: 25 }],
+      'Zócalos': [{ id: 'zocalo', name: 'Zócalo de carga USB-C A53', cost: 15, stock: 6, plan: '1 planificada en AT-000152', disp: 5 }],
+      'Baterías': [{ id: 'bat', name: 'Batería Samsung A53 EB-BA536', cost: 45, stock: 0, disp: 0, block: 'Sin stock', blockMeta: 'Stock 0 · pide al proveedor o elige otra pieza' }]
+    };
+  }
+
+  tickets() {
+    const base = [
+      { code: 'AT-000152', name: 'Jorge Paredes', phone: '+51 975 338 690', device: 'Redmi Note 12', title: 'Cambio de zócalo de carga', st: 'pendiente', tech: 'Kevin Armas', date: 'Hoy · 11:05', total: 80, adel: 0 },
+      { code: 'AT-000151', name: 'Rosa Mendoza', phone: '+51 998 223 104', device: 'iPhone 12', color: 'Blanco', imei: 'IMEI 356728119043552', title: 'Cambio de batería iPhone 12', st: 'pendiente', tech: 'Martin Armas', date: 'Hoy · 09:40', total: 160, adel: 50, met: 'Yape',
+        falla: 'La batería dura menos de medio día y el equipo se apaga al 20%.', ingreso: 'Sin golpes, con funda y sin chip.', clave: { tipo: 'PIN', val: '4821' },
+        piezas: [['Batería iPhone 12', 1, 'planificada', 55, 5]], tl: [['Hoy · 9:40 a. m.', 'Karla R.']],
+        notas: [['Karla R.', 'Hoy · 9:45 a. m.', 'La clienta confirma el precio por WhatsApp antes de las 6 p. m.']], notaCli: 'Te enviamos el presupuesto por WhatsApp. Apenas lo apruebes empezamos.' },
+      { code: 'AT-000150', name: 'María Quispe', phone: '+51 912 345 678', device: 'Galaxy A53', color: 'Negro', imei: 'Sin IMEI', title: 'Reparación de pantalla A53', st: 'pendiente', tech: 'Martin Armas', date: 'Ayer · 17:20', total: 250, adel: 50, met: 'Yape',
+        falla: 'Pantalla con manchas verdes y líneas verticales.', ingreso: 'Golpe en la esquina superior del marco.', clave: { tipo: 'Contraseña', val: 'maria2024' },
+        piezas: [['Pantalla Samsung A53 OLED', 1, 'planificada', 120, 0]], tl: [['Ayer · 5:20 p. m.', 'Jhon M.']], notaCli: 'Recibimos tu equipo. Te avisamos cuando empecemos.' },
+      { code: 'AT-000149', name: 'Carlos Huamán', phone: '+51 944 870 221', device: 'Galaxy A53', title: 'Pantalla original con marco A53', st: 'pendiente', tech: 'Kevin Armas', date: 'Ayer · 12:30', total: 290, adel: 0 },
+      { code: 'AT-000148', name: 'Andrea Salazar', phone: '+51 987 654 321', device: 'Galaxy A53', color: 'Negro', imei: 'IMEI 352098114023371', title: 'Reparación de pantalla A53', st: 'trabajando', tech: 'Martin Armas', date: '23 set · 10:24', total: 250, adel: 100, met: 'Yape',
+        falla: 'Pantalla rota tras una caída; el táctil no responde en la parte inferior.', ingreso: 'Tapa trasera rajada, sin chip y sin funda.', clave: { tipo: 'Patrón', pat: [0, 1, 2, 5, 8] },
+        piezas: [['Pantalla Samsung A53 OLED', 1, 'descontada', 120, 4], ['Batería Samsung A53', 1, 'devuelta', 45, 0]],
+        tl: [['23 set · 10:24 a. m.', 'Jhon M.'], ['23 set · 11:02 a. m.', 'Jhon M.'], ['24 set · 9:10 a. m.', 'Karla R.']],
+        notas: [['Karla R.', '24 set · 11:42 a. m.', 'Marco doblado: hay que enderezarlo antes de montar la pantalla.'], ['Jhon M.', '25 set · 4:05 p. m.', 'Pantalla instalada. La batería no fue necesaria y volvió al stock.']],
+        notaCli: 'Encontramos el marco ligeramente doblado y lo enderezamos sin costo extra. Entrega estimada: mañana por la tarde.' },
+      { code: 'AT-000147', name: 'Luis Quispe', phone: '+51 912 667 830', device: 'iPhone 13', color: 'Azul', imei: 'IMEI 353914107725408', title: 'Cambio de tapa trasera iPhone 13', st: 'listo', tech: 'Martin Armas', date: '22 set · 15:15', total: 120, adel: 50, met: 'Yape',
+        falla: 'Tapa trasera rota por una caída.', ingreso: 'Cámara trasera sin daños, sin chip.', clave: { tipo: 'Sin bloqueo' },
+        piezas: [['Tapa trasera vidrio iPhone 13', 1, 'descontada', 35, 3]],
+        tl: [['22 set · 3:15 p. m.', 'Karla R.'], ['22 set · 3:40 p. m.', 'Karla R.'], ['23 set · 10:00 a. m.', 'Jhon M.'], ['24 set · 6:30 p. m.', 'Jhon M.']],
+        notaCli: 'Tu iPhone está listo. Probamos la cámara y la carga inalámbrica.' },
+      { code: 'AT-000146', name: 'Valeria Rojas', phone: '+51 961 007 452', device: 'Moto G52', title: 'Cambio de flex de encendido', st: 'aprobado', tech: 'Kevin Armas', date: '22 set · 12:10', total: 90, adel: 50 },
+      { code: 'AT-000145', name: 'Diego Torres', phone: '+51 933 450 876', device: 'Galaxy A14', title: 'Cambio de pantalla A14', st: 'entregado', tech: 'Kevin Armas', date: '20 set · 16:48', total: 150, adel: 0 },
+      { code: 'AT-000144', name: 'Pedro Ramos', phone: '+51 947 612 095', device: 'Redmi Note 13', title: 'Diagnóstico de placa', st: 'cancelado', tech: 'Kevin Armas', date: '18 set · 11:20', total: 60, adel: 0 },
+      { code: 'AT-000139', name: 'Sofía Castro', phone: '+51 986 540 213', device: 'iPhone 8', title: 'Cambio de batería iPhone 8', st: 'abandonado', tech: 'Martin Armas', date: '10 set · 17:02', total: 90, adel: 0 }
+    ];
+    return base.map(t => Object.assign({}, t, { st: this.state.st[t.code] || t.st }));
+  }
+
+  advance(code, to) { this.setState(s => ({ st: Object.assign({}, s.st, { [code]: to }) })); }
+
+  det(code, stOv, fid, live) {
+    const S = this.state;
+    const t = this.tickets().find(x => x.code === code);
+    const st = stOv || t.st;
+    const g = this.tag(st);
+    const order = ['pendiente', 'aprobado', 'trabajando', 'listo', 'entregado'];
+    const labels = ['Pendiente', 'Aprobado', 'Trabajando', 'Listo', 'Entregado'];
+    const idx = order.indexOf(st);
+    const fin = st === 'entregado';
+    const tl = (t.tl || []).slice();
+    while (tl.length <= idx) tl.push(['Hoy · ' + this.hm(), 'Jhon M.']);
+    const timeline = order.map((k, i) => {
+      const done = i < idx || (fin && i === idx), cur = i === idx && !fin, on = done || cur;
+      return { label: labels[i], date: on ? tl[i][0] : '—', who: on ? tl[i][1] : '',
+        cell: 'position:relative;padding:12px 8px 0 ' + (i ? '10px' : '0') + ';display:flex;flex-direction:column;gap:3px;' + (i ? 'border-left:1px solid var(--color-divider)' : ''),
+        bar: 'position:absolute;left:0;right:0;top:-2px;height:4px;background:' + (done ? 'var(--color-text)' : cur ? 'var(--color-accent)' : 'transparent'),
+        labelStyle: 'font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:' + (cur ? 'var(--ink-accent)' : on ? 'var(--color-text)' : 'var(--muted)') };
+    });
+    const pz = (t.piezas || []).map(([name, qty, pst, cost, stock]) => {
+      const ps = fin && pst === 'planificada' ? 'descontada' : (st !== 'pendiente' && pst === 'planificada' ? 'descontada' : pst);
+      const tagBase = 'font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;white-space:nowrap;';
+      return { name, qty, cost: this.money(cost * qty), stock, pst: ps, tagLabel: { planificada: 'Planificada', descontada: 'Descontada', devuelta: 'Devuelta' }[ps],
+        tagStyle: tagBase + { planificada: 'border:1px solid var(--color-divider)', descontada: 'background:var(--color-text);color:var(--color-bg)', devuelta: 'border:1px dashed var(--color-divider);color:var(--muted)' }[ps] };
+    });
+    const costo = pz.filter(p => p.pst !== 'devuelta').reduce((a, p) => a + Number(p.cost.slice(3)), 0);
+    const saldo = t.total - t.adel;
+    const cl = t.clave || { tipo: 'Sin bloqueo' };
+    const shown = !!S.showClave[fid];
+    const hasCl = cl.tipo !== 'Sin bloqueo' && !fin;
+    const pat = cl.pat || [];
+    const notas = (S.notas[code] || []).concat((t.notas || []).map(([who, date, text]) => ({ who, date, text })));
+    const primLabel = { pendiente: 'Aprobar', aprobado: 'Empezar', trabajando: 'Marcar listo', listo: 'Entregar' }[st];
+    const setDlg = (d) => this.setState({ liveDlg: d });
+    return {
+      code, title: t.title, stLabel: g.label, tagStyle: g.style, dotStyle: g.dot,
+      name: t.name, phone: t.phone, device: t.device + (t.color ? ' · ' + t.color : ''), imei: t.imei || 'Sin IMEI', tech: t.tech,
+      timeline, total: this.money(t.total), adel: this.money(t.adel), adelMet: t.adel ? (t.met || 'Efectivo') : 'Sin adelanto',
+      saldo: this.money(fin ? 0 : saldo), saldoNum: saldo.toFixed(2), saldoLabel: fin ? 'Saldo · pagado' : 'Saldo por cobrar',
+      saldoMet: S.entMet === 'yape' ? 'Yape' : 'Efectivo', saldoPagado: this.money(saldo),
+      costo: this.money(costo), ganancia: this.money(t.total - costo),
+      falla: t.falla || '—', ingreso: t.ingreso || '—', piezas: pz,
+      planned: pz.filter(p => p.pst === 'planificada' || st === 'pendiente').map(p => ({ name: p.name, qty: p.qty, stockTxt: 'Stock ' + p.stock + ' → ' + Math.max(0, p.stock - p.qty) })),
+      claveTipo: fin ? 'Borrada' : cl.tipo, canToggleClave: hasCl, claveBtn: shown ? 'Ocultar' : 'Mostrar',
+      claveHidden: hasCl && !shown, claveShowPat: hasCl && shown && !!cl.pat, claveShowTxt: hasCl && shown && !!cl.val, claveVal: cl.val || '',
+      patDots: [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => { const o = pat.indexOf(i); return { label: o >= 0 ? String(o + 1) : '',
+        style: 'width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;' + (o >= 0 ? 'background:var(--color-accent);color:#0f172a' : 'border:2px solid var(--color-divider)') }; }),
+      claveNote: fin ? 'Se borró al entregar el equipo.' : hasCl ? 'Cifrada. Se borra al entregar.' : 'El equipo no tiene bloqueo.',
+      toggleClave: () => this.setState(s => ({ showClave: Object.assign({}, s.showClave, { [fid]: !s.showClave[fid] }) })),
+      notas, notaCli: t.notaCli || 'Sin nota para el cliente.',
+      addNota: () => { const v = S.notaIn.trim(); if (!v) return; this.setState(s => ({ notaIn: '', notas: Object.assign({}, s.notas, { [code]: [{ who: 'Jhon M.', date: 'Hoy · ' + this.hm(), text: v }].concat(s.notas[code] || []) }) })); },
+      hasPrimary: !!primLabel && st !== 'cancelado', primaryLabel: primLabel || '',
+      canCancel: ['pendiente', 'aprobado', 'trabajando'].includes(st),
+      primary: live ? () => { if (st === 'pendiente') setDlg('aprobar'); else if (st === 'listo') setDlg('entregar'); else this.advance(code, order[idx + 1]); } : () => {},
+      cancel: live ? () => this.advance(code, 'cancelado') : () => {},
+      openComp: live ? () => setDlg('comp') : () => {},
+      confirmAprobar: live ? () => { if (code === 'AT-000150') setDlg('err'); else { this.advance(code, 'aprobado'); setDlg(null); } } : () => {},
+      confirmEntregar: live ? () => { this.advance(code, 'entregado'); setDlg('comp'); } : () => {},
+      ingresoFecha: tl[0][0], entregaFecha: fin ? tl[4][0] : 'Pendiente',
+      token: { 'AT-000148': 'k7Q2mX9p', 'AT-000147': 'r4Tn8LwZ', 'AT-000151': 'b9Hc3VxQ', 'AT-000150': 'p2Ws6KdY' }[code] || 'x8Jm5RtA'
+    };
+  }
+
+  renderVals() {
+    const S = this.state, dark = this.dark, noop = () => {}, set = (o) => () => this.setState(o);
+    const lima = (o) => new Intl.DateTimeFormat('es-PE', Object.assign({ timeZone: 'America/Lima' }, o)).format(S.now);
+    const clockTime = lima({ hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const clockDate = lima({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const T = this.tickets();
+    const act = ['pendiente', 'aprobado', 'trabajando', 'listo'];
+    const activeCount = T.filter(t => act.includes(t.st)).length;
+    const rowOf = (t, live) => {
+      const g = this.tag(t.st), saldo = t.total - t.adel;
+      const paid = t.st === 'entregado', canc = t.st === 'cancelado';
+      return { code: t.code, name: t.name, phone: t.phone, device: t.device, title: t.title, tech: t.tech, date: t.date,
+        total: this.money(t.total), saldo: paid ? 'Pagado' : canc ? '—' : this.money(saldo),
+        saldoStyle: 'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;' + (!paid && !canc && saldo > 0 ? 'font-weight:800' : 'color:var(--muted)'),
+        tagStyle: g.style, dotStyle: g.dot, stLabel: g.label,
+        rowStyle: 'cursor:pointer;' + (t.st === 'abandonado' ? 'opacity:.6' : ''),
+        open: live && t.tl ? () => this.setState({ liveDet: t.code, liveNew: false, liveDlg: null }) : noop };
+    };
+    const chipBase = 'display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;font:600 15px var(--font-body);cursor:pointer;border:1px solid var(--color-divider);';
+    const chipDefs = [['todos', 'Todos'], ['pendiente', 'Pendiente'], ['aprobado', 'Aprobado'], ['trabajando', 'Trabajando'], ['listo', 'Listo'], ['entregado', 'Entregado'], ['cancelado', 'Cancelado']];
+    const chipsFor = (list, cur, live) => chipDefs.map(([k, l]) => {
+      const n = k === 'todos' ? list.length : list.filter(t => t.st === k).length, on = cur === k;
+      return { label: l, count: String(n), select: live ? set({ fst: k }) : noop,
+        style: chipBase + (on ? 'background:var(--color-text);color:var(--color-bg);border-color:var(--color-text)' : 'background:transparent;color:var(--color-text)'),
+        countStyle: 'font-size:14px;font-weight:700;' + (on ? 'opacity:.75' : 'color:var(--muted)') };
+    });
+    const match = (t, q) => { const d = q.replace(/\s/g, '').toLowerCase(); return !d || [t.code, t.name, t.phone, t.device, t.imei || ''].some(v => v.replace(/\s/g, '').toLowerCase().includes(d)); };
+    const trackStyle = (on) => 'width:40px;height:22px;padding:2px;display:flex;background:' + (on ? 'var(--color-accent)' : 'var(--color-divider)') + ';justify-content:' + (on ? 'flex-end' : 'flex-start');
+    const knobStyle = (on) => 'width:18px;height:18px;background:' + (on ? '#0f172a' : 'var(--color-bg)');
+
+    const P = this.cat();
+    const all = Object.values(P).flat();
+    const piezas = S.piezas.map(p => Object.assign({}, all.find(x => x.id === p.id), { qty: p.qty }));
+    const costo = piezas.reduce((a, p) => a + p.cost * p.qty, 0);
+    const precio = Number(S.precio) || 0, adel = Number(S.adel) || 0;
+    const segOpt = (on, i) => 'height:42px;border:0;' + (i ? 'border-left:1px solid var(--color-divider);' : '') + 'font:700 15px var(--font-body);cursor:pointer;' + (on ? 'background:var(--color-text);color:var(--color-bg)' : 'background:transparent;color:var(--color-text)');
+    const updPz = (id, f) => this.setState(s => ({ piezas: s.piezas.map(p => p.id === id ? Object.assign({}, p, { qty: f(p.qty) }) : p) }));
+    const nt = {
+      cat: S.cat, onCat: (e) => this.setState({ cat: e.target.value }),
+      results: (P[S.cat] || []).map(r => {
+        const added = S.piezas.some(p => p.id === r.id);
+        return { name: r.name, cost: 'Costo ' + this.money(r.cost), blocked: !!r.block, free: !r.block, blockLabel: r.block || '',
+          meta: r.block ? r.blockMeta : 'Stock ' + r.stock + (r.plan ? ' · ' + r.plan : '') + ' · ' + r.disp + ' disponibles',
+          metaStyle: 'font-size:14px;color:var(--muted)',
+          rowStyle: 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--color-divider);' + (r.block ? 'opacity:.7' : ''),
+          addLabel: added ? 'Agregada' : 'Agregar',
+          addStyle: 'height:36px;padding:0 14px;font:700 14px var(--font-body);cursor:pointer;white-space:nowrap;' + (added ? 'background:transparent;border:1px solid var(--color-divider);color:var(--muted)' : 'background:var(--color-accent);border:0;color:#0f172a'),
+          add: () => { if (!added) this.setState(s => ({ piezas: s.piezas.concat({ id: r.id, qty: 1 }) })); } };
+      }),
+      piezas: piezas.map(p => ({ name: p.name, qty: p.qty,
+        dec: () => updPz(p.id, q => Math.max(1, q - 1)), inc: () => updPz(p.id, q => Math.min(p.disp || q + 1, q + 1)),
+        remove: () => this.setState(s => ({ piezas: s.piezas.filter(x => x.id !== p.id) })) })),
+      noPiezas: piezas.length === 0,
+      titulo: S.titulo, onTitulo: (e) => this.setState({ titulo: e.target.value }),
+      precio: S.precio, onPrecio: (e) => this.setState({ precio: e.target.value }),
+      adel: S.adel, onAdel: (e) => this.setState({ adel: e.target.value }),
+      tecnico: S.tecnico, onTecnico: (e) => this.setState({ tecnico: e.target.value }),
+      techOpts: S.techs.filter(t => t.active).map(t => t.name),
+      metOpts: [['efectivo', 'Efectivo'], ['yape', 'Yape']].map(([k, l], i) => ({ label: l, select: set({ met: k }), style: segOpt(S.met === k, i) })),
+      total: this.money(precio), saldo: this.money(Math.max(0, precio - adel)),
+      costo: this.money(costo), ganancia: this.money(precio - costo),
+      ganStyle: 'font-variant-numeric:tabular-nums;color:' + (precio - costo < 0 ? 'var(--danger-ink)' : 'var(--ink-accent)')
+    };
+
+    const patronDots = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => {
+      const o = S.patron.indexOf(i);
+      return { label: o >= 0 ? String(o + 1) : '·',
+        click: () => this.setState(s => ({ patron: s.patron.includes(i) ? s.patron : s.patron.concat(i) })),
+        style: 'width:52px;height:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 18px var(--font-body);' +
+          (o >= 0 ? 'background:var(--color-accent);border:0;color:#0f172a' : 'background:var(--color-bg);border:2px solid var(--color-divider);color:var(--muted)') };
+    });
+
+    const navS = (on) => 'display:flex;align-items:center;gap:12px;padding:11px 12px;font-size:15px;font-weight:600;text-decoration:none;' + (on ? 'background:rgba(249,115,22,.16);color:#fdba74' : 'color:#cbd5e1');
+    const F = [
+      { id: 'live', route: '/admin/tickets', cap: 'Bandeja · interactiva: filtra, busca, toca una fila o «Nuevo ticket»', nav: 'tk', kind: 'bandeja', live: true },
+      { id: 'vacia', route: '/admin/tickets', cap: 'Bandeja sin tickets', nav: 'tk', kind: 'bandeja', empty: true },
+      { id: 'sinres', route: '/admin/tickets', cap: 'Búsqueda sin resultados', nav: 'tk', kind: 'bandeja', q: 'Galaxy A71' },
+      { id: 'n1', route: '/admin/tickets', cap: 'Nuevo ticket · cliente existente con ticket en curso · clave con patrón', nav: 'tk', kind: 'bandeja', nuevo: [1, 2], cli: 'existe', clave: 'patron' },
+      { id: 'n2', route: '/admin/tickets', cap: 'Nuevo ticket · cliente nuevo · clave con PIN', nav: 'tk', kind: 'bandeja', nuevo: [1, 2], cli: 'nuevo', clave: 'pin' },
+      { id: 'n3', route: '/admin/tickets', cap: 'Nuevo ticket · piezas (reservada y sin stock) · precio y cierre', nav: 'tk', kind: 'bandeja', nuevo: [3, 4] },
+      { id: 'd1', route: '/admin/tickets', cap: 'Detalle · AT-000148 en Trabajando (toca «Mostrar» en la clave)', nav: 'tk', kind: 'bandeja', det: 'AT-000148' },
+      { id: 'd2', route: '/admin/tickets', cap: 'Aprobar · confirma el descuento de piezas', nav: 'tk', kind: 'bandeja', det: 'AT-000151', dlg: 'aprobar' },
+      { id: 'd3', route: '/admin/tickets', cap: 'Error al aprobar por falta de stock', nav: 'tk', kind: 'bandeja', det: 'AT-000150', dlg: 'err' },
+      { id: 'd4', route: '/admin/tickets', cap: 'Entregar · cobro del saldo', nav: 'tk', kind: 'bandeja', det: 'AT-000147', dlg: 'entregar' },
+      { id: 'd5', route: '/admin/tickets', cap: 'Comprobante de servicio (en pantalla)', nav: 'tk', kind: 'bandeja', det: 'AT-000147', stOv: 'entregado', dlg: 'comp' },
+      { id: 'tec', route: '/admin/tecnicos', cap: 'Técnicos · solo owner', nav: 'tec', kind: 'tec' },
+      { id: 'cli', route: '/admin/clientes', cap: 'Detalle del cliente · pestaña Historial de servicios', nav: 'cli', kind: 'cli' },
+      { id: 'caja', route: '/admin/historial', cap: 'Filas de cobros de tickets bloqueadas', nav: 'his', kind: 'caja' }
+    ];
+    const baseList = T.filter(t => t.st !== 'abandonado');
+    const screens = F.map((f, i) => {
+      const live = !!f.live;
+      const aband = live ? S.aband : false;
+      const pool = aband ? T : baseList;
+      const q = live ? S.q : (f.q || '');
+      const fst = live ? S.fst : 'todos';
+      let rows = f.empty ? [] : pool.filter(t => (fst === 'todos' || t.st === fst) && match(t, q)).map(t => rowOf(t, live));
+      if (f.q) rows = [];
+      const nuevo = f.nuevo || (live && S.liveNew ? [1, 2, 3, 4] : null);
+      const clave = S.clave[f.id] || f.clave || 'patron';
+      const detCode = f.det || (live ? S.liveDet : null);
+      const dlg = f.dlg || (live ? S.liveDlg : null);
+      const d = detCode ? this.det(detCode, f.stOv || null, f.id, live) : {};
+      const blocks = nuevo || [];
+      const stepL = ['Cliente', 'Equipo', 'Piezas', 'Precio'];
+      return {
+        num: String(i + 1).padStart(2, '0'), route: f.route, cap: f.cap,
+        crumb: { tk: 'Tickets', tec: 'Técnicos', cli: 'Clientes', his: 'Historial de caja' }[f.nav] + (f.det ? ' / ' + f.det : nuevo ? ' / Nuevo' : ''),
+        navTk: navS(f.nav === 'tk'), navInv: navS(false), navHis: navS(f.nav === 'his'), navCli: navS(f.nav === 'cli'), navPer: navS(false), navTec: navS(f.nav === 'tec'),
+        menuOpen: S.menu === f.id, toggleMenu: () => this.setState({ menu: S.menu === f.id ? null : f.id }),
+        isBandeja: f.kind === 'bandeja', isTec: f.kind === 'tec', isCli: f.kind === 'cli', isCaja: f.kind === 'caja',
+        q, onQ: live ? (e) => this.setState({ q: e.target.value }) : noop,
+        toggleAband: live ? set({ aband: !S.aband }) : noop, abandTrack: trackStyle(aband), abandKnob: knobStyle(aband),
+        abandCount: f.empty ? '0' : '1',
+        chips: chipsFor(f.empty ? [] : pool, fst, live),
+        rows, hasRows: rows.length > 0, isEmpty: !!f.empty, isNoRes: !f.empty && rows.length === 0,
+        openNew: live ? set({ liveNew: true, liveDet: null, liveDlg: null }) : noop,
+        showNew: !!nuevo, closeNew: live ? set({ liveNew: false }) : noop,
+        createNew: live ? set({ liveNew: false }) : noop,
+        b1: blocks.includes(1), b2: blocks.includes(2), b3: blocks.includes(3), b4: blocks.includes(4),
+        b3Head: 'display:flex;align-items:baseline;gap:10px;padding-top:14px;' + (blocks.includes(2) ? 'border-top:2px solid var(--color-text)' : ''),
+        steps: stepL.map((l, j) => { const on = blocks.includes(j + 1); return { num: '0' + (j + 1), label: l,
+          style: 'display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:15px;font-weight:700;margin-top:-2px;' + (j ? 'border-left:1px solid var(--color-divider);' : '') +
+            (on ? 'border-top:3px solid var(--color-accent);color:var(--color-text)' : 'border-top:3px solid transparent;color:var(--muted)') }; }),
+        cliExiste: f.cli !== 'nuevo', cliNuevo: f.cli === 'nuevo',
+        nPhone: f.cli === 'nuevo' ? '956 778 102' : '987 654 321',
+        nPhoneTagLabel: f.cli === 'nuevo' ? 'Cliente nuevo' : 'Encontrado',
+        nPhoneTag: 'display:flex;align-items:center;margin:8px;padding:0 10px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;' + (f.cli === 'nuevo' ? 'border:1px solid var(--color-divider);color:var(--muted)' : 'background:var(--color-accent);color:#0f172a'),
+        claveOpts: [['none', 'Sin bloqueo'], ['pin', 'PIN'], ['txt', 'Contraseña'], ['patron', 'Patrón']].map(([k, l], j) => ({ label: l, style: segOpt(clave === k, j),
+          select: () => this.setState(s => ({ clave: Object.assign({}, s.clave, { [f.id]: k }) })) })),
+        clavePatron: clave === 'patron', clavePin: clave === 'pin', claveTxt: clave === 'txt', claveNone: clave === 'none',
+        showDet: !!detCode, det: d, closeDet: live ? set({ liveDet: null, liveDlg: null }) : noop,
+        dlgAprobar: dlg === 'aprobar', dlgErr: dlg === 'err', dlgEntregar: dlg === 'entregar', dlgComp: dlg === 'comp',
+        closeDlg: live ? set({ liveDlg: null }) : noop,
+        showCliDrawer: f.kind === 'cli'
+      };
+    });
+
+    const techs = S.techs.map(m => {
+      const mine = T.filter(t => t.tech === m.name && act.includes(t.st));
+      return { name: m.name, since: m.since, initials: m.name.split(' ').map(w => w[0]).join('').slice(0, 2),
+        status: m.active ? 'Activo' : 'Inactivo', dot: 'width:9px;height:9px;background:' + (m.active ? 'var(--color-text)' : 'var(--danger)'),
+        count: String(mine.length), codes: mine.length ? mine.map(t => t.code.slice(3)).join(' · ') : 'Sin tickets',
+        rowStyle: m.active ? '' : 'opacity:.65',
+        btnLabel: m.active ? 'Desactivar' : 'Activar',
+        btnStyle: 'min-height:38px;padding:0 14px;font:700 14px var(--font-body);cursor:pointer;background:transparent;border:1px solid ' + (m.active ? 'var(--danger);color:var(--danger-ink)' : 'var(--color-divider);color:var(--color-text)'),
+        toggle: () => this.setState(s => ({ techs: s.techs.map(x => x.id === m.id ? Object.assign({}, x, { active: !x.active }) : x) })) };
+    });
+
+    const C = [['Andrea Salazar', '+51 987 654 321', '4/5', '4', '25 set · 10:12', true], ['Luis Quispe', '+51 912 667 830', '5/5', '5', '25 set · 09:40'], ['María Quispe', '+51 912 345 678', '2/5', '2', 'Ayer · 17:20'], ['Rosa Mendoza', '+51 998 223 104', '3/5', '3', 'Hoy · 09:40'], ['Carlos Huamán', '+51 944 870 221', '1/5', '1', 'Ayer · 12:30']];
+    const cliRows = C.map(([name, phone, stamps, visits, last, sel]) => ({ name, phone, stamps, visits, last, rowStyle: sel ? 'background:color-mix(in srgb,var(--color-accent) 12%,transparent)' : '' }));
+    const H = [['AT-000148', '23 set 2026', 'Galaxy A53', 'Reparación de pantalla A53', 'trabajando', 250], ['AT-000131', '12 ago 2026', 'Galaxy A53', 'Cambio de mica 9D', 'entregado', 35], ['AT-000102', '03 may 2026', 'Galaxy A32', 'Cambio de batería', 'entregado', 110]];
+    const cliTickets = H.map(([code, date, device, title, st, total]) => { const g = this.tag(this.state.st[code] || st); return { code, date, device, title, total: this.money(total), tagStyle: g.style, dotStyle: g.dot, stLabel: g.label }; });
+    const tabS = (on) => 'padding:12px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid ' + (on ? 'var(--color-accent)' : 'transparent') + ';color:' + (on ? 'var(--color-text)' : 'var(--muted)') + ';font:' + (on ? 700 : 600) + ' 15px var(--font-body);cursor:pointer';
+
+    const R = [
+      ['50.00', '', 'Cambio de mica Galaxy A14', '', '', '', 'Guardado'],
+      ['', '50.00', 'Adelanto AT-000151 · Rosa Mendoza', '', '', '', 'Ticket', true],
+      ['35.00', '', 'Mica + instalación', '', '', '', 'Guardado'],
+      ['', '', '', '25.00', '', 'Movilidad proveedor', 'Guardado'],
+      ['70.00', '', 'Saldo AT-000147 · Luis Quispe', '', '', '', 'Ticket', true],
+      ['', '120.00', 'Batería iPhone 11 · venta mostrador', '', '', '', 'Guardado'],
+      ['', '', '', '', '', '', '']
+    ];
+    let n = 0;
+    const cajaRows = R.map(r => { const locked = !!r[7]; if (!locked) n++;
+      return { n: String(n), locked, free: !locked, ci: r[0], yi: r[1], di: r[2], ce: r[3], ye: r[4], de: r[5], status: r[6],
+        rowStyle: 'display:grid;grid-template-columns:44px 1fr 1fr 2fr 1fr 1fr 1.5fr 104px;border-bottom:1px solid var(--color-divider);font-variant-numeric:tabular-nums;' + (locked ? 'background:var(--color-surface);cursor:not-allowed;font-weight:700' : ''),
+        diStyle: 'padding:11px 12px;border-right:2px solid var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (locked ? 'color:var(--ink-accent)' : ''),
+        statusStyle: 'padding:11px 12px;font-size:14px;font-weight:700;' + (locked ? 'color:var(--ink-accent);text-decoration:underline;cursor:pointer' : 'color:var(--muted);font-weight:600') };
+    });
+
+    return {
+      dark, themeLabel: dark ? 'Modo claro' : 'Modo oscuro', toggleTheme: () => this.setState({ dark: !dark }), themeVars: this.vars(dark),
+      clockTime, clockDate, activeCount: String(activeCount), stop: (e) => e.stopPropagation(), noop, ro: true,
+      screens, nt, patronDots, patronTxt: S.patron.length ? S.patron.map(i => i + 1).join(' → ') : '—', clearPatron: set({ patron: [] }),
+      tagTrab: this.tag('trabajando').style, dotTrab: this.tag('trabajando').dot,
+      notaIn: S.notaIn, onNotaIn: (e) => this.setState({ notaIn: e.target.value }),
+      entMetOpts: [['efectivo', 'Efectivo'], ['yape', 'Yape']].map(([k, l], i) => ({ label: l, select: set({ entMet: k }), style: segOpt(S.entMet === k, i) })),
+      techs, techIn: S.techIn, onTechIn: (e) => this.setState({ techIn: e.target.value }),
+      addTech: () => { const v = S.techIn.trim(); if (!v) return; this.setState(s => ({ techIn: '', techs: s.techs.concat({ id: 't' + Date.now(), name: v, active: true, since: 'Set 2026' }) })); },
+      cliRows, cliTickets, cliHist: S.cliTab === 'hist', cliFid: S.cliTab === 'fid',
+      setCliHist: set({ cliTab: 'hist' }), setCliFid: set({ cliTab: 'fid' }), tabHist: tabS(S.cliTab === 'hist'), tabFid: tabS(S.cliTab === 'fid'),
+      cajaRows
+    };
+  }
+}
+</script>
+</body>
+</html>

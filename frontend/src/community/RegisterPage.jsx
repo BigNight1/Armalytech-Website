@@ -1,199 +1,162 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { communityApi } from './api/communityApi.js';
-import { isValidPeruvianPhone } from './lib/phone.js';
+import LoyaltyCard from './components/LoyaltyCard.jsx';
+import RegisterForm from './components/RegisterForm.jsx';
+import RegisterResult from './components/RegisterResult.jsx';
 import { ApiError } from '../admin/shared/api/httpClient.js';
 
+const EMPTY_VALUES = { firstName: '', lastName: '', phone: '', consent: false };
+
+const GENERIC_ERROR =
+  'No pudimos completar tu registro. Intenta nuevamente en unos minutos.';
+
 /**
- * Public QR/NFC landing page (ADR 0012-0015): no NavBar/Footer/WhatsApp
- * widget — a physical code inside the store points straight here, and the
- * canal (qr|nfc) travels as a query param, e.g. `/registrar/usuario?canal=nfc`.
+ * Public QR/NFC landing page (ADR 0012-0015, updated 2026-09-25 for optional
+ * consent): no NavBar/Footer/WhatsApp widget — a physical code inside the
+ * store points straight here, and the canal (qr|nfc) travels as a query
+ * param, e.g. `/registrar/usuario?canal=nfc`.
+ *
+ * Visual source of truth: `design/Rediseño de registro de usuario/Panel
+ * Admin Rediseño.dc.html`, `/registrar/usuario` board (`regScreen()` /
+ * `regScreens()`). Client-side validation mirrors that design exactly; the
+ * backend remains the source of truth and its errors surface on submit.
  */
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const channel = searchParams.get('canal') === 'nfc' ? 'nfc' : 'qr';
 
-  const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', marketingConsent: false });
+  const [values, setValues] = useState(EMPTY_VALUES);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState('idle'); // idle | submitting | success | error
-  const [result, setResult] = useState(null);
   const [submitError, setSubmitError] = useState('');
-
-  const phoneIsValid = useMemo(
-    () => form.phone.trim() === '' || isValidPeruvianPhone(form.phone),
-    [form.phone],
-  );
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null); // { client, isNewClient } once done
 
   function updateField(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setValues((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+    setSubmitError('');
   }
 
   function validate() {
-    const nextErrors = {};
-    if (!form.firstName.trim()) nextErrors.firstName = 'Ingresa tu nombre';
-    if (!form.lastName.trim()) nextErrors.lastName = 'Ingresa tu apellido';
-    if (!isValidPeruvianPhone(form.phone)) {
-      nextErrors.phone = 'Ingresa un número de WhatsApp peruano válido (9 dígitos, empieza con 9)';
-    }
-    if (!form.marketingConsent) {
-      nextErrors.marketingConsent = 'Debes aceptar para poder registrarte';
-    }
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    const digits = values.phone.replace(/\D/g, '');
+    return {
+      firstName: values.firstName.trim() ? '' : 'Ingresa tu nombre',
+      lastName: values.lastName.trim() ? '' : 'Ingresa tu apellido',
+      phone: /^9\d{8}$/.test(digits) ? '' : 'Debe tener 9 dígitos y empezar con 9',
+    };
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!validate()) return;
+    const nextErrors = validate();
+    if (nextErrors.firstName || nextErrors.lastName || nextErrors.phone) {
+      setErrors(nextErrors);
+      return;
+    }
 
-    setStatus('submitting');
+    setErrors({});
     setSubmitError('');
+    setBusy(true);
     try {
+      const digits = values.phone.replace(/\D/g, '');
       const data = await communityApi.register({
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        phone: form.phone.trim(),
-        marketingConsent: form.marketingConsent,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        phone: digits,
+        marketingConsent: values.consent,
         channel,
       });
       setResult(data);
-      setStatus('success');
     } catch (error) {
-      setStatus('error');
       if (error instanceof ApiError && error.code === 'validation_error') {
-        setSubmitError('Revisa tus datos: ' + error.message);
+        // The only backend rejection left on this endpoint is an invalid
+        // phone number (ADR 0015 update, 2026-09-25) — name fields are
+        // already validated client-side with the same rule as the DTO.
+        setErrors({ phone: 'Debe tener 9 dígitos y empezar con 9' });
       } else {
-        setSubmitError('No pudimos completar tu registro. Intenta nuevamente en unos minutos.');
+        setSubmitError(GENERIC_ERROR);
       }
+    } finally {
+      setBusy(false);
     }
   }
 
+  const bannerText = errors.firstName || errors.lastName || errors.phone
+    ? 'Revisa los campos marcados.'
+    : submitError;
+
+  const done = !!result;
+  const isNewClient = result?.isNewClient;
+  const firstName = result?.client?.firstName || values.firstName.trim();
+  const stamps = result?.client?.stamps ?? 0;
+
+  const card = done
+    ? isNewClient
+      ? { stamps: 0, tagActive: true, tagLabel: 'Activa · 0/5', footText: 'Tu primer sello llega en tu próxima visita.' }
+      : {
+          stamps,
+          tagActive: true,
+          tagLabel: `${stamps}/5`,
+          footText: `Te faltan ${5 - stamps} visitas para tu 20% de descuento.`,
+        }
+    : { stamps: 0, tagActive: false, tagLabel: '0/5', footText: 'Un sello por cada visita o reparación en tienda.' };
+
+  const resultCopy = isNewClient
+    ? {
+        kicker: 'Registro completo',
+        title: `¡Listo, ${firstName}! Ya eres parte de ArmalyTech Club.`,
+        text: 'Tu tarjeta está activa. Tu primer sello llega en tu próxima visita a la tienda.',
+      }
+    : {
+        kicker: 'Ya eres parte del club',
+        title: `¡Hola de nuevo, ${firstName}!`,
+        text: 'Este número ya está registrado. No necesitas hacer nada más: sigue sumando sellos en cada visita.',
+      };
+
   return (
-    <div className="min-h-screen bg-brand-navy flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-brand-navy font-archivo text-brand-ink">
       <Helmet>
         <title>Únete a la comunidad ArmalyTech</title>
         <meta name="robots" content="noindex" />
       </Helmet>
 
-      <img
-        src="/ArmalyTechlogopeq.webp"
-        alt="ArmalyTech"
-        className="w-20 h-20 object-contain mb-4"
-      />
+      <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col">
+        <header className="flex h-16 flex-none items-center gap-2.5 border-b-2 border-brand-ink/[0.12] px-5">
+          <img
+            src="/Armalytech_logo.png"
+            alt="ArmalyTech"
+            className="h-[34px] w-[34px] object-contain"
+          />
+          <span className="text-[17px] font-extrabold text-white">ArmalyTech</span>
+          <span className="ml-auto text-[13px] font-bold uppercase tracking-widest text-brand-orange-300">
+            Club
+          </span>
+        </header>
 
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
-        {status === 'success' ? (
-          <SuccessState result={result} />
-        ) : (
-          <>
-            <h1 className="text-xl font-bold text-brand-navy text-center mb-1">
-              Únete a la comunidad ArmalyTech
-            </h1>
-            <p className="text-sm text-slate-500 text-center mb-6">
-              Regístrate y entérate primero de nuestras promociones.
-            </p>
+        <main className="flex flex-1 flex-col gap-[22px] px-5 pb-7 pt-6">
+          <LoyaltyCard
+            stamps={card.stamps}
+            tagLabel={card.tagLabel}
+            tagActive={card.tagActive}
+            footText={card.footText}
+          />
 
-            <form onSubmit={handleSubmit} noValidate className="space-y-4">
-              <Field
-                id="firstName"
-                label="Nombre"
-                value={form.firstName}
-                onChange={(v) => updateField('firstName', v)}
-                error={errors.firstName}
-                autoComplete="given-name"
-              />
-              <Field
-                id="lastName"
-                label="Apellido"
-                value={form.lastName}
-                onChange={(v) => updateField('lastName', v)}
-                error={errors.lastName}
-                autoComplete="family-name"
-              />
-              <Field
-                id="phone"
-                label="Número de WhatsApp"
-                value={form.phone}
-                onChange={(v) => updateField('phone', v)}
-                error={errors.phone}
-                placeholder="9XX XXX XXX"
-                inputMode="tel"
-                autoComplete="tel"
-                hint={!phoneIsValid && form.phone.trim() !== '' ? 'Formato no reconocido' : undefined}
-              />
-
-              <label className="flex items-start gap-2 text-sm text-slate-600">
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-orange focus:ring-brand-orange"
-                  checked={form.marketingConsent}
-                  onChange={(e) => updateField('marketingConsent', e.target.checked)}
-                />
-                <span>Acepto recibir ofertas y promociones por WhatsApp.</span>
-              </label>
-              {errors.marketingConsent && (
-                <p className="text-xs text-red-600 -mt-2">{errors.marketingConsent}</p>
-              )}
-
-              {status === 'error' && submitError && (
-                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {submitError}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={status === 'submitting'}
-                className="w-full rounded-lg bg-brand-orange text-white font-semibold py-2.5 hover:bg-brand-orange-600 disabled:opacity-60 transition"
-              >
-                {status === 'submitting' ? 'Enviando…' : 'Registrarme'}
-              </button>
-            </form>
-          </>
-        )}
+          {done ? (
+            <RegisterResult {...resultCopy} />
+          ) : (
+            <RegisterForm
+              values={values}
+              errors={errors}
+              bannerText={bannerText}
+              busy={busy}
+              onChange={updateField}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </main>
       </div>
-    </div>
-  );
-}
-
-function Field({ id, label, value, onChange, error, hint, ...inputProps }) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
-        {label}
-      </label>
-      <input
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-          error ? 'border-red-400 focus:ring-red-300' : 'border-slate-300 focus:ring-brand-orange/50'
-        }`}
-        {...inputProps}
-      />
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
-      {!error && hint && <p className="text-xs text-slate-400 mt-1">{hint}</p>}
-    </div>
-  );
-}
-
-function SuccessState({ result }) {
-  const isNew = result?.isNewClient;
-  return (
-    <div className="text-center py-4">
-      <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-3xl">
-        ✓
-      </div>
-      <h2 className="text-lg font-bold text-brand-navy mb-1">
-        {isNew ? '¡Registrado!' : '¡Gracias por volver!'}
-      </h2>
-      <p className="text-sm text-slate-500">
-        {isNew
-          ? 'Ya formas parte de la comunidad ArmalyTech.'
-          : `Visita #${result?.visitCount ?? ''}`}
-      </p>
     </div>
   );
 }

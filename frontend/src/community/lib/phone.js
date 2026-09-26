@@ -30,3 +30,15 @@ export function formatPeruvianPhone(phoneE164) {
   const national = phoneE164.slice(2);
   return `+51 ${national.slice(0, 3)} ${national.slice(3, 6)} ${national.slice(6)}`;
 }
+
+/**
+ * Live-formats raw keystrokes into `9XX XXX XXX` groups as the user types
+ * (design's `fmtPhone`, ADR 0012 board `/registrar/usuario`): strips
+ * non-digits, caps at 9 digits, groups 3-3-3.
+ */
+export function formatNationalPhoneInput(raw) {
+  const digits = (raw ?? '').replace(/\D/g, '').slice(0, 9);
+  return [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 9)]
+    .filter(Boolean)
+    .join(' ');
+}
