@@ -292,6 +292,49 @@ export class TicketUseCases {
     };
   }
 
+  async lookupPublicTicket(
+    codigo?: string,
+    telefono?: string,
+  ): Promise<{ publicToken: string; codigo: string }> {
+    const rawCodigo = (codigo ?? '').trim().toUpperCase();
+    const rawPhone = (telefono ?? '').replace(/\D/g, '');
+
+    if (!rawCodigo || !rawPhone) {
+      throw new BadRequestException(
+        'Ingresa el número de ticket y el celular registrado.',
+      );
+    }
+
+    let normalizedCodigo = rawCodigo;
+    if (/^\d+$/.test(rawCodigo)) {
+      normalizedCodigo = `AT-${rawCodigo.padStart(6, '0')}`;
+    }
+
+    const ticket = await this.ticketRepository.findByCodigo(normalizedCodigo);
+    if (!ticket) {
+      throw new NotFoundException(
+        'No se encontró ningún ticket que coincida con estos datos.',
+      );
+    }
+
+    const ticketPhone = (ticket.cliente?.telefono ?? '').replace(/\D/g, '');
+    const matchesPhone =
+      ticketPhone.length >= 7 &&
+      rawPhone.length >= 7 &&
+      (ticketPhone.endsWith(rawPhone) || rawPhone.endsWith(ticketPhone));
+
+    if (!matchesPhone) {
+      throw new NotFoundException(
+        'No se encontró ningún ticket que coincida con estos datos.',
+      );
+    }
+
+    return {
+      publicToken: ticket.publicToken,
+      codigo: ticket.codigo,
+    };
+  }
+
   async list(filters: ListTicketsFilters): Promise<ListTicketsResult> {
     return this.ticketRepository.list(filters);
   }

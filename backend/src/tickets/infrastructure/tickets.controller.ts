@@ -34,6 +34,14 @@ export class TicketsController {
     return this.ticketUseCases.getPublicByToken(token);
   }
 
+  @Public()
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
+  @Post('public/lookup')
+  @HttpCode(HttpStatus.OK)
+  async lookupPublicTicket(@Body() body: { codigo?: string; telefono?: string }) {
+    return this.ticketUseCases.lookupPublicTicket(body.codigo, body.telefono);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createTicket(

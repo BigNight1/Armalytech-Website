@@ -4,6 +4,7 @@ import ScrollToLink from "../ScrollToLink.jsx";
 import menuItems from "./menuItems.json";
 import NavBarItem from "./NavBarItem.jsx";
 import Icon1 from "../Icons/Icon1.jsx";
+import { Ticket } from "lucide-react";
 import "./navbar.css";
 
 const PHONE_NUMBER = "+51 924548268";
@@ -60,15 +61,24 @@ const Navbar = () => {
           <a href="/" className="flex items-center shrink-0">
             <img src="/logoarmalytech.webp" className="h-10 rounded-full" alt="ArmalyTech" />
           </a>
-          <button
-            type="button"
-            onClick={toggleMenu}
-            className="md:hidden inline-flex p-2 w-10 h-10 justify-center text-gray-400 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-600"
-            aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
-          >
-            <Icon1/>
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <Link
+              to="/consultar-ticket"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/40 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 text-xs font-semibold transition"
+            >
+              <Ticket size={14} />
+              <span>Ticket</span>
+            </Link>
+            <button
+              type="button"
+              onClick={toggleMenu}
+              className="inline-flex p-2 w-10 h-10 justify-center items-center text-gray-400 rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-600"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            >
+              <Icon1/>
+            </button>
+          </div>
           <div className="hidden w-full md:flex md:w-auto md:flex-1 md:justify-center">
             <ul className="font-medium flex flex-col py-4 md:py-0 md:flex-row md:items-center md:gap-8 md:justify-center">
               {menuItems.map((item) => {
@@ -112,21 +122,30 @@ const Navbar = () => {
               })}
             </ul>
           </div>
-          {isHome ? (
-            <ScrollToLink
-              to="contacto"
-              className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 shrink-0 cursor-pointer"
-            >
-              Solicitar cotización
-            </ScrollToLink>
-          ) : (
+          <div className="hidden md:flex items-center gap-3 shrink-0">
             <Link
-              to="/contactanos"
-              className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 shrink-0"
+              to="/consultar-ticket"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-orange-500/40 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500 text-sm font-medium transition"
             >
-              Solicitar cotización
+              <Ticket size={15} />
+              <span>Consultar Ticket</span>
             </Link>
-          )}
+            {isHome ? (
+              <ScrollToLink
+                to="contacto"
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 shrink-0 cursor-pointer text-sm"
+              >
+                Solicitar cotización
+              </ScrollToLink>
+            ) : (
+              <Link
+                to="/contactanos"
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 shrink-0 text-sm"
+              >
+                Solicitar cotización
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -153,6 +172,16 @@ const Navbar = () => {
           </div>
           <div className="navbar-overlay__content">
             <ul className="navbar-overlay__links">
+              <li>
+                <Link
+                  to="/consultar-ticket"
+                  onClick={closeMenu}
+                  className="flex items-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-orange-500/15 border border-orange-500/40 text-orange-400 font-semibold text-[1.125rem] mb-2 hover:bg-orange-500/25 transition"
+                >
+                  <Ticket size={18} className="text-orange-400" />
+                  <span>Consultar Ticket</span>
+                </Link>
+              </li>
               {menuItems.map((item) => (
                 <li key={item.name}>
                   {item.route && item.to ? (

@@ -41,4 +41,11 @@ export const ticketApi = {
     httpClient.get(`/tickets/public/${encodeURIComponent(token)}`, {
       skipUnauthorizedHandler: true,
     }),
+
+  lookupPublicTicket: ({ codigo, telefono }) =>
+    httpClient.post(
+      '/tickets/public/lookup',
+      { codigo, telefono },
+      { skipUnauthorizedHandler: true },
+    ),
 };

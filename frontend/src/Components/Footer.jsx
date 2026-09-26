@@ -14,6 +14,7 @@ const FOOTER_LINKS = {
     { label: "Nosotros", href: "/sobre-nosotros" },
     { label: "Servicios", to: "services" },
     { label: "Precios", href: "/precios" },
+    { label: "Consultar Ticket", href: "/consultar-ticket" },
     { label: "Redes", href: "/redes" },
   ],
   services: [

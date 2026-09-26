@@ -23,6 +23,7 @@ const RegisterPage = lazy(() => import('./community/RegisterPage.jsx'));
 // Lazy-loaded public ticket status page (R3, rediseno-panel): own bundle
 // chunk, kept out of both the public and admin bundles.
 const TicketPage = lazy(() => import('./ticket/TicketPage.jsx'));
+const SearchTicketPage = lazy(() => import('./ticket/SearchTicketPage.jsx'));
 
 const CompanyIcon = () => (
   <img 
@@ -86,6 +87,22 @@ function App() {
             element={
               <Suspense fallback={<div className="min-h-screen bg-[#f8fafc]" />}>
                 <TicketPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/consultar-ticket"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+                <SearchTicketPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/ticket"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+                <SearchTicketPage />
               </Suspense>
             }
           />
