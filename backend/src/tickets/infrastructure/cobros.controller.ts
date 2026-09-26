@@ -29,6 +29,14 @@ function toCobroView(c: {
   anuladoPor?: string;
   anuladoAt?: Date;
   motivoAnulacion?: string;
+  descripcion?: string;
+  items?: Array<{
+    productoId: string;
+    nombre: string;
+    cantidad: number;
+    precioUnitario: number;
+    costoUnitario?: number;
+  }>;
 }) {
   return {
     id: c.id ?? (c._id as { toString(): string })?.toString(),
@@ -43,6 +51,8 @@ function toCobroView(c: {
     anuladoPor: c.anuladoPor,
     anuladoAt: c.anuladoAt,
     motivoAnulacion: c.motivoAnulacion,
+    descripcion: c.descripcion,
+    items: c.items,
   };
 }
 

@@ -64,6 +64,7 @@ export default function CashClosingsGrid({
   cobros = [],
   isOwner = false,
   onAnularRequest,
+  onCobroSelect,
   onCellChange,
   onCellCommit,
   onAddRow,
@@ -87,14 +88,16 @@ export default function CashClosingsGrid({
   const getGroupDetails = useMemo(() => buildGetGroupDetails(theme), [theme]);
   const rowThemeOverride = useMemo(() => buildRowThemeOverride(theme), [theme]);
 
-  // Locked ticket-cobro rows (T-C3) are appended after the manual rows and
-  // before the synthetic totals row — sorted so the grid reads chronologically.
+  // Locked ticket-cobro and sale rows (T-C3, Fase D) are rendered at the top
+  // so the day's real transactions are immediately visible without scrolling,
+  // followed by the editable manual rows and the synthetic totals row.
   const cobroRows = useMemo(
     () => [...cobros].sort((a, b) => new Date(a.fecha) - new Date(b.fecha)),
     [cobros],
   );
+  const cobroCount = cobroRows.length;
   const manualRowCount = rows.length;
-  const totalsRowIndex = manualRowCount + cobroRows.length;
+  const totalsRowIndex = cobroCount + manualRowCount;
 
   // Debounce saves so a paste/fill touching many cells triggers one save per
   // row instead of one PUT per keystroke/cell.
@@ -174,11 +177,9 @@ export default function CashClosingsGrid({
         };
       }
 
-      // Locked ticket-cobro row (T-C3) — read-only, never sent to the
-      // cash-closings save API; the "actions" cell doubles as the
-      // lock marker and (owner-only, non-annulled) the "Anular cobro" trigger.
-      if (row >= manualRowCount) {
-        const cobro = cobroRows[row - manualRowCount];
+      // Locked ticket-cobro and sale rows (T-C3, Fase D) rendered at top
+      if (row < cobroCount) {
+        const cobro = cobroRows[row];
         if (!cobro) {
           return { kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false, readonly: true };
         }
@@ -205,6 +206,7 @@ export default function CashClosingsGrid({
             displayData: detail,
             allowOverlay: false,
             readonly: true,
+            cursor: "pointer",
             ...(cobro.anulado ? {} : { themeOverride: { textDark: isDark ? "#fdba74" : "#c2410c" } }),
           };
         }
@@ -221,6 +223,7 @@ export default function CashClosingsGrid({
             displayData: amount === "" ? "" : formatPEN(amount),
             allowOverlay: false,
             readonly: true,
+            cursor: "pointer",
             contentAlign: "right",
           };
         }
@@ -228,7 +231,8 @@ export default function CashClosingsGrid({
         return { kind: GridCellKind.Text, data: "", displayData: "", allowOverlay: false, readonly: true };
       }
 
-      const dataRow = rows[row];
+      const manualIndex = row - cobroCount;
+      const dataRow = rows[manualIndex];
       if (!dataRow) {
         return {
           kind: GridCellKind.Text,
@@ -310,8 +314,9 @@ export default function CashClosingsGrid({
 
   const applyEdit = useCallback(
     (col, row, newValue) => {
+      if (row < cobroCount || row === totalsRowIndex) return;
       const column = columns[col];
-      const dataRow = rows[row];
+      const dataRow = rows[row - cobroCount];
       if (
         !column ||
         !dataRow ||
@@ -337,7 +342,7 @@ export default function CashClosingsGrid({
       }
       scheduleSave(dataRow.rowIndex);
     },
-    [columns, rows, onCellChange, scheduleSave],
+    [columns, rows, cobroCount, totalsRowIndex, onCellChange, scheduleSave],
   );
 
   const onCellEdited = useCallback(
@@ -397,35 +402,51 @@ export default function CashClosingsGrid({
       const selectedRows = selection.rows.toArray();
       if (selectedRows.length > 0) {
         selectedRows.forEach((rowIndex) => {
-          const dataRow = rows[rowIndex];
-          if (dataRow) onDeleteRow(dataRow.rowIndex);
+          if (rowIndex >= cobroCount && rowIndex < totalsRowIndex) {
+            const dataRow = rows[rowIndex - cobroCount];
+            if (dataRow) onDeleteRow(dataRow.rowIndex);
+          }
         });
         return false; // handled ourselves
       }
       return true; // let the grid clear the selected cells' contents
     },
-    [rows, onDeleteRow],
+    [rows, onDeleteRow, cobroCount, totalsRowIndex],
   );
 
   const onCellClicked = useCallback(
     ([col, row]) => {
-      if (columns[col]?.kind !== "actions") return;
+      // Locked ticket-cobro or sale row (rendered at the top):
+      if (row < cobroCount) {
+        const cobro = cobroRows[row];
+        if (!cobro) return;
 
-      // Locked ticket-cobro row: the marker is the "Anular cobro" trigger,
-      // owner-only and never for an already-annulled cobro.
-      if (row >= manualRowCount && row < totalsRowIndex) {
-        if (!isOwner) return;
-        const cobro = cobroRows[row - manualRowCount];
-        if (cobro && !cobro.anulado) onAnularRequest?.(cobro);
+        if (columns[col]?.kind === "actions") {
+          if (isOwner && !cobro.anulado) {
+            onAnularRequest?.(cobro);
+          } else {
+            onCobroSelect?.(cobro);
+          }
+          return;
+        }
+
+        // Clicking on any cell of the cobro/sale row opens the full detail
+        onCobroSelect?.(cobro);
         return;
       }
 
-      if (rows[row]) {
-        if (rowStatus[rows[row].rowIndex] === "saving") return;
-        setPendingDeleteRow(rows[row].rowIndex);
-      }
+      if (row === totalsRowIndex) return;
+
+      const manualIndex = row - cobroCount;
+      const dataRow = rows[manualIndex];
+      if (!dataRow) return;
+
+      if (columns[col]?.kind !== "actions") return;
+
+      if (rowStatus[dataRow.rowIndex] === "saving") return;
+      setPendingDeleteRow(dataRow.rowIndex);
     },
-    [columns, rows, rowStatus, manualRowCount, totalsRowIndex, cobroRows, isOwner, onAnularRequest],
+    [columns, rows, rowStatus, cobroCount, totalsRowIndex, cobroRows, isOwner, onAnularRequest, onCobroSelect],
   );
 
   const confirmDelete = useCallback(() => {
@@ -436,13 +457,14 @@ export default function CashClosingsGrid({
   const getRowThemeOverride = useCallback(
     (row) => {
       if (row === totalsRowIndex) return rowThemeOverride(undefined, { isTotals: true });
-      if (row >= manualRowCount) {
-        const cobro = cobroRows[row - manualRowCount];
+      if (row < cobroCount) {
+        const cobro = cobroRows[row];
         return rowThemeOverride(undefined, { isLocked: true, isAnnulled: cobro?.anulado });
       }
-      return rowThemeOverride(rowStatus[rows[row]?.rowIndex]);
+      const manualIndex = row - cobroCount;
+      return rowThemeOverride(rowStatus[rows[manualIndex]?.rowIndex]);
     },
-    [rows, rowStatus, rowThemeOverride, totalsRowIndex, manualRowCount, cobroRows],
+    [rows, rowStatus, rowThemeOverride, totalsRowIndex, cobroCount, cobroRows],
   );
 
   const gridColumns = useMemo(

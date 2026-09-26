@@ -17,6 +17,7 @@ import CashClosingsGrid from './components/CashClosingsGrid.jsx';
 import SummaryPanel from './components/SummaryPanel.jsx';
 import AnularCobroDialog from './components/AnularCobroDialog.jsx';
 import RegisterSaleDrawer from './components/RegisterSaleDrawer.jsx';
+import CobroDetailModal from './components/CobroDetailModal.jsx';
 import { cashClosingsKeys } from './api/queryKeys.js';
 
 const SUMMARY_TITLES = {
@@ -40,6 +41,7 @@ export default function CashClosingsPage() {
   const [selectedDate, setSelectedDate] = useState(() => todayInLima());
   const [summaryTab, setSummaryTab] = useState('day');
   const [anularTarget, setAnularTarget] = useState(null);
+  const [selectedCobroDetail, setSelectedCobroDetail] = useState(null);
   const [showSaleDrawer, setShowSaleDrawer] = useState(false);
   const today = useMemo(() => todayInLima(), []);
 
@@ -124,6 +126,7 @@ export default function CashClosingsPage() {
             cobros={dayCobros.cobros}
             isOwner={isOwner}
             onAnularRequest={setAnularTarget}
+            onCobroSelect={setSelectedCobroDetail}
             onCellChange={updateCell}
             onCellCommit={saveRow}
             onAddRow={addRow}
@@ -146,6 +149,16 @@ export default function CashClosingsPage() {
         open={showSaleDrawer}
         onClose={() => setShowSaleDrawer(false)}
         onSuccess={handleSaleSuccess}
+      />
+
+      <CobroDetailModal
+        cobro={selectedCobroDetail}
+        isOwner={isOwner}
+        onClose={() => setSelectedCobroDetail(null)}
+        onAnularRequest={(cobro) => {
+          setSelectedCobroDetail(null);
+          setAnularTarget(cobro);
+        }}
       />
 
       <AnularCobroDialog
