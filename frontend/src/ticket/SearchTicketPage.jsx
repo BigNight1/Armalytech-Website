@@ -80,13 +80,7 @@ export default function SearchTicketPage() {
         <div className="absolute bottom-10 left-10 w-72 h-72 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="w-full max-w-xl relative z-10">
-          {/* Header pill */}
-          <div className="flex justify-center mb-6">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-orange-500/10 border border-orange-500/30 text-orange-400">
-              <ShieldCheck size={14} className="text-orange-400" />
-              Seguimiento Seguro de Reparaciones
-            </span>
-          </div>
+         
 
           {/* Card */}
           <div className="rounded-2xl border border-gray-800/80 bg-gray-900/70 p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
@@ -95,7 +89,7 @@ export default function SearchTicketPage() {
                 Consulta el estado de tu equipo
               </h1>
               <p className="text-sm sm:text-base text-gray-400 leading-relaxed max-w-md mx-auto">
-                Ingresa el código de tu ticket y tu celular registrado para conocer en tiempo real los avances de tu reparación.
+                Ingresa el código de tu ticket y tu celular registrado para conocer el avance de tu reparación.
               </p>
             </div>
 
@@ -156,7 +150,7 @@ export default function SearchTicketPage() {
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-gray-400">
-                  El mismo número con el que dejaste tu equipo en el taller.
+                  El mismo número con el que dejaste tu equipo en el servicio técnico.
                 </p>
               </div>
 
