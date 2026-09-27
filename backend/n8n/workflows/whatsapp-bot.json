@@ -1,0 +1,576 @@
+{
+  "name": "WhatsApp · Bot ArmalyTech",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "webhookId": "armalytech-whatsapp"
+    },
+    {
+      "id": "classify",
+      "name": "Clasificar mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Classifies each WhatsApp webhook event into a route for the Switch.\n// Keyword routes run before the AI so they are instant and deterministic.\nconst HANDOFF_MS = 12 * 60 * 60 * 1000;\nconst state = $getWorkflowStaticData('global');\nstate.handoff = state.handoff || {};\nconst now = Date.now();\nconst out = [];\n\nfor (const item of $input.all()) {\n  const j = item.json;\n\n  if (Array.isArray(j.statuses) && j.statuses.length) {\n    const s = j.statuses[0];\n    out.push({ json: { route: 'status', from: s.recipient_id, status: s.status, messageId: s.id, errors: s.errors || [] } });\n    continue;\n  }\n\n  const msg = Array.isArray(j.messages) ? j.messages[0] : undefined;\n  if (!msg) continue;\n\n  const from = msg.from;\n  const name = (j.contacts && j.contacts[0] && j.contacts[0].profile && j.contacts[0].profile.name) || '';\n  const text = (\n    (msg.text && msg.text.body) ||\n    (msg.button && msg.button.text) ||\n    (msg.interactive && msg.interactive.button_reply && msg.interactive.button_reply.title) ||\n    ''\n  ).trim();\n  const lower = text.toLowerCase();\n  const base = { from, name, text, messageId: msg.id, type: msg.type };\n\n  const until = state.handoff[from] || 0;\n  if (/^\\s*(bot|volver al bot)\\s*$/i.test(text)) {\n    delete state.handoff[from];\n    out.push({ json: { ...base, route: 'ia', text: 'Hola' } });\n    continue;\n  }\n  if (until > now) {\n    out.push({ json: { ...base, route: 'silenciado' } });\n    continue;\n  }\n\n  if (!text) {\n    out.push({ json: { ...base, route: 'no_texto' } });\n    continue;\n  }\n  if (/^\\s*(baja|stop|parar|no mas promociones|no más promociones)\\s*[.!]*\\s*$/i.test(lower)) {\n    out.push({ json: { ...base, route: 'baja' } });\n    continue;\n  }\n  if (/(asesor|humano|persona real|hablar con (alguien|una persona|un agente|alguien del equipo)|agente|atenci[oó]n personal)/i.test(lower)) {\n    state.handoff[from] = now + HANDOFF_MS;\n    out.push({ json: { ...base, route: 'humano', handoffUntil: new Date(now + HANDOFF_MS).toISOString() } });\n    continue;\n  }\n  const code = text.match(/\\bAT[-\\s]?(\\d{1,6})\\b/i) || text.match(/\\bticket\\D{0,12}(\\d{1,6})\\b/i);\n  if (code) {\n    out.push({ json: { ...base, route: 'ticket', codigo: code[1] } });\n    continue;\n  }\n  out.push({ json: { ...base, route: 'ia' } });\n}\n\nreturn out;\n"
+      }
+    },
+    {
+      "id": "router",
+      "name": "Ruta",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        280
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-status",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-baja",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "baja",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "baja"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-humano",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "humano",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "humano"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-ticket",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "ticket",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ticket"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-ia",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "ia",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ia"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-no_texto",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "no_texto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "no_texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-silenciado",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "silenciado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "silenciado"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "status",
+      "name": "Estado de entrega → backend",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        -40
+      ],
+      "parameters": {},
+      "notesInFlow": true,
+      "notes": "Pending backend endpoint: store delivered/read/failed status"
+    },
+    {
+      "id": "send-baja",
+      "name": "Confirmar baja",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        100
+      ],
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $json.from }}",
+        "textBody": "Listo, no te enviaremos más promociones. Si cambias de opinión, avísanos por aquí.",
+        "additionalFields": {}
+      },
+      "notesInFlow": true,
+      "notes": "Select the WhatsApp credential and the sender number"
+    },
+    {
+      "id": "baja-backend",
+      "name": "Registrar baja → backend",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {},
+      "notesInFlow": true,
+      "notes": "Pending backend endpoint: revoke marketing consent"
+    },
+    {
+      "id": "send-humano",
+      "name": "Avisar al cliente",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        240
+      ],
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $json.from }}",
+        "textBody": "Te comunico con una persona del equipo de ArmalyTech. Te responderemos por aquí en breve. 🙌",
+        "additionalFields": {}
+      },
+      "notesInFlow": true,
+      "notes": "Select the WhatsApp credential and the sender number"
+    },
+    {
+      "id": "notify-owner",
+      "name": "Avisar al dueño",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        240
+      ],
+      "parameters": {},
+      "notesInFlow": true,
+      "notes": "Pending decision: Telegram or WhatsApp notification to the owner"
+    },
+    {
+      "id": "lookup",
+      "name": "Consultar ticket",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        380
+      ],
+      "parameters": {
+        "jsCode": "// Looks the ticket up by code + the sender's WhatsApp number (same check as the public page).\nconst ESTADOS = {\n  pendiente: 'recibido y pendiente de revisión',\n  aprobado: 'aprobado, en cola para reparación',\n  trabajando: 'en reparación ahora mismo',\n  listo: '¡listo para recoger! 🎉',\n  entregado: 'entregado',\n  cancelado: 'cancelado',\n  abandonado: 'cerrado por falta de recojo',\n};\nconst out = [];\nfor (const item of $input.all()) {\n  const { from, codigo } = item.json;\n  let reply;\n  try {\n    const res = await this.helpers.httpRequest({\n      method: 'POST',\n      url: 'https://api.armalytech.com/api/tickets/public/lookup',\n      body: { codigo, telefono: from },\n      json: true,\n      timeout: 8000,\n    });\n    // The API wraps payloads as { ok, data }.\n    const found = res.data || res;\n    const t = await this.helpers.httpRequest({\n      method: 'GET',\n      url: 'https://api.armalytech.com/api/tickets/public/' + encodeURIComponent(found.publicToken),\n      json: true,\n      timeout: 8000,\n    });\n    const data = t.data || t;\n    const equipo = [data.equipo && data.equipo.marca, data.equipo && data.equipo.modelo].filter(Boolean).join(' ');\n    const estado = ESTADOS[data.estado] || data.estado;\n    reply = 'Tu ticket ' + data.codigo + (equipo ? ' (' + equipo + ')' : '') + ' está ' + estado + '.';\n    if (data.estado === 'listo' && data.saldo > 0) reply += ' Saldo pendiente: S/ ' + Number(data.saldo).toFixed(2) + '.';\n    reply += '\\nDetalle: https://demo.armalytech.com/ticket/' + found.publicToken;\n  } catch (e) {\n    reply = 'No encontré un ticket con ese número para este WhatsApp. Revisa el código (ej. AT-000123) o escribe \"asesor\" y te ayuda una persona del equipo.';\n  }\n  out.push({ json: { ...item.json, reply } });\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "send-ticket",
+      "name": "Responder ticket",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        380
+      ],
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $json.from }}",
+        "textBody": "={{ $json.reply }}",
+        "additionalFields": {}
+      },
+      "notesInFlow": true,
+      "notes": "Select the WhatsApp credential and the sender number"
+    },
+    {
+      "id": "agent",
+      "name": "Agente IA",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        760,
+        540
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "Eres el asistente virtual de ArmalyTech, servicio técnico de celulares y accesorios en San Borja, Lima.\nResponde siempre en español, breve (máximo 2 o 3 frases), amable y claro.\nSolo hablas de ArmalyTech: reparaciones, accesorios, estado de equipos y atención.\nSi preguntan por el estado de su equipo, pide el número de ticket (formato AT-000123).\nNunca inventes precios, plazos, horarios ni disponibilidad: di que un asesor lo confirmará y que pueden escribir \"asesor\".\nNo uses listas largas ni markdown."
+        }
+      }
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama (qwen2.5:3b)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        700,
+        760
+      ],
+      "parameters": {
+        "model": "qwen2.5:3b",
+        "options": {
+          "temperature": 0.3,
+          "keepAlive": "24h"
+        }
+      }
+    },
+    {
+      "id": "memory",
+      "name": "Memoria por número",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        760
+      ],
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Clasificar mensaje').item.json.from }}",
+        "contextWindowLength": 6
+      }
+    },
+    {
+      "id": "send-ia",
+      "name": "Responder IA",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        540
+      ],
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $('Clasificar mensaje').item.json.from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "notesInFlow": true,
+      "notes": "Select the WhatsApp credential and the sender number"
+    },
+    {
+      "id": "send-no-texto",
+      "name": "Solo texto",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        700
+      ],
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "",
+        "recipientPhoneNumber": "={{ $json.from }}",
+        "textBody": "Por ahora solo puedo leer mensajes de texto. Escríbeme tu consulta o \"asesor\" para hablar con una persona.",
+        "additionalFields": {}
+      },
+      "notesInFlow": true,
+      "notes": "Select the WhatsApp credential and the sender number"
+    },
+    {
+      "id": "silenced",
+      "name": "Bot en pausa (atiende una persona)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        760,
+        840
+      ],
+      "parameters": {},
+      "notesInFlow": true,
+      "notes": "Human handoff active for this number (12h). Customer can type \"bot\" to resume."
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Clasificar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar mensaje": {
+      "main": [
+        [
+          {
+            "node": "Ruta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta": {
+      "main": [
+        [
+          {
+            "node": "Estado de entrega → backend",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Confirmar baja",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Avisar al cliente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Solo texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bot en pausa (atiende una persona)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar baja": {
+      "main": [
+        [
+          {
+            "node": "Registrar baja → backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar al cliente": {
+      "main": [
+        [
+          {
+            "node": "Avisar al dueño",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar ticket": {
+      "main": [
+        [
+          {
+            "node": "Responder ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente IA": {
+      "main": [
+        [
+          {
+            "node": "Responder IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama (qwen2.5:3b)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria por número": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Lima"
+  },
+  "pinData": {}
+}

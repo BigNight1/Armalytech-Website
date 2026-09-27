@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
+  ChevronDown,
   Eye,
   EyeOff,
   Printer,
   X,
   AlertTriangle,
 } from 'lucide-react';
-import TicketStatusBadge from './TicketStatusBadge.jsx';
+import TicketStatusBadge, { TICKET_ESTADO_CONFIG } from './TicketStatusBadge.jsx';
 import { formatLimaShort } from '../../shared/lib/time.js';
 import { formatPEN } from '../../shared/lib/money.js';
 import { ticketsApi } from '../api/ticketsApi.js';
@@ -20,6 +21,26 @@ const TIMELINE_STEPS = [
   { key: 'listo', label: 'Listo' },
   { key: 'entregado', label: 'Entregado' },
 ];
+
+// Mirrors backend validateTransition (ADR 0007). `entregado → listo` is
+// intentionally omitted: the backend does not reverse the recorded cobro.
+const STATUS_TRANSITIONS = {
+  pendiente: ['aprobado', 'cancelado'],
+  aprobado: ['trabajando', 'pendiente', 'cancelado'],
+  trabajando: ['listo', 'aprobado', 'cancelado'],
+  listo: ['entregado', 'trabajando', 'abandonado'],
+  entregado: [],
+  cancelado: ['pendiente'],
+  abandonado: ['entregado', 'cancelado'],
+};
+
+const TRANSITION_LABELS = {
+  'aprobado→pendiente': 'Volver a Pendiente (devuelve piezas al stock)',
+  'trabajando→aprobado': 'Volver a Aprobado',
+  'listo→trabajando': 'Volver a En taller',
+  'listo→abandonado': 'Marcar como Abandonado',
+  'cancelado→pendiente': 'Reabrir ticket (Pendiente)',
+};
 
 const CLAVE_HIDE_MS = 30_000;
 
@@ -49,6 +70,7 @@ export default function TicketDetailDrawer({
   const [showDlgEntregar, setShowDlgEntregar] = useState(false);
   const [showDlgComp, setShowDlgComp] = useState(false);
   const [showDlgCancel, setShowDlgCancel] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
 
   // Delivery form state
   const [entregarMetodo, setEntregarMetodo] = useState('efectivo');
@@ -71,6 +93,7 @@ export default function TicketDetailDrawer({
     setShowClave(false);
     setClaveError('');
     clearTimeout(claveHideTimer.current);
+    setShowStatusMenu(false);
   }, [ticket?.id]);
 
   if (!ticket || !open) return null;
@@ -100,6 +123,7 @@ export default function TicketDetailDrawer({
   // Timeline computation
   const currentStepIdx = TIMELINE_STEPS.findIndex((s) => s.key === ticket.estado);
   const timelineHistory = ticket.historialEstados || [];
+  const allowedTransitions = STATUS_TRANSITIONS[ticket.estado] || [];
 
   async function handleToggleClave() {
     if (showClave) {
@@ -200,6 +224,21 @@ export default function TicketDetailDrawer({
       }
     } finally {
       setIsProcessing(false);
+    }
+  }
+
+  // Transitions with side effects (stock, cobro) go through their dialogs.
+  function handleSelectTransition(nuevoEstado) {
+    setShowStatusMenu(false);
+    if (nuevoEstado === 'aprobado' && ticket.estado === 'pendiente') {
+      setShowDlgAprobar(true);
+    } else if (nuevoEstado === 'entregado') {
+      setEntregarMetodo('efectivo');
+      setShowDlgEntregar(true);
+    } else if (nuevoEstado === 'cancelado') {
+      setShowDlgCancel(true);
+    } else {
+      handleDirectTransition(nuevoEstado);
     }
   }
 
@@ -323,13 +362,13 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* Primary Action Buttons */}
-            {ticket.estado !== 'entregado' && ticket.estado !== 'cancelado' && (
-              <div className="flex items-center gap-2 pt-1">
+            {allowedTransitions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1">
                 {ticket.estado === 'pendiente' && (
                   <button
                     type="button"
                     onClick={() => setShowDlgAprobar(true)}
-                    className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
                   >
                     <span>Aprobar reparación</span>
                     <ArrowRight size={18} />
@@ -341,7 +380,7 @@ export default function TicketDetailDrawer({
                     type="button"
                     onClick={() => handleDirectTransition('trabajando')}
                     disabled={isProcessing}
-                    className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
                   >
                     <span>Iniciar trabajo</span>
                     <ArrowRight size={18} />
@@ -353,7 +392,7 @@ export default function TicketDetailDrawer({
                     type="button"
                     onClick={() => handleDirectTransition('listo')}
                     disabled={isProcessing}
-                    className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
                   >
                     <span>Marcar como listo</span>
                     <ArrowRight size={18} />
@@ -367,20 +406,66 @@ export default function TicketDetailDrawer({
                       setEntregarMetodo('efectivo');
                       setShowDlgEntregar(true);
                     }}
-                    className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
                   >
                     <span>Entregar y cobrar saldo</span>
                     <ArrowRight size={18} />
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => setShowDlgCancel(true)}
-                  className="min-h-[46px] px-4 bg-transparent border border-danger text-danger-ink font-bold text-[15px] cursor-pointer hover:bg-danger-bg transition-colors"
-                >
-                  Cancelar ticket
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowStatusMenu((v) => !v)}
+                    disabled={isProcessing}
+                    aria-haspopup="menu"
+                    aria-expanded={showStatusMenu}
+                    className="btn btn-secondary min-h-[46px] text-[15px] gap-2"
+                  >
+                    <span>Cambiar estado</span>
+                    <ChevronDown size={16} />
+                  </button>
+                  {showStatusMenu && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setShowStatusMenu(false)}
+                      />
+                      <div
+                        role="menu"
+                        className="absolute left-0 top-full z-20 mt-1 min-w-[280px] border border-line bg-surface shadow-admin-lg"
+                      >
+                        {allowedTransitions.map((estado) => (
+                          <button
+                            key={estado}
+                            type="button"
+                            role="menuitem"
+                            onClick={() => handleSelectTransition(estado)}
+                            className={`flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left text-[15px] font-bold last:border-b-0 hover:bg-bg transition-colors ${
+                              estado === 'cancelado' ? 'text-danger-ink' : 'text-ink'
+                            }`}
+                          >
+                            <TicketStatusBadge estado={estado} />
+                            <span>
+                              {TRANSITION_LABELS[`${ticket.estado}→${estado}`] ||
+                                `Pasar a ${TICKET_ESTADO_CONFIG[estado]?.label || estado}`}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {allowedTransitions.includes('cancelado') && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDlgCancel(true)}
+                    className="min-h-[46px] px-4 bg-transparent border border-danger text-danger-ink font-bold text-[15px] cursor-pointer hover:bg-danger-bg transition-colors"
+                  >
+                    Cancelar ticket
+                  </button>
+                )}
               </div>
             )}
 
@@ -745,7 +830,7 @@ export default function TicketDetailDrawer({
                 type="button"
                 onClick={handleConfirmAprobar}
                 disabled={isProcessing}
-                className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
               >
                 {isProcessing ? 'Aprobando...' : 'Aprobar y descontar'}
               </button>
@@ -805,7 +890,7 @@ export default function TicketDetailDrawer({
               <button
                 type="button"
                 onClick={goToPiezas}
-                className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
               >
                 Cambiar pieza
               </button>
@@ -901,7 +986,7 @@ export default function TicketDetailDrawer({
                 type="button"
                 onClick={handleConfirmEntregar}
                 disabled={isProcessing}
-                className="btn btn-primary min-h-[46px] px-5 text-[#0f172a] text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
               >
                 {isProcessing ? 'Cobrando...' : 'Cobrar y entregar'}
               </button>
@@ -969,7 +1054,7 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgComp Comprobante de servicio */}
       {showDlgComp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[500px] max-h-[860px] flex flex-col bg-white text-[#0f172a] shadow-2xl">
+          <div className="w-full max-w-[500px] max-h-[860px] flex flex-col bg-whiteshadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3.5 bg-[#0f172a] text-[#e2e8f0] shrink-0">
               <span className="text-[13px] uppercase tracking-[0.14em] font-bold text-[#fdba74]">
@@ -1111,7 +1196,7 @@ export default function TicketDetailDrawer({
               <button
                 type="button"
                 onClick={handleSendWhatsApp}
-                className="min-h-[46px] flex items-center gap-2 px-4 bg-[#f97316] text-[#0f172a] font-extrabold text-[15px] cursor-pointer"
+                className="min-h-[46px] flex items-center gap-2 px-4 bg-[#f97316]font-extrabold text-[15px] cursor-pointer"
               >
                 <span>Enviar por WhatsApp</span>
               </button>

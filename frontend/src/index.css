@@ -3,6 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Admin panel buttons (themed via --admin-* tokens, light and dark). */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-accent text-on-accent hover:opacity-95;
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink hover:border-accent;
+  }
+}
 
 * {
   margin: 0;
