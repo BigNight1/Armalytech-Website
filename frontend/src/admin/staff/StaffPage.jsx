@@ -202,39 +202,47 @@ export default function StaffPage() {
       )}
 
       {/* Modal Nuevo Personal */}
-      <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Crear nuevo personal">
-        <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
-          <p className="text-[15px] leading-normal text-muted">
-            Crea una cuenta con una contraseña temporal. En su primer ingreso, el sistema le exigirá crear su propia
-            contraseña privada.
-          </p>
-          <Input
-            label="Correo electrónico"
-            name="email"
-            type="email"
-            placeholder="ejemplo@armalytech.com"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            required
-          />
-          <Input
-            label="Contraseña temporal"
-            name="password"
-            type="text"
-            placeholder="Mínimo 6 caracteres"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
-            <Button type="button" variant="secondary" onClick={() => setCreateModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creando…' : 'Crear personal'}
-            </Button>
-          </div>
-        </form>
+      <Modal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        title="Crear nuevo personal"
+        dismissible={false}
+        isDirty={newEmail.trim() !== '' || newPassword.trim() !== ''}
+      >
+        {(requestClose) => (
+          <form onSubmit={handleCreateSubmit} className="flex flex-col gap-4">
+            <p className="text-[15px] leading-normal text-muted">
+              Crea una cuenta con una contraseña temporal. En su primer ingreso, el sistema le exigirá crear su propia
+              contraseña privada.
+            </p>
+            <Input
+              label="Correo electrónico"
+              name="email"
+              type="email"
+              placeholder="ejemplo@armalytech.com"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              required
+            />
+            <Input
+              label="Contraseña temporal"
+              name="password"
+              type="text"
+              placeholder="Mínimo 6 caracteres"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+            <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
+              <Button type="button" variant="secondary" onClick={requestClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? 'Creando…' : 'Crear personal'}
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       {/* Modal Resetear Contraseña */}
@@ -245,37 +253,34 @@ export default function StaffPage() {
           setSelectedStaff(null);
         }}
         title={`Resetear contraseña: ${selectedStaff?.email ?? ''}`}
+        dismissible={false}
+        isDirty={resetPasswordVal.trim() !== ''}
       >
-        <form onSubmit={handleResetSubmit} className="flex flex-col gap-4">
-          <p className="text-[15px] leading-normal text-muted">
-            Asigna una nueva clave temporal. Las sesiones activas de este usuario se cerrarán inmediatamente y se le
-            pedirá cambiarla al ingresar.
-          </p>
-          <Input
-            label="Nueva contraseña temporal"
-            name="password"
-            type="text"
-            placeholder="Mínimo 6 caracteres"
-            value={resetPasswordVal}
-            onChange={(e) => setResetPasswordVal(e.target.value)}
-            required
-          />
-          <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setResetModalOpen(false);
-                setSelectedStaff(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={resetPasswordMutation.isPending}>
-              {resetPasswordMutation.isPending ? 'Guardando…' : 'Asignar clave'}
-            </Button>
-          </div>
-        </form>
+        {(requestClose) => (
+          <form onSubmit={handleResetSubmit} className="flex flex-col gap-4">
+            <p className="text-[15px] leading-normal text-muted">
+              Asigna una nueva clave temporal. Las sesiones activas de este usuario se cerrarán inmediatamente y se le
+              pedirá cambiarla al ingresar.
+            </p>
+            <Input
+              label="Nueva contraseña temporal"
+              name="password"
+              type="text"
+              placeholder="Mínimo 6 caracteres"
+              value={resetPasswordVal}
+              onChange={(e) => setResetPasswordVal(e.target.value)}
+              required
+            />
+            <div className="mt-2 flex justify-end gap-2 border-t border-line pt-4">
+              <Button type="button" variant="secondary" onClick={requestClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={resetPasswordMutation.isPending}>
+                {resetPasswordMutation.isPending ? 'Guardando…' : 'Asignar clave'}
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       {/* Dialog Confirmar Activación / Desactivación */}

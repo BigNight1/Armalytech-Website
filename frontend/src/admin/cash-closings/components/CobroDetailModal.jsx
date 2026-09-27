@@ -52,7 +52,7 @@ export default function CobroDetailModal({
               </span>
             )}
           </div>
-          <h2 className="text-xl font-bold text-ink">
+          <h2 className="text-lg sm:text-xl font-bold text-ink break-words">
             {isVenta ? `Comprobante de Venta · ${cobro.codigo}` : `Ticket de Servicio · ${cobro.codigo}`}
           </h2>
         </div>
@@ -142,8 +142,8 @@ export default function CobroDetailModal({
             </div>
 
             {cobro.items && cobro.items.length > 0 ? (
-              <div className="overflow-hidden border border-line">
-                <table className="w-full text-left text-sm">
+              <div className="overflow-x-auto border border-line">
+                <table className="w-full min-w-[420px] text-left text-sm">
                   <thead className="border-b border-line bg-surface text-xs font-semibold text-muted">
                     <tr>
                       <th className="px-3.5 py-2">Producto</th>
@@ -157,7 +157,7 @@ export default function CobroDetailModal({
                       const subtotal = (item.precioUnitario ?? 0) * (item.cantidad ?? 1);
                       return (
                         <tr key={item.productoId || idx} className="hover:bg-surface/50">
-                          <td className="px-3.5 py-2.5 font-medium text-ink">
+                          <td className="px-3.5 py-2.5 font-medium text-ink max-w-[220px] truncate">
                             {item.nombre}
                           </td>
                           <td className="px-3 py-2.5 text-center text-muted font-mono">

@@ -12,7 +12,7 @@ import TicketStatusBadge, { TICKET_ESTADO_CONFIG } from './TicketStatusBadge.jsx
 import { formatLimaShort } from '../../shared/lib/time.js';
 import { formatPEN } from '../../shared/lib/money.js';
 import { ticketsApi } from '../api/ticketsApi.js';
-import { useToast } from '../../shared/ui/index.js';
+import { useToast, useUnsavedGuard, DiscardChangesDialog } from '../../shared/ui/index.js';
 
 const TIMELINE_STEPS = [
   { key: 'pendiente', label: 'Recepcionado' },
@@ -95,6 +95,23 @@ export default function TicketDetailDrawer({
     clearTimeout(claveHideTimer.current);
     setShowStatusMenu(false);
   }, [ticket?.id]);
+
+  // Unsaved-changes guard: this drawer is mostly read-only + actions, the
+  // only typed input at risk of accidental loss is an unsent internal note
+  // (odd/tasks/unsaved-changes-guard.md).
+  const isDirty = nuevaNota.trim() !== '';
+  const { requestClose, confirmOpen, confirmDiscard, cancelDiscard } = useUnsavedGuard(isDirty, onClose);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        requestClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, requestClose]);
 
   if (!ticket || !open) return null;
 
@@ -308,17 +325,17 @@ export default function TicketDetailDrawer({
     <>
       {/* Drawer Overlay */}
       <div
-        onClick={onClose}
+        onClick={requestClose}
         className="fixed inset-0 z-50 flex justify-end bg-black/60 transition-opacity"
         role="dialog"
         aria-modal="true"
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="flex h-full w-full max-w-[640px] flex-col border-l-4 border-accent bg-bg text-ink shadow-admin-lg"
+          className="flex h-full w-full max-w-[640px] flex-col overflow-y-auto sm:overflow-hidden border-l-4 border-accent bg-bg text-ink shadow-admin-lg"
         >
           {/* Drawer Top Header */}
-          <div className="flex flex-col gap-3 px-7 pt-5 pb-4 border-b-2 border-line shrink-0">
+          <div className="flex flex-col gap-3 px-4 sm:px-7 pt-5 pb-4 border-b-2 border-line shrink-0">
             <div className="flex items-center gap-3">
               <span className="font-mono text-[15px] font-bold text-accent-ink">
                 {ticket.codigo}
@@ -326,7 +343,7 @@ export default function TicketDetailDrawer({
               <TicketStatusBadge estado={ticket.estado} />
               <button
                 type="button"
-                onClick={onClose}
+                onClick={requestClose}
                 aria-label="Cerrar"
                 className="ml-auto flex h-10 w-10 items-center justify-center border border-line text-ink transition-colors hover:border-accent hover:text-accent-ink"
               >
@@ -338,7 +355,7 @@ export default function TicketDetailDrawer({
               {ticket.titulo || `Reparación de ${ticket.equipo?.marca || ''} ${equipoModelo}`}
             </h2>
 
-            <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-3 text-[15px]">
+            <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr_1fr] gap-3 text-[15px]">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[13px] text-muted">Cliente</span>
                 <span className="font-bold text-ink">{clienteNombre}</span>
@@ -368,7 +385,7 @@ export default function TicketDetailDrawer({
                   <button
                     type="button"
                     onClick={() => setShowDlgAprobar(true)}
-                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5 text-base gap-2.5 font-extrabold w-full sm:w-auto"
                   >
                     <span>Aprobar reparación</span>
                     <ArrowRight size={18} />
@@ -380,7 +397,7 @@ export default function TicketDetailDrawer({
                     type="button"
                     onClick={() => handleDirectTransition('trabajando')}
                     disabled={isProcessing}
-                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5 text-base gap-2.5 font-extrabold w-full sm:w-auto"
                   >
                     <span>Iniciar trabajo</span>
                     <ArrowRight size={18} />
@@ -392,7 +409,7 @@ export default function TicketDetailDrawer({
                     type="button"
                     onClick={() => handleDirectTransition('listo')}
                     disabled={isProcessing}
-                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5 text-base gap-2.5 font-extrabold w-full sm:w-auto"
                   >
                     <span>Marcar como listo</span>
                     <ArrowRight size={18} />
@@ -406,7 +423,7 @@ export default function TicketDetailDrawer({
                       setEntregarMetodo('efectivo');
                       setShowDlgEntregar(true);
                     }}
-                    className="btn btn-primary min-h-[46px] px-5text-base gap-2.5 font-extrabold"
+                    className="btn btn-primary min-h-[46px] px-5 text-base gap-2.5 font-extrabold w-full sm:w-auto"
                   >
                     <span>Entregar y cobrar saldo</span>
                     <ArrowRight size={18} />
@@ -433,7 +450,7 @@ export default function TicketDetailDrawer({
                       />
                       <div
                         role="menu"
-                        className="absolute left-0 top-full z-20 mt-1 min-w-[280px] border border-line bg-surface shadow-admin-lg"
+                        className="absolute left-0 top-full z-20 mt-1 w-[min(280px,calc(100vw-2rem))] border border-line bg-surface shadow-admin-lg"
                       >
                         {allowedTransitions.map((estado) => (
                           <button
@@ -475,7 +492,7 @@ export default function TicketDetailDrawer({
           </div>
 
           {/* Drawer Scrollable Body */}
-          <div className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+          <div className="sm:flex-1 sm:overflow-y-auto px-4 sm:px-7 py-5 flex flex-col gap-5">
             {/* 1. 5-Step Timeline Bar */}
             <div className="grid grid-cols-5 border-t-2 border-line pt-2">
               {TIMELINE_STEPS.map((step, idx) => {
@@ -483,14 +500,14 @@ export default function TicketDetailDrawer({
                 const isCurrent = ticket.estado === step.key;
                 const hist = timelineHistory.find((h) => h.estado === step.key);
                 return (
-                  <div key={step.key} className="flex flex-col gap-1 pr-2">
+                  <div key={step.key} className="flex flex-col gap-1 pr-1 sm:pr-2 min-w-0">
                     <div
                       className={`h-1 w-full mb-1 transition-colors ${
                         isPassed ? 'bg-accent' : 'bg-line'
                       }`}
                     />
                     <span
-                      className={`text-[13px] leading-tight ${
+                      className={`text-[11px] sm:text-[13px] leading-tight break-words ${
                         isCurrent
                           ? 'font-extrabold text-accent-ink'
                           : isPassed
@@ -519,14 +536,14 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* 2. 3-Column Price Box */}
-            <div className="grid grid-cols-3 border-2 border-ink">
+            <div className="grid grid-cols-1 sm:grid-cols-3 border-2 border-ink">
               <div className="p-3 flex flex-col gap-0.5">
                 <span className="text-[13px] text-muted">Total acordado</span>
                 <span className="text-[22px] font-extrabold tabular-nums text-ink">
                   {formatPEN(total)}
                 </span>
               </div>
-              <div className="p-3 border-l border-line flex flex-col gap-0.5">
+              <div className="p-3 border-t sm:border-t-0 sm:border-l border-line flex flex-col gap-0.5">
                 <span className="text-[13px] text-muted">Adelanto</span>
                 <span className="text-[22px] font-extrabold tabular-nums text-ink">
                   {formatPEN(adelanto)}
@@ -535,7 +552,7 @@ export default function TicketDetailDrawer({
                   {metodoAdelanto || '—'}
                 </span>
               </div>
-              <div className="p-3 border-l border-line flex flex-col gap-0.5 bg-surface">
+              <div className="p-3 border-t sm:border-t-0 sm:border-l border-line flex flex-col gap-0.5 bg-surface">
                 <span className="text-[13px] text-muted">
                   {saldo === 0 ? 'Saldo cancelado' : 'Saldo pendiente'}
                 </span>
@@ -551,7 +568,7 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* 3. Solo panel strip */}
-            <div className="flex items-center gap-3.5 p-2.5 border border-dashed border-line text-[15px] bg-surface/40">
+            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 p-2.5 border border-dashed border-line text-[15px] bg-surface/40">
               <span className="text-xs font-extrabold tracking-wider uppercase px-2 py-0.5 bg-ink text-bg">
                 Solo panel
               </span>
@@ -565,7 +582,7 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* 4. 2-col info: Falla y Estado de ingreso */}
-            <div className="grid grid-cols-2 gap-4 text-[15px] leading-relaxed">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[15px] leading-relaxed">
               <div className="flex flex-col gap-1">
                 <span className="text-[13px] tracking-wider uppercase font-bold text-muted">
                   Falla reportada
@@ -720,7 +737,7 @@ export default function TicketDetailDrawer({
                   value={nuevaNota}
                   onChange={(e) => setNuevaNota(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddNota()}
-                  className="flex-1 min-h-[44px] border border-line bg-surface px-3 text-[15px] text-ink outline-none border-r-0"
+                  className="min-w-0 flex-1 min-h-[44px] border border-line bg-surface px-3 text-[15px] text-ink outline-none border-r-0"
                 />
                 <button
                   type="button"
@@ -748,33 +765,35 @@ export default function TicketDetailDrawer({
           </div>
 
           {/* Drawer Bottom Footer */}
-          <div className="flex items-center gap-2 px-7 py-3.5 border-t-2 border-ink shrink-0 bg-bg">
-            <button
-              type="button"
-              onClick={handleSendWhatsApp}
-              className="btn btn-secondary min-h-[46px] text-[15px] gap-2.5"
-            >
-              <img
-                src="/assets/redes/whatsapp.svg"
-                alt=""
-                className="w-4 h-4 object-contain"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-              <span>Enviar por WhatsApp</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowDlgComp(true)}
-              className="btn btn-secondary min-h-[46px] text-[15px]"
-            >
-              Ver comprobante
-            </button>
+          <div className="flex flex-col gap-2 px-4 sm:px-7 py-3.5 border-t-2 border-ink shrink-0 bg-bg sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleSendWhatsApp}
+                className="btn btn-secondary min-h-[46px] text-[15px] gap-2.5 w-full sm:w-auto"
+              >
+                <img
+                  src="/assets/redes/whatsapp.svg"
+                  alt=""
+                  className="w-4 h-4 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <span>Enviar por WhatsApp</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDlgComp(true)}
+                className="btn btn-secondary min-h-[46px] text-[15px] w-full sm:w-auto"
+              >
+                Ver comprobante
+              </button>
+            </div>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="ml-auto text-[13px] text-muted font-mono truncate max-w-[220px] hover:text-accent-ink hover:underline"
+              className="sm:ml-auto text-[13px] text-muted font-mono truncate max-w-full sm:max-w-[220px] hover:text-accent-ink hover:underline"
               title="Copiar enlace de seguimiento"
             >
               {trackingUrl(ticket).replace(/^https?:\/\//, '')}
@@ -786,12 +805,12 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgAprobar */}
       {showDlgAprobar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-accent shadow-admin-lg p-7 flex flex-col gap-4">
+          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-accent shadow-admin-lg p-4 sm:p-7 flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <span className="text-xs uppercase tracking-[0.14em] text-accent-ink font-bold">
                 {ticket.codigo}
               </span>
-              <h2 className="text-[26px] font-extrabold leading-tight text-ink m-0">
+              <h2 className="text-xl sm:text-[26px] font-extrabold leading-tight text-ink m-0">
                 Aprobar ticket
               </h2>
               <p className="text-base text-muted m-0 leading-relaxed">
@@ -830,7 +849,7 @@ export default function TicketDetailDrawer({
                 type="button"
                 onClick={handleConfirmAprobar}
                 disabled={isProcessing}
-                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5 text-[15px] font-bold"
               >
                 {isProcessing ? 'Aprobando...' : 'Aprobar y descontar'}
               </button>
@@ -842,13 +861,13 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgErr — 409 insufficient_stock */}
       {showDlgErr && stockError && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-danger shadow-admin-lg p-7 flex flex-col gap-4">
+          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-danger shadow-admin-lg p-4 sm:p-7 flex flex-col gap-4">
             <div className="flex gap-3.5 items-start">
               <span className="flex h-[46px] w-[46px] shrink-0 items-center justify-center bg-danger-bg text-danger-ink">
                 <AlertTriangle size={22} />
               </span>
-              <div className="flex flex-col gap-1.5">
-                <h2 className="text-[26px] font-extrabold leading-tight text-ink m-0">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <h2 className="text-xl sm:text-[26px] font-extrabold leading-tight text-ink m-0">
                   No se pudo aprobar {ticket.codigo}
                 </h2>
                 <p className="text-[17px] leading-tight text-danger-ink font-bold m-0">
@@ -890,7 +909,7 @@ export default function TicketDetailDrawer({
               <button
                 type="button"
                 onClick={goToPiezas}
-                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5 text-[15px] font-bold"
               >
                 Cambiar pieza
               </button>
@@ -902,33 +921,33 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgEntregar */}
       {showDlgEntregar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-accent shadow-admin-lg p-7 flex flex-col gap-4">
+          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-accent shadow-admin-lg p-4 sm:p-7 flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <span className="text-xs uppercase tracking-[0.14em] text-accent-ink font-bold">
                 {ticket.codigo} · {ticket.cliente?.nombre}
               </span>
-              <h2 className="text-[26px] font-extrabold leading-tight text-ink m-0">
+              <h2 className="text-xl sm:text-[26px] font-extrabold leading-tight text-ink m-0">
                 Entregar y cobrar saldo
               </h2>
             </div>
 
-            <div className="grid grid-cols-[1fr_1fr_1.2fr] border-2 border-ink">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1.2fr] border-2 border-ink">
               <div className="p-3 flex flex-col gap-0.5">
                 <span className="text-xs text-muted">Total</span>
                 <span className="text-lg font-extrabold text-ink">{formatPEN(total)}</span>
               </div>
-              <div className="p-3 border-l border-line flex flex-col gap-0.5">
+              <div className="p-3 border-t sm:border-t-0 sm:border-l border-line flex flex-col gap-0.5">
                 <span className="text-xs text-muted">Adelanto</span>
                 <span className="text-lg font-extrabold text-ink">{formatPEN(adelanto)}</span>
               </div>
-              <div className="p-3 border-l border-line flex flex-col gap-0.5 bg-accent text-[#0f172a]">
+              <div className="p-3 border-t sm:border-t-0 sm:border-l border-line flex flex-col gap-0.5 bg-accent text-[#0f172a]">
                 <span className="text-xs font-bold">Saldo a cobrar</span>
                 <span className="text-2xl font-extrabold">{formatPEN(saldo)}</span>
               </div>
             </div>
 
             {saldo > 0 && (
-              <div className="grid grid-cols-2 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                 <div className="flex flex-col gap-1">
                   <label className="text-sm text-muted">Monto a cobrar</label>
                   <div className="flex border border-line">
@@ -986,7 +1005,7 @@ export default function TicketDetailDrawer({
                 type="button"
                 onClick={handleConfirmEntregar}
                 disabled={isProcessing}
-                className="btn btn-primary min-h-[46px] px-5text-[15px] font-bold"
+                className="btn btn-primary min-h-[46px] px-5 text-[15px] font-bold"
               >
                 {isProcessing ? 'Cobrando...' : 'Cobrar y entregar'}
               </button>
@@ -998,16 +1017,16 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgCancel */}
       {showDlgCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-danger shadow-admin-lg p-7 flex flex-col gap-4">
+          <div className="w-full max-w-[520px] bg-bg text-ink border-t-4 border-danger shadow-admin-lg p-4 sm:p-7 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-danger-bg text-danger-ink">
                 <AlertTriangle size={22} />
               </span>
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-xs uppercase tracking-[0.14em] text-danger-ink font-bold">
                   {ticket.codigo}
                 </span>
-                <h2 className="text-[24px] font-extrabold leading-tight text-ink m-0">
+                <h2 className="text-xl sm:text-[24px] font-extrabold leading-tight text-ink m-0">
                   Cancelar orden de servicio
                 </h2>
               </div>
@@ -1054,9 +1073,9 @@ export default function TicketDetailDrawer({
       {/* MODAL: dlgComp Comprobante de servicio */}
       {showDlgComp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-[500px] max-h-[860px] flex flex-col bg-whiteshadow-2xl">
+          <div className="w-full max-w-[500px] max-h-[860px] flex flex-col bg-white shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-3.5 bg-[#0f172a] text-[#e2e8f0] shrink-0">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0f172a] text-[#e2e8f0] shrink-0">
               <span className="text-[13px] uppercase tracking-[0.14em] font-bold text-[#fdba74]">
                 Comprobante de servicio
               </span>
@@ -1071,7 +1090,7 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* Receipt body */}
-            <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-4 text-[#0f172a]">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-7 py-6 flex flex-col gap-4 text-[#0f172a]">
               <div className="flex items-center gap-3">
                 <img
                   src="/assets/Armalytech_logo.png"
@@ -1099,7 +1118,7 @@ export default function TicketDetailDrawer({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm leading-snug">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5 text-sm leading-snug">
                 <div className="flex flex-col">
                   <span className="text-slate-500 text-xs">Cliente</span>
                   <span className="font-bold">{clienteNombre}</span>
@@ -1110,7 +1129,7 @@ export default function TicketDetailDrawer({
                     {ticket.equipo?.marca} {equipoModelo}
                   </span>
                 </div>
-                <div className="flex flex-col col-span-2">
+                <div className="flex flex-col sm:col-span-2">
                   <span className="text-slate-500 text-xs">Falla</span>
                   <span className="font-bold">
                     {ticket.equipo?.fallaReportada || ticket.fallaReportada || '—'}
@@ -1166,12 +1185,12 @@ export default function TicketDetailDrawer({
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="flex flex-col gap-1 text-sm">
+                <div className="flex min-w-0 flex-col gap-1 text-sm">
                   <span className="font-bold">Sigue tu reparación</span>
                   <button
                     type="button"
                     onClick={handleCopyLink}
-                    className="font-mono text-xs text-slate-600 text-left hover:underline"
+                    className="max-w-full truncate font-mono text-xs text-slate-600 text-left hover:underline"
                   >
                     {trackingUrl(ticket).replace(/^https?:\/\//, '')}
                   </button>
@@ -1184,26 +1203,28 @@ export default function TicketDetailDrawer({
             </div>
 
             {/* Footer */}
-            <div className="flex gap-2 px-7 py-3.5 border-t-2 border-[#0f172a] shrink-0 bg-slate-50">
-              <button
-                type="button"
-                onClick={handlePrintReceipt}
-                className="btn btn-secondary min-h-[46px] text-sm gap-2"
-              >
-                <Printer size={16} />
-                <span>Imprimir</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleSendWhatsApp}
-                className="min-h-[46px] flex items-center gap-2 px-4 bg-[#f97316]font-extrabold text-[15px] cursor-pointer"
-              >
-                <span>Enviar por WhatsApp</span>
-              </button>
+            <div className="flex flex-col gap-2 px-4 sm:px-7 py-3.5 border-t-2 border-[#0f172a] shrink-0 bg-slate-50 sm:flex-row sm:items-center">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrintReceipt}
+                  className="btn btn-secondary min-h-[46px] text-sm gap-2"
+                >
+                  <Printer size={16} />
+                  <span>Imprimir</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendWhatsApp}
+                  className="min-h-[46px] flex items-center gap-2 px-4 bg-[#f97316] font-extrabold text-[15px] cursor-pointer"
+                >
+                  <span>Enviar por WhatsApp</span>
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowDlgComp(false)}
-                className="btn btn-secondary ml-auto min-h-[46px] text-[15px]"
+                className="btn btn-secondary sm:ml-auto min-h-[46px] text-[15px] w-full sm:w-auto"
               >
                 Cerrar
               </button>
@@ -1211,6 +1232,8 @@ export default function TicketDetailDrawer({
           </div>
         </div>
       )}
+
+      <DiscardChangesDialog open={confirmOpen} onCancel={cancelDiscard} onDiscard={confirmDiscard} />
     </>
   );
 }

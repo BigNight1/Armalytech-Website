@@ -54,7 +54,9 @@ export default function AdminLayout() {
           </div>
         )}
 
-        <div className="flex min-h-screen flex-1 flex-col lg:pl-[264px]">
+        {/* min-w-0 lets tables scroll inside their own overflow-x-auto
+            wrappers instead of widening the whole page on phones. */}
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col lg:pl-[264px]">
           <Header onOpenSidebar={() => setSidebarOpen(true)} />
           <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
             <Outlet />

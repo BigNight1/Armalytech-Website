@@ -9,6 +9,7 @@ import { usePhones } from '../../inventory/hooks/usePhones.js';
 import { useCategories } from '../../inventory/hooks/useCategories.js';
 import { formatPEN } from '../../shared/lib/money.js';
 import LoyaltyStamps from '../../clients/components/LoyaltyStamps.jsx';
+import { useUnsavedGuard, DiscardChangesDialog } from '../../shared/ui/index.js';
 
 // D3: Orden 1 Cliente -> 2 Equipo -> 3 Precio y cierre -> 4 Piezas
 const STEPS = [
@@ -448,11 +449,47 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
     refs[stepNum]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // Unsaved-changes guard: dirty when any client/equipment/price/parts
+  // field has been touched (odd/tasks/unsaved-changes-guard.md).
+  const isDirty =
+    phone !== '' ||
+    firstName.trim() !== '' ||
+    lastName.trim() !== '' ||
+    marcaInput.trim() !== '' ||
+    modeloInput.trim() !== '' ||
+    color.trim() !== '' ||
+    imei.trim() !== '' ||
+    fallaReportada.trim() !== '' ||
+    estadoIngreso.trim() !== '' ||
+    tipoClave !== 'ninguno' ||
+    patronSequence.length > 0 ||
+    pinValue !== '' ||
+    txtValue !== '' ||
+    titulo.trim() !== '' ||
+    precio !== '' ||
+    adelanto !== '' ||
+    tecnicoId !== '' ||
+    notaCliente.trim() !== '' ||
+    selectedPiezas.length > 0;
+  const { requestClose, confirmOpen, confirmDiscard, cancelDiscard } = useUnsavedGuard(isDirty, onClose);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        requestClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, requestClose]);
+
   if (!open) return null;
 
   return (
+    <>
     <div
-      onClick={onClose}
+      onClick={requestClose}
       className="fixed inset-0 z-50 flex justify-end bg-black/60 transition-opacity"
       role="dialog"
       aria-modal="true"
@@ -462,18 +499,18 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
         className="flex h-full w-full max-w-[640px] flex-col border-l-4 border-accent bg-bg text-ink shadow-admin-lg"
       >
         {/* Drawer Header */}
-        <div className="flex h-20 shrink-0 items-center justify-between gap-4 px-7 border-b border-line">
-          <div className="flex flex-col gap-1">
+        <div className="flex h-20 shrink-0 items-center justify-between gap-4 px-4 sm:px-7 border-b border-line">
+          <div className="flex min-w-0 flex-col gap-1">
             <span className="text-[13px] font-bold uppercase tracking-[0.14em] text-accent-ink">
               Tickets · Nuevo
             </span>
-            <h2 className="text-[26px] font-extrabold leading-none text-ink">
+            <h2 className="text-xl sm:text-[26px] font-extrabold leading-none text-ink truncate">
               Nuevo ticket
             </h2>
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Cerrar"
             className="flex h-10 w-10 items-center justify-center border border-line text-ink transition-colors hover:border-accent hover:text-accent-ink"
           >
@@ -490,7 +527,7 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
                 key={s.id}
                 type="button"
                 onClick={() => scrollToStep(s.id)}
-                className={`flex items-center gap-2 py-3 px-3 text-[15px] font-bold transition-colors ${
+                className={`flex items-center justify-center gap-1 sm:justify-start sm:gap-2 py-3 px-1 sm:px-3 text-xs sm:text-[15px] font-bold transition-colors ${
                   idx > 0 ? 'border-l border-line' : ''
                 } ${
                   isActive
@@ -499,14 +536,14 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
                 }`}
               >
                 <span className="text-xs font-mono font-bold text-muted">{s.num}</span>
-                <span className="truncate">{s.label}</span>
+                <span className="hidden truncate sm:inline">{s.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Scrollable Form Content */}
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-7 py-4">
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 sm:px-7 py-4">
           {errorMsg && (
             <div className="flex items-center gap-2 border border-danger bg-danger-bg p-3 text-sm text-danger-ink">
               <AlertCircle size={16} className="shrink-0" />
@@ -605,7 +642,7 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
                 <p className="text-sm text-muted">
                   No encontramos este número. Completa sus datos y lo creamos junto con el ticket.
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs text-muted">Nombre</label>
                     <input
@@ -760,7 +797,7 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
                       key={key}
                       type="button"
                       onClick={() => setTipoClave(key)}
-                      className={`h-11 text-[15px] font-bold transition-colors ${
+                      className={`h-11 truncate px-1 text-xs sm:text-[15px] font-bold transition-colors ${
                         idx > 0 ? 'border-l border-line' : ''
                       } ${
                         isSel
@@ -924,7 +961,7 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted">Precio total acordado</label>
                 <div className="flex items-stretch border border-line bg-surface">
@@ -957,7 +994,7 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-muted">Adelanto (opcional)</label>
                 <div className="flex items-stretch border border-line bg-surface">
@@ -1181,30 +1218,34 @@ export default function NewTicketDrawer({ open, onClose, onSubmit }) {
         </div>
 
         {/* Sticky Footer */}
-        <div className="flex shrink-0 items-center gap-4 px-7 py-4 border-t-2 border-ink bg-bg">
+        <div className="flex shrink-0 flex-col gap-3 px-4 sm:px-7 py-4 border-t-2 border-ink bg-bg sm:flex-row sm:items-center sm:gap-4">
           <div className="flex flex-col leading-tight">
             <span className="text-xs text-muted">Total {formatPEN(numPrecio)}</span>
             <span className="text-[17px] font-extrabold text-ink">Saldo {formatPEN(saldo)}</span>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="ml-auto h-12 px-5 border border-line bg-surface text-[15px] font-bold text-ink hover:border-accent transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={handleCreateTicket}
-            disabled={isSubmitting}
-            className="h-12 px-6 bg-accent text-on-accent text-base font-extrabold tracking-wide hover:opacity-95 transition-opacity"
-          >
-            {isSubmitting ? 'Creando…' : 'Crear ticket'}
-          </button>
+          <div className="flex gap-3 sm:ml-auto">
+            <button
+              type="button"
+              onClick={requestClose}
+              disabled={isSubmitting}
+              className="h-12 flex-1 sm:flex-none px-5 border border-line bg-surface text-[15px] font-bold text-ink hover:border-accent transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleCreateTicket}
+              disabled={isSubmitting}
+              className="h-12 flex-1 sm:flex-none px-6 bg-accent text-on-accent text-base font-extrabold tracking-wide hover:opacity-95 transition-opacity"
+            >
+              {isSubmitting ? 'Creando…' : 'Crear ticket'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
+    <DiscardChangesDialog open={confirmOpen} onCancel={cancelDiscard} onDiscard={confirmDiscard} />
+    </>
   );
 }

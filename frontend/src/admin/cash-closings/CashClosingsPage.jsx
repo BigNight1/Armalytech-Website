@@ -98,7 +98,7 @@ export default function CashClosingsPage() {
           <h1>Historial del día</h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button variant="primary" onClick={() => setShowSaleDrawer(true)}>
             <ShoppingBag size={16} />
             <span>Registrar venta</span>

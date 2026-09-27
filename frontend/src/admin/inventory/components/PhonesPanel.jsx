@@ -76,22 +76,29 @@ export default function PhonesPanel({ brands, phones, isLoading, brandFilter, on
         options={[{ value: '', label: 'Todas las marcas' }, ...brands.map((b) => ({ value: b.id, label: b.name }))]}
       />
 
-      <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-2">
-        <div className="w-32">
-          <Select
-            name="new-phone-brand"
-            label="Marca"
-            value={newBrandId}
-            onChange={(e) => setNewBrandId(e.target.value)}
-            options={[{ value: '', label: 'Selecciona...' }, ...brands.map((b) => ({ value: b.id, label: b.name }))]}
-          />
+      <form onSubmit={handleCreate} className="flex flex-col gap-2">
+        <Select
+          name="new-phone-brand"
+          label="Marca"
+          value={newBrandId}
+          onChange={(e) => setNewBrandId(e.target.value)}
+          options={[{ value: '', label: 'Selecciona...' }, ...brands.map((b) => ({ value: b.id, label: b.name }))]}
+        />
+        <div className="flex items-end">
+          <div className="min-w-0 flex-1">
+            <Input
+              name="new-phone-name"
+              label="Modelo"
+              placeholder="Ej: A54"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="border-r-0"
+            />
+          </div>
+          <Button type="submit" disabled={saving || !newBrandId || !newName.trim()} className="shrink-0">
+            Agregar
+          </Button>
         </div>
-        <div className="min-w-[120px] flex-1">
-          <Input name="new-phone-name" label="Modelo" placeholder="Ej: A54" value={newName} onChange={(e) => setNewName(e.target.value)} />
-        </div>
-        <Button type="submit" disabled={saving || !newBrandId || !newName.trim()}>
-          Agregar
-        </Button>
       </form>
 
       {isLoading ? (

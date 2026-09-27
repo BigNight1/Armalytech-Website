@@ -48,7 +48,7 @@ export default function TicketView({ ticket, demoSelector }) {
 
         <TicketContact />
 
-        <p className="text-sm text-[var(--tk-muted)]">
+        <p className="break-all text-sm text-[var(--tk-muted)]">
           Enlace privado del ticket {codigo} ·{' '}
           {typeof window !== 'undefined'
             ? `${window.location.host}${window.location.pathname}`

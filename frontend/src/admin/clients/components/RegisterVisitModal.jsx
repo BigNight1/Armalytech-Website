@@ -95,8 +95,13 @@ export default function RegisterVisitModal({ open, onClose, initialClient = null
 
   const nextStamps = foundClient ? Math.min(5, (foundClient.stamps ?? 0) + 1) : 1;
 
+  // Only the unsubmitted phone search box carries "unsaved" typed input —
+  // once a client is found, registering the visit already hit the server.
+  const isDirty = !initialClient && !foundClient && phone.trim() !== '';
+
   return (
-    <Modal open={open} title="Registrar visita de cliente" onClose={onClose}>
+    <Modal open={open} title="Registrar visita de cliente" onClose={onClose} dismissible={false} isDirty={isDirty}>
+      {(requestClose) => (
       <div className="flex flex-col gap-4">
         {!initialClient && (
           <form onSubmit={handleSearch} className="flex items-end gap-2">
@@ -160,11 +165,12 @@ export default function RegisterVisitModal({ open, onClose, initialClient = null
         )}
 
         <div className="flex justify-end pt-2">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={requestClose}>
             {resultNotice ? 'Cerrar' : 'Cancelar'}
           </Button>
         </div>
       </div>
+      )}
     </Modal>
   );
 }

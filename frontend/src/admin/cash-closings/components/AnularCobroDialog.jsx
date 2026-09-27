@@ -28,9 +28,11 @@ export default function AnularCobroDialog({ cobro, loading, onConfirm, onCancel 
       size="sm"
       tone="danger"
       onClose={onCancel}
-      footer={
+      dismissible={false}
+      isDirty={trimmed !== ''}
+      footer={(requestClose) => (
         <>
-          <Button variant="ghost" onClick={onCancel} disabled={loading}>
+          <Button variant="ghost" onClick={requestClose} disabled={loading}>
             Cancelar
           </Button>
           <Button
@@ -41,7 +43,7 @@ export default function AnularCobroDialog({ cobro, loading, onConfirm, onCancel 
             {loading ? 'Anulando…' : 'Anular cobro'}
           </Button>
         </>
-      }
+      )}
     >
       {cobro && (
         <div className="flex flex-col gap-3.5">

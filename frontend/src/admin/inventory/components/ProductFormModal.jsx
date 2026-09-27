@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Input, Modal, NumberInput, Select } from '../../shared/ui/index.js';
 import { formatPEN } from '../../shared/lib/money.js';
 import PhoneMultiSelect from './PhoneMultiSelect.jsx';
@@ -97,16 +97,26 @@ export default function ProductFormModal({
   const [newBrandName, setNewBrandName] = useState('');
   const [creatingBrand, setCreatingBrand] = useState(false);
   const [extraBrands, setExtraBrands] = useState([]);
+  const initialValuesRef = useRef(emptyForm());
 
   useEffect(() => {
     if (open) {
-      setValues(mode === 'edit' && product ? formFromProduct(product) : emptyForm());
+      const baseline = mode === 'edit' && product ? formFromProduct(product) : emptyForm();
+      setValues(baseline);
+      initialValuesRef.current = baseline;
       setErrors({});
       setShowNewBrand(false);
       setNewBrandName('');
       setExtraBrands([]);
     }
   }, [open, mode, product]);
+
+  // Unsaved-changes guard (odd/tasks/unsaved-changes-guard.md): dirty when
+  // any field diverges from the snapshot taken when the drawer opened, or
+  // when the inline "nueva marca" mini-form has unsaved text.
+  const isDirty =
+    newBrandName.trim() !== '' ||
+    JSON.stringify(values) !== JSON.stringify(initialValuesRef.current);
 
   const allBrands = [...brands, ...extraBrands.filter((b) => !brands.some((existing) => existing.id === b.id))];
   const editingWithBrand = mode === 'edit' && Boolean(product?.brand);
@@ -180,16 +190,18 @@ export default function ProductFormModal({
         </div>
       }
       onClose={onClose}
-      footer={
+      dismissible={false}
+      isDirty={isDirty}
+      footer={(requestClose) => (
         <>
-          <Button variant="secondary" onClick={onClose} disabled={submitting}>
+          <Button variant="secondary" onClick={requestClose} disabled={submitting}>
             Cancelar
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
             {mode === 'edit' ? 'Guardar cambios' : 'Crear producto'}
           </Button>
         </>
-      }
+      )}
     >
       <form onSubmit={handleSubmit} className="contents">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

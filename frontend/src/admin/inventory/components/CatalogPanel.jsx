@@ -68,13 +68,15 @@ export default function CatalogPanel({ title, countLabel, items, isLoading, item
       </div>
 
       <form onSubmit={handleCreate} className="flex">
-        <Input
-          name={`new-${itemLabel}`}
-          placeholder={`Nueva ${itemLabel}`}
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="border-r-0"
-        />
+        <div className="min-w-0 flex-1">
+          <Input
+            name={`new-${itemLabel}`}
+            placeholder={`Nueva ${itemLabel}`}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="border-r-0"
+          />
+        </div>
         <Button type="submit" disabled={saving || !newName.trim()} className="shrink-0">
           Agregar
         </Button>

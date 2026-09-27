@@ -45,32 +45,34 @@ export default function MovementsModal({ open, product, movements, isLoading, pa
         ) : movements.length === 0 ? (
           <p className="text-sm text-muted">Sin movimientos registrados.</p>
         ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Tipo</th>
-                <th className="text-right">Cantidad</th>
-                <th className="text-right">Stock después</th>
-                <th>Motivo</th>
-                <th>Usuario</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movements.map((movement) => (
-                <tr key={movement.id}>
-                  <td className="whitespace-nowrap">{formatMovementDate(movement.occurredAt)}</td>
-                  <td className="font-semibold">{TYPE_LABELS[movement.type] ?? movement.type}</td>
-                  <td className={`text-right font-extrabold tabular-nums ${movement.quantity >= 0 ? 'text-accent-ink' : 'text-danger-ink'}`}>
-                    {movement.quantity >= 0 ? `+${movement.quantity}` : movement.quantity}
-                  </td>
-                  <td className="text-right tabular-nums">{movement.stockAfter}</td>
-                  <td className="text-muted">{movement.reason ?? '—'}</td>
-                  <td className="text-muted">{movement.userEmail}</td>
+          <div className="overflow-x-auto">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th className="text-right">Cantidad</th>
+                  <th className="text-right">Stock después</th>
+                  <th>Motivo</th>
+                  <th>Usuario</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {movements.map((movement) => (
+                  <tr key={movement.id}>
+                    <td className="whitespace-nowrap">{formatMovementDate(movement.occurredAt)}</td>
+                    <td className="font-semibold">{TYPE_LABELS[movement.type] ?? movement.type}</td>
+                    <td className={`text-right font-extrabold tabular-nums ${movement.quantity >= 0 ? 'text-accent-ink' : 'text-danger-ink'}`}>
+                      {movement.quantity >= 0 ? `+${movement.quantity}` : movement.quantity}
+                    </td>
+                    <td className="text-right tabular-nums">{movement.stockAfter}</td>
+                    <td className="text-muted">{movement.reason ?? '—'}</td>
+                    <td className="text-muted">{movement.userEmail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {totalPages > 1 && (

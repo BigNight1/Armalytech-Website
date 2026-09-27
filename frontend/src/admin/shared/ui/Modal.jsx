@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import useUnsavedGuard from './useUnsavedGuard.js';
+import DiscardChangesDialog from './DiscardChangesDialog.jsx';
 
 const TONE_BORDER = {
   accent: 'border-accent',
@@ -36,6 +38,18 @@ const SIZE_WIDTH = {
  * ...) in place of the plain `title` heading — pass `header={null}` to
  * render no header content at all (e.g. `ConfirmDialog`, which builds its
  * own icon + title block in `children`). `title` always sets `aria-label`.
+ *
+ * `dismissible` (default `true`, current behavior) gates backdrop click:
+ * `false` makes the backdrop a no-op, for forms that must only close via
+ * ✕/Esc/"Cancelar" (unsaved-changes guard, `odd/tasks/unsaved-changes-guard.md`).
+ * `isDirty` (default `false`) feeds the same guard: every dismiss path (✕,
+ * Esc, backdrop when dismissible) goes through it internally, showing
+ * `DiscardChangesDialog` when dirty instead of closing outright. `footer`
+ * and `children` may be a function `(requestClose) => node` instead of a
+ * plain node, so a caller's own "Cancelar" button (in the footer or inside
+ * the body) can also call the exact same guarded closer — plain nodes still
+ * work unchanged for callers that don't need this (`ConfirmDialog`,
+ * `MovementsModal`, `CobroDetailModal`, ...).
  */
 export default function Modal({
   open,
@@ -48,19 +62,23 @@ export default function Modal({
   size,
   variant = 'dialog',
   bordered = false,
+  dismissible = true,
+  isDirty = false,
 }) {
+  const { requestClose, confirmOpen, confirmDiscard, cancelDiscard } = useUnsavedGuard(isDirty, onClose);
+
   useEffect(() => {
     if (!open) return undefined;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        onClose?.();
+        requestClose();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
+  }, [open, requestClose]);
 
   if (!open) {
     return null;
@@ -72,90 +90,106 @@ export default function Modal({
   const usesPanelChrome = isDrawer || bordered;
 
   const headerNode = header !== undefined ? header : <h2 className={isDrawer ? 'text-2xl' : 'text-xl'}>{title}</h2>;
+  const bodyContent = typeof children === 'function' ? children(requestClose) : children;
+  const footerContent = typeof footer === 'function' ? footer(requestClose) : footer;
+  const handleBackdropClick = dismissible ? requestClose : undefined;
 
   const closeButton = usesPanelChrome ? (
     <button
       type="button"
-      onClick={onClose}
+      onClick={requestClose}
       aria-label="Cerrar"
       className="flex h-10 w-10 shrink-0 items-center justify-center border border-line text-ink hover:border-accent hover:text-accent-ink"
     >
       &#10005;
     </button>
   ) : (
-    <button type="button" onClick={onClose} className="text-muted hover:text-accent-ink" aria-label="Cerrar">
+    <button type="button" onClick={requestClose} className="text-muted hover:text-accent-ink" aria-label="Cerrar">
       &#10005;
     </button>
   );
 
+  const discardDialog = (
+    <DiscardChangesDialog open={confirmOpen} onCancel={cancelDiscard} onDiscard={confirmDiscard} />
+  );
+
   if (isDrawer) {
     return (
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose} role="presentation">
-        <div
-          className={`flex h-full w-full ${widthClass} flex-col border-l-4 ${toneBorder} bg-bg text-ink shadow-admin-lg`}
-          onClick={(event) => event.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-label={title}
-        >
-          <div className="flex h-[84px] shrink-0 items-center justify-between gap-4 border-b-2 border-line px-7">
-            {headerNode}
-            {closeButton}
+      <>
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={handleBackdropClick} role="presentation">
+          <div
+            className={`flex h-full w-full ${widthClass} flex-col border-l-4 ${toneBorder} bg-bg text-ink shadow-admin-lg`}
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+          >
+            <div className="flex h-[84px] shrink-0 items-center justify-between gap-4 border-b-2 border-line px-4 sm:px-7">
+              {headerNode}
+              {closeButton}
+            </div>
+            <div className="flex flex-1 flex-col gap-[18px] overflow-auto px-4 sm:px-7 py-6">{bodyContent}</div>
+            {footerContent && (
+              <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t-2 border-line px-4 sm:px-7 py-[18px]">{footerContent}</div>
+            )}
           </div>
-          <div className="flex flex-1 flex-col gap-[18px] overflow-auto px-7 py-6">{children}</div>
-          {footer && (
-            <div className="flex shrink-0 justify-end gap-2 border-t-2 border-line px-7 py-[18px]">{footer}</div>
-          )}
         </div>
-      </div>
+        {discardDialog}
+      </>
     );
   }
 
   if (bordered) {
     return (
+      <>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={handleBackdropClick}
+          role="presentation"
+        >
+          <div
+            className={`flex max-h-[85vh] w-full ${widthClass} flex-col border-t-4 ${toneBorder} bg-bg text-ink shadow-admin-lg`}
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-4 border-b-2 border-line px-4 sm:px-7 py-5">
+              {headerNode}
+              {closeButton}
+            </div>
+            <div className="flex-1 overflow-auto px-4 sm:px-7 py-5 text-[15px] text-ink">{bodyContent}</div>
+            {footerContent && <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t-2 border-line px-4 sm:px-7 py-4">{footerContent}</div>}
+          </div>
+        </div>
+        {discardDialog}
+      </>
+    );
+  }
+
+  return (
+    <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+        onClick={handleBackdropClick}
         role="presentation"
       >
         <div
-          className={`flex max-h-[85vh] w-full ${widthClass} flex-col border-t-4 ${toneBorder} bg-bg text-ink shadow-admin-lg`}
+          className={`w-full ${widthClass} border-t-4 bg-bg p-7 text-ink shadow-admin-lg ${toneBorder}`}
           onClick={(event) => event.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label={title}
         >
-          <div className="flex shrink-0 items-center justify-between gap-4 border-b-2 border-line px-7 py-5">
+          <div className="mb-5 flex items-center justify-between gap-4">
             {headerNode}
             {closeButton}
           </div>
-          <div className="flex-1 overflow-auto px-7 py-5 text-[15px] text-ink">{children}</div>
-          {footer && <div className="flex shrink-0 justify-end gap-2 border-t-2 border-line px-7 py-4">{footer}</div>}
+          <div className="text-[15px] text-ink">{bodyContent}</div>
+          {footerContent && <div className="mt-6 flex justify-end gap-3">{footerContent}</div>}
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-      onClick={onClose}
-      role="presentation"
-    >
-      <div
-        className={`w-full ${widthClass} border-t-4 bg-bg p-7 text-ink shadow-admin-lg ${toneBorder}`}
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-      >
-        <div className="mb-5 flex items-center justify-between gap-4">
-          {headerNode}
-          {closeButton}
-        </div>
-        <div className="text-[15px] text-ink">{children}</div>
-        {footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
-      </div>
-    </div>
+      {discardDialog}
+    </>
   );
 }

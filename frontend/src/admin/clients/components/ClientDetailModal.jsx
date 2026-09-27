@@ -174,11 +174,21 @@ export default function ClientDetailModal({
 
   const initials = getClientInitials(client.firstName, client.lastName);
 
+  // Unsaved-changes guard: only the "Datos" form (name/consent) below is
+  // editable here — the loyalty/messaging sections act immediately against
+  // the server, so they carry no unsaved state of their own.
+  const isDirty =
+    form.firstName !== client.firstName ||
+    form.lastName !== client.lastName ||
+    form.marketingConsent !== client.marketingConsent;
+
   return (
     <Modal
       open={Boolean(client)}
       variant="drawer"
       size="lg"
+      dismissible={false}
+      isDirty={isDirty}
       title={`${client.firstName} ${client.lastName}`}
       header={
         <div className="flex items-center gap-4">

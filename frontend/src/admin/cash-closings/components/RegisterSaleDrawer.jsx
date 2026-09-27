@@ -3,7 +3,7 @@ import { AlertCircle, Plus, Search, ShoppingBag, Trash2, X } from 'lucide-react'
 import { inventoryApi } from '../../inventory/api/inventoryApi.js';
 import { httpClient } from '../../shared/api/httpClient.js';
 import { formatPEN } from '../../shared/lib/money.js';
-import { useToast } from '../../shared/ui/index.js';
+import { useToast, useUnsavedGuard, DiscardChangesDialog } from '../../shared/ui/index.js';
 
 export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
   const { notify } = useToast();
@@ -122,6 +122,23 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
     [cart],
   );
 
+  // Unsaved-changes guard: a non-empty cart or an unsearched query is typed
+  // input the accidental backdrop click/✕/Esc/Cancelar must not discard
+  // silently (odd/tasks/unsaved-changes-guard.md).
+  const isDirty = cart.length > 0 || search.trim() !== '';
+  const { requestClose, confirmOpen, confirmDiscard, cancelDiscard } = useUnsavedGuard(isDirty, onClose);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        requestClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, requestClose]);
+
   async function handleRegisterSale() {
     if (cart.length === 0) {
       setErrorMsg('Agrega al menos un producto a la venta.');
@@ -156,8 +173,9 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
   if (!open) return null;
 
   return (
+    <>
     <div
-      onClick={onClose}
+      onClick={requestClose}
       className="fixed inset-0 z-50 flex justify-end bg-black/60 transition-opacity"
       role="dialog"
       aria-modal="true"
@@ -167,7 +185,7 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
         className="flex h-full w-full max-w-[560px] flex-col border-l-4 border-accent bg-bg text-ink shadow-admin-lg"
       >
         {/* Header */}
-        <div className="flex h-20 shrink-0 items-center justify-between gap-4 px-7 border-b border-line">
+        <div className="flex h-20 shrink-0 items-center justify-between gap-4 px-4 sm:px-7 border-b border-line">
           <div className="flex flex-col gap-1">
             <span className="text-[13px] font-bold uppercase tracking-[0.14em] text-accent-ink">
               Historial · Venta rápida
@@ -178,7 +196,7 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Cerrar"
             className="flex h-10 w-10 items-center justify-center border border-line text-ink transition-colors hover:border-accent hover:text-accent-ink"
           >
@@ -187,7 +205,7 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
         </div>
 
         {/* Content */}
-        <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-7 py-5">
+        <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4 sm:px-7 py-5">
           {errorMsg && (
             <div className="flex items-center gap-2 border border-danger bg-danger-bg p-3 text-sm text-danger-ink">
               <AlertCircle size={16} className="shrink-0" />
@@ -283,8 +301,8 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
             ) : (
               <div className="flex flex-col divide-y divide-line border border-line bg-surface">
                 {cart.map((item) => (
-                  <div key={item.productoId} className="flex items-center gap-3 p-3">
-                    <div className="flex flex-col flex-1 min-w-0">
+                  <div key={item.productoId} className="flex flex-wrap items-center gap-2 sm:gap-3 p-2.5 sm:p-3">
+                    <div className="flex flex-col flex-1 min-w-0 basis-full sm:basis-auto">
                       <span className="font-bold text-[15px] text-ink truncate">{item.nombre}</span>
                       <span className="text-xs text-muted">Stock máx: {item.stock}</span>
                     </div>
@@ -312,7 +330,7 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
                     </div>
 
                     {/* Unit Price input */}
-                    <div className="flex items-center border border-line bg-bg px-2 h-8 w-24 shrink-0">
+                    <div className="flex items-center border border-line bg-bg px-2 h-8 w-20 sm:w-24 shrink-0">
                       <span className="text-xs text-muted mr-1">S/</span>
                       <input
                         type="number"
@@ -363,18 +381,18 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 items-center justify-between gap-4 px-7 py-4 border-t-2 border-ink bg-bg">
+        <div className="flex flex-wrap shrink-0 items-center justify-between gap-4 px-4 sm:px-7 py-4 border-t-2 border-ink bg-bg">
           <div className="flex flex-col leading-tight">
             <span className="text-xs text-muted">Total a cobrar</span>
-            <span className="text-[26px] font-extrabold font-mono text-ink">
+            <span className="text-xl sm:text-[26px] font-extrabold font-mono text-ink">
               {formatPEN(total)}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={requestClose}
               disabled={isSubmitting}
               className="h-12 px-5 border border-line bg-surface text-[15px] font-bold text-ink hover:border-accent transition-colors"
             >
@@ -392,5 +410,7 @@ export default function RegisterSaleDrawer({ open, onClose, onSuccess }) {
         </div>
       </div>
     </div>
+    <DiscardChangesDialog open={confirmOpen} onCancel={cancelDiscard} onDiscard={confirmDiscard} />
+    </>
   );
 }
