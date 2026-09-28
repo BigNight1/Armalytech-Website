@@ -5,6 +5,7 @@ import Sidebar from './Sidebar.jsx';
 import Header, { SECTION_LABELS } from './Header.jsx';
 import { BreadcrumbProvider, useBreadcrumbExtra } from './breadcrumb.jsx';
 import MustChangePasswordModal from '../../auth/components/MustChangePasswordModal.jsx';
+import { useRealtimeSync } from '../realtime/useRealtimeSync.js';
 
 function AdminPageTitle() {
   const location = useLocation();
@@ -25,9 +26,14 @@ function AdminPageTitle() {
  * it, plus a header (breadcrumb, Lima clock, theme toggle). `ThemeProvider`
  * (the `.admin-shell` root every token here resolves against) lives higher
  * up, in `AdminRoutes.jsx`, so it also covers the login screen.
+ *
+ * Only mounted behind `RequireAuth` (see `AdminRoutes.jsx`), so `useRealtimeSync`
+ * (ADR 0028) here always has a session; it unmounts — and closes its
+ * `EventSource` — the moment `RequireAuth` redirects to `/admin/login`.
  */
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useRealtimeSync();
 
   return (
     <BreadcrumbProvider>

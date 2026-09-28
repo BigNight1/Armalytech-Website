@@ -16,8 +16,11 @@ export default defineConfig(({ mode }) => {
         // `/api/contact` serverless function (see api/) untouched by scoping
         // the proxy to the admin-panel prefixes only. This prefix list
         // duplicates vercel.ts's BACKEND_PREFIXES (kept separate to avoid a
-        // shared build-time import between the two configs).
-        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales)': {
+        // shared build-time import between the two configs). `events` is the
+        // realtime SSE stream (ADR 0028, `GET /api/events`); Vite's proxy
+        // (http-proxy) forwards it as a plain streamed response, so it needs
+        // no extra options beyond the target.
+        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales|events)': {
           target: backendUrl,
           changeOrigin: true,
         },

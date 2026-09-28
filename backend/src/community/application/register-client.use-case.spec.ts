@@ -3,6 +3,7 @@ import {
   FakeClientRepository,
   FakeCommunityEventRepository,
   FakeCommunityNotifier,
+  FakeRealtimePublisher,
 } from './__tests__/fakes';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 
@@ -10,13 +11,15 @@ describe('RegisterClientUseCase', () => {
   let clients: FakeClientRepository;
   let events: FakeCommunityEventRepository;
   let notifier: FakeCommunityNotifier;
+  let realtime: FakeRealtimePublisher;
   let useCase: RegisterClientUseCase;
 
   beforeEach(() => {
     clients = new FakeClientRepository();
     events = new FakeCommunityEventRepository();
     notifier = new FakeCommunityNotifier();
-    useCase = new RegisterClientUseCase(clients, events, notifier);
+    realtime = new FakeRealtimePublisher();
+    useCase = new RegisterClientUseCase(clients, events, notifier, realtime);
   });
 
   it('creates a new client and a "registro" event on first submission', async () => {
@@ -35,6 +38,34 @@ describe('RegisterClientUseCase', () => {
     expect(events.events).toHaveLength(1);
     expect(events.events[0].type).toBe('registro');
     expect(notifier.calls).toHaveLength(1);
+  });
+
+  it('publishes "clients" with reason "client_registered" after a successful registration', async () => {
+    await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: true,
+      channel: 'qr',
+    });
+
+    expect(realtime.calls).toEqual([
+      { topics: 'clients', reason: 'client_registered' },
+    ]);
+  });
+
+  it('does not publish when the phone number is invalid and registration is rejected', async () => {
+    await expect(
+      useCase.execute({
+        firstName: 'Juana',
+        lastName: 'Perez',
+        phone: '123456789',
+        marketingConsent: true,
+        channel: 'qr',
+      }),
+    ).rejects.toThrow(ValidationDomainError);
+
+    expect(realtime.calls).toHaveLength(0);
   });
 
   it('keeps visit count at 0 on repeat submission (only technician registers visits)', async () => {

@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnApplicationBootstrap,
+  Optional,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -7,6 +12,7 @@ import {
 } from '../infrastructure/schemas/technician.schema';
 import { ITicketRepository } from '../domain/ticket.repository.port';
 import { TICKET_REPOSITORY } from './ticket.use-cases';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 export interface TechnicianView {
   id: string;
@@ -23,6 +29,7 @@ export class TechnicianService implements OnApplicationBootstrap {
     private readonly technicianModel: Model<TechnicianDocument>,
     @Inject(TICKET_REPOSITORY)
     private readonly ticketRepository: ITicketRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -47,6 +54,7 @@ export class TechnicianService implements OnApplicationBootstrap {
       activo: true,
     });
     const saved = await doc.save();
+    this.realtime?.publish('tickets');
     return this.toView(saved);
   }
 
@@ -63,6 +71,7 @@ export class TechnicianService implements OnApplicationBootstrap {
       current.activo = input.activo;
     }
     const saved = await current.save();
+    this.realtime?.publish('tickets');
     return this.toView(saved);
   }
 

@@ -9,6 +9,26 @@ server {
     # the backend is not up yet.
     resolver 127.0.0.11 valid=30s ipv6=off;
 
+    # Realtime panel sync (ADR 0028): dedicated exact-match block, evaluated
+    # before the prefix regex below, so this long-lived SSE connection never
+    # gets buffered, compressed, or timed out like a normal short request.
+    location = /api/events {
+        set $backend_upstream ${BACKEND_URL};
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+        chunked_transfer_encoding on;
+    }
+
     # Admin panel backend prefixes. Keep in sync with vercel.ts BACKEND_PREFIXES
     # and the vite.config.js dev proxy.
     location ~ ^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales)(/|$) {

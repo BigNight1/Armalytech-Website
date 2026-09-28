@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { PhoneNumber } from '../domain/phone-number.vo';
 import { Client, CommunityChannel } from '../domain/client.entity';
 import {
@@ -14,6 +14,7 @@ import {
   COMMUNITY_NOTIFIER,
 } from '../domain/community-notifier.port';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 export interface RegisterClientInput {
   firstName: string;
@@ -45,6 +46,7 @@ export class RegisterClientUseCase {
     @Inject(COMMUNITY_EVENT_REPOSITORY)
     private readonly events: CommunityEventRepository,
     @Inject(COMMUNITY_NOTIFIER) private readonly notifier: CommunityNotifier,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(input: RegisterClientInput): Promise<RegisterClientResult> {
@@ -88,6 +90,8 @@ export class RegisterClientUseCase {
     });
 
     await this.notifier.notifyRegistered(client, wasNew);
+
+    this.realtime?.publish('clients', 'client_registered');
 
     return { client, isNewClient: wasNew };
   }

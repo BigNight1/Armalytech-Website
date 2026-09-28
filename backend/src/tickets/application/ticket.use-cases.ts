@@ -42,6 +42,10 @@ import { RegisterClientUseCase } from '../../community/application/register-clie
 import { PhoneNumber } from '../../community/domain/phone-number.vo';
 import { ResolvePhoneUseCase } from '../../inventory/application/phone/resolve-phone.use-case';
 import { CobroService } from './cobro.service';
+import {
+  RealtimePublisher,
+  RealtimeTopic,
+} from '../../shared/realtime/realtime-publisher';
 
 export const TICKET_REPOSITORY = 'ITicketRepository';
 
@@ -88,6 +92,8 @@ export class TicketUseCases {
     private readonly registerClient?: RegisterClientUseCase,
     @Optional()
     private readonly resolvePhone?: ResolvePhoneUseCase,
+    @Optional()
+    private readonly realtime?: RealtimePublisher,
   ) {}
 
   async createTicket(
@@ -239,6 +245,8 @@ export class TicketUseCases {
         descripcion: `Adelanto Ticket ${saved.codigo}`,
       });
     }
+
+    this.realtime?.publish('tickets');
 
     return saved;
   }
@@ -492,7 +500,15 @@ export class TicketUseCases {
       nota: dto.notaTecnica,
     });
 
-    return this.ticketRepository.update(ticket);
+    const updated = await this.ticketRepository.update(ticket);
+
+    // Simplification (ADR 0028): a status change can touch stock (aprobado,
+    // cancelado, back to pendiente) and/or record a cobro (entregado), so we
+    // always publish all three rather than re-deriving exactly which one
+    // applied for this transition.
+    this.realtime?.publish(['tickets', 'inventory', 'sales']);
+
+    return updated;
   }
 
   /** precioTotal minus every non-annulled cobro already recorded for this ticket. */
@@ -553,7 +569,9 @@ export class TicketUseCases {
     if (dto.tecnicoNombre !== undefined)
       ticket.tecnicoNombre = dto.tecnicoNombre;
 
-    return this.ticketRepository.update(ticket);
+    const updated = await this.ticketRepository.update(ticket);
+    this.realtime?.publish('tickets');
+    return updated;
   }
 
   async updatePieces(
@@ -610,7 +628,16 @@ export class TicketUseCases {
     ticket.precioTotal = dto.precioTotal;
     ticket.saldo = Math.max(0, dto.precioTotal - ticket.adelanto);
 
-    return this.ticketRepository.update(ticket);
+    const updated = await this.ticketRepository.update(ticket);
+
+    // Touches stock only when the ticket is already in a stock-active state
+    // (aprobado/trabajando/listo); otherwise it only edits planned pieces.
+    const topics: RealtimeTopic[] = isStockActive
+      ? ['tickets', 'inventory']
+      : ['tickets'];
+    this.realtime?.publish(topics);
+
+    return updated;
   }
 
   /**
@@ -800,7 +827,9 @@ export class TicketUseCases {
     }
     const noteEntry = autor ? `[${autor}] ${texto}` : texto;
     ticket.notasInternas.push(noteEntry);
-    return this.ticketRepository.update(ticket);
+    const updated = await this.ticketRepository.update(ticket);
+    this.realtime?.publish('tickets');
+    return updated;
   }
 
   async getPieceAvailability(productoId: string) {

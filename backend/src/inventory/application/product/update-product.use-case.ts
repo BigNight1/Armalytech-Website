@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Product } from '../../domain/product.entity';
 import {
   ProductRepository,
@@ -23,6 +23,7 @@ import {
   ProductNotFoundError,
 } from '../../domain/inventory.errors';
 import { roundMoney } from '../../../shared/domain/money';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 /** Never includes `stock`: stock only changes through adjust (and, later, sales/tickets). */
 export interface UpdateProductCommand {
@@ -44,6 +45,7 @@ export class UpdateProductUseCase {
     private readonly categories: CategoryRepository,
     @Inject(BRAND_REPOSITORY) private readonly brands: BrandRepository,
     @Inject(PHONE_REPOSITORY) private readonly phones: PhoneRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(id: string, input: UpdateProductCommand): Promise<Product> {
@@ -84,6 +86,7 @@ export class UpdateProductUseCase {
     if (!updated) {
       throw new ProductNotFoundError(id);
     }
+    this.realtime?.publish('inventory');
     return updated;
   }
 

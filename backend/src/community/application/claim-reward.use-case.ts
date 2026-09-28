@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   ClientRepository,
   CLIENT_REPOSITORY,
@@ -10,6 +10,7 @@ import {
 import { ClientNotFoundError } from '../domain/community.errors';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 import { Client } from '../domain/client.entity';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 @Injectable()
 export class ClaimRewardUseCase {
@@ -17,6 +18,7 @@ export class ClaimRewardUseCase {
     @Inject(CLIENT_REPOSITORY) private readonly clients: ClientRepository,
     @Inject(COMMUNITY_EVENT_REPOSITORY)
     private readonly events: CommunityEventRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(clientId: string): Promise<Client> {
@@ -45,6 +47,8 @@ export class ClaimRewardUseCase {
       channel: 'manual',
       occurredAt,
     });
+
+    this.realtime?.publish('clients');
 
     return updated;
   }

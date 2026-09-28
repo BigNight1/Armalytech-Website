@@ -12,6 +12,7 @@ import { CommunityModule } from './community/community.module';
 import { StaffModule } from './staff/staff.module';
 import { AccountModule } from './account/account.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { RealtimeModule } from './shared/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TicketsModule } from './tickets/tickets.module';
         uri: process.env.MONGODB_URI,
       }),
     }),
+    RealtimeModule,
     HealthModule,
     AuthModule,
     InventoryModule,

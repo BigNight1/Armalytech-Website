@@ -3,6 +3,22 @@ import { SalesService } from '../sales.service';
 import { Product } from '../../../inventory/domain/product.entity';
 import { ProductRepository } from '../../../inventory/domain/product-repository.port';
 import { StockMovementRepository } from '../../../inventory/domain/stock-movement-repository.port';
+import {
+  RealtimePublisher,
+  RealtimeReason,
+  RealtimeTopic,
+} from '../../../shared/realtime/realtime-publisher';
+
+class FakeRealtimePublisher implements RealtimePublisher {
+  calls: {
+    topics: RealtimeTopic | RealtimeTopic[];
+    reason?: RealtimeReason;
+  }[] = [];
+
+  publish(topics: RealtimeTopic | RealtimeTopic[], reason?: RealtimeReason) {
+    this.calls.push({ topics, reason });
+  }
+}
 
 describe('SalesService', () => {
   let service: SalesService;
@@ -10,6 +26,7 @@ describe('SalesService', () => {
   let movements: any[];
   let cobros: any[];
   let seqCounter: number;
+  let realtime: FakeRealtimePublisher;
 
   beforeEach(() => {
     seqCounter = 0;
@@ -93,11 +110,13 @@ describe('SalesService', () => {
       }),
     };
 
+    realtime = new FakeRealtimePublisher();
     service = new SalesService(
       fakeCounterModel as any,
       fakeProductRepository as any,
       fakeStockMovementRepository as any,
       fakeCobroService as any,
+      realtime,
     );
   });
 
@@ -126,9 +145,13 @@ describe('SalesService', () => {
     expect(cobros[0].tipo).toBe('venta');
     expect(cobros[0].origen).toBe('venta');
     expect(cobros[0].items).toHaveLength(2);
+    expect(realtime.calls).toContainEqual({
+      topics: ['sales', 'inventory'],
+      reason: undefined,
+    });
   });
 
-  it('fails with 409 and faltantes if stock is insufficient', async () => {
+  it('fails with 409 and faltantes if stock is insufficient, and never publishes', async () => {
     await expect(
       service.createSale({
         items: [{ productoId: 'prod-2', cantidad: 5, precioUnitario: 15 }],
@@ -139,6 +162,7 @@ describe('SalesService', () => {
     expect(products.get('prod-2')!.stock).toBe(2);
     expect(movements).toHaveLength(0);
     expect(cobros).toHaveLength(0);
+    expect(realtime.calls).toHaveLength(0);
   });
 
   it('fails with 404 if product does not exist', async () => {

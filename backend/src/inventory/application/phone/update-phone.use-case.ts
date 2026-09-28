@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Phone } from '../../domain/phone.entity';
 import {
   PhoneRepository,
@@ -13,6 +13,7 @@ import {
   DuplicatePhoneNameError,
   PhoneNotFoundError,
 } from '../../domain/inventory.errors';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 export interface UpdatePhoneCommand {
   brandId?: string;
@@ -24,6 +25,7 @@ export class UpdatePhoneUseCase {
   constructor(
     @Inject(PHONE_REPOSITORY) private readonly phones: PhoneRepository,
     @Inject(BRAND_REPOSITORY) private readonly brands: BrandRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(id: string, input: UpdatePhoneCommand): Promise<Phone> {
@@ -58,6 +60,7 @@ export class UpdatePhoneUseCase {
     if (!updated) {
       throw new PhoneNotFoundError(id);
     }
+    this.realtime?.publish('inventory');
     return updated;
   }
 }

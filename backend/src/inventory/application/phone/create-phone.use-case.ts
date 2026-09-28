@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Phone } from '../../domain/phone.entity';
 import {
   PhoneRepository,
@@ -12,12 +12,14 @@ import {
   BrandNotFoundError,
   DuplicatePhoneNameError,
 } from '../../domain/inventory.errors';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 @Injectable()
 export class CreatePhoneUseCase {
   constructor(
     @Inject(PHONE_REPOSITORY) private readonly phones: PhoneRepository,
     @Inject(BRAND_REPOSITORY) private readonly brands: BrandRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(brandId: string, name: string): Promise<Phone> {
@@ -34,6 +36,8 @@ export class CreatePhoneUseCase {
       throw new DuplicatePhoneNameError(name);
     }
 
-    return this.phones.create(brandId, name.trim());
+    const phone = await this.phones.create(brandId, name.trim());
+    this.realtime?.publish('inventory');
+    return phone;
   }
 }

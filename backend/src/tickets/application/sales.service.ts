@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -20,6 +21,7 @@ import {
 } from '../infrastructure/schemas/counter.schema';
 import { CobroService } from './cobro.service';
 import { CreateSaleDto } from '../infrastructure/dto/sales.dto';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 export interface CurrentUser {
   usuarioId?: string;
@@ -36,6 +38,7 @@ export class SalesService {
     @Inject(STOCK_MOVEMENT_REPOSITORY)
     private readonly stockMovementRepository: StockMovementRepository,
     private readonly cobroService: CobroService,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async createSale(dto: CreateSaleDto, user?: CurrentUser) {
@@ -157,6 +160,8 @@ export class SalesService {
       descripcion: dto.nota?.trim() || `Venta rápida ${codigo}`,
       items: preparedItems,
     });
+
+    this.realtime?.publish(['sales', 'inventory']);
 
     return {
       id: (cobro as any)._id?.toString() ?? saleId,

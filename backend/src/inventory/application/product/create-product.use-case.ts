@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Product } from '../../domain/product.entity';
 import {
   ProductRepository,
@@ -27,6 +27,7 @@ import {
 } from '../../domain/inventory.errors';
 import { roundMoney } from '../../../shared/domain/money';
 import { Actor } from './actor';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 export interface CreateProductCommand {
   categoryId: string;
@@ -50,6 +51,7 @@ export class CreateProductUseCase {
     @Inject(PHONE_REPOSITORY) private readonly phones: PhoneRepository,
     @Inject(STOCK_MOVEMENT_REPOSITORY)
     private readonly movements: StockMovementRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(input: CreateProductCommand, actor: Actor): Promise<Product> {
@@ -92,6 +94,8 @@ export class CreateProductUseCase {
         userEmail: actor.userEmail,
       });
     }
+
+    this.realtime?.publish('inventory');
 
     return product;
   }

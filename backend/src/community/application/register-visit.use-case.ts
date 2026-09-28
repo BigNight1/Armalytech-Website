@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   ClientRepository,
   CLIENT_REPOSITORY,
@@ -15,6 +15,7 @@ import { PhoneNumber } from '../domain/phone-number.vo';
 import { ClientNotFoundError } from '../domain/community.errors';
 import { ValidationDomainError } from '../../shared/domain/domain-error';
 import { Client } from '../domain/client.entity';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 export interface RegisterVisitInput {
   clientId?: string;
@@ -34,6 +35,7 @@ export class RegisterVisitUseCase {
     @Inject(COMMUNITY_EVENT_REPOSITORY)
     private readonly events: CommunityEventRepository,
     @Inject(COMMUNITY_NOTIFIER) private readonly notifier: CommunityNotifier,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(input: RegisterVisitInput): Promise<RegisterVisitResult> {
@@ -75,6 +77,8 @@ export class RegisterVisitUseCase {
     if (thresholdReached && updated.marketingConsent) {
       await this.notifier.notifyVisitThreshold(updated, 4);
     }
+
+    this.realtime?.publish('clients');
 
     return {
       client: updated,

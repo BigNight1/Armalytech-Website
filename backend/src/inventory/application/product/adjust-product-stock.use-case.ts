@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Product } from '../../domain/product.entity';
 import {
   ProductRepository,
@@ -13,6 +13,7 @@ import {
   ProductNotFoundError,
 } from '../../domain/inventory.errors';
 import { Actor } from './actor';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 export interface AdjustProductStockCommand {
   delta: number;
@@ -31,6 +32,7 @@ export class AdjustProductStockUseCase {
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
     @Inject(STOCK_MOVEMENT_REPOSITORY)
     private readonly movements: StockMovementRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(
@@ -62,6 +64,8 @@ export class AdjustProductStockUseCase {
       userId: actor.userId,
       userEmail: actor.userEmail,
     });
+
+    this.realtime?.publish('inventory');
 
     return result;
   }

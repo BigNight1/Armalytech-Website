@@ -20,6 +20,10 @@ import {
   CobroItemModel,
   CobroModel,
 } from '../infrastructure/schemas/cobro.schema';
+import {
+  RealtimePublisher,
+  RealtimeTopic,
+} from '../../shared/realtime/realtime-publisher';
 
 export interface CreateCobroInput {
   origen: 'ticket' | 'venta';
@@ -47,6 +51,8 @@ export class CobroService {
     @Optional()
     @Inject(STOCK_MOVEMENT_REPOSITORY)
     private readonly stockMovementRepository?: StockMovementRepository,
+    @Optional()
+    private readonly realtime?: RealtimePublisher,
   ) {}
 
   async create(input: CreateCobroInput): Promise<CobroModel> {
@@ -55,7 +61,9 @@ export class CobroService {
       anulado: false,
       fecha: new Date(),
     });
-    return doc.save();
+    const saved = await doc.save();
+    this.realtime?.publish('sales');
+    return saved;
   }
 
   /** Boundary in UTC for the start of `dateStr` (YYYY-MM-DD) as a Lima calendar day. */
@@ -103,14 +111,15 @@ export class CobroService {
     cobro.motivoAnulacion = motivo;
 
     // Restores stock if this cobro was a quick sale (ADR 0025, Fase D)
-    if (
+    const restoresStock =
       cobro.tipo === 'venta' &&
       cobro.items &&
       cobro.items.length > 0 &&
       this.productRepository &&
-      this.stockMovementRepository
-    ) {
-      for (const item of cobro.items) {
+      this.stockMovementRepository;
+
+    if (restoresStock) {
+      for (const item of cobro.items!) {
         const updated = await this.productRepository.adjustStock(
           item.productoId,
           item.cantidad,
@@ -129,6 +138,13 @@ export class CobroService {
       }
     }
 
-    return cobro.save();
+    const saved = await cobro.save();
+
+    const topics: RealtimeTopic[] = restoresStock
+      ? ['sales', 'inventory']
+      : ['sales'];
+    this.realtime?.publish(topics);
+
+    return saved;
   }
 }

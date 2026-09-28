@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   CategoryRepository,
   CATEGORY_REPOSITORY,
@@ -11,6 +11,7 @@ import {
   CategoryInUseError,
   CategoryNotFoundError,
 } from '../../domain/inventory.errors';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 /** No cascade: blocks with 409 when any product still uses this category. */
 @Injectable()
@@ -19,6 +20,7 @@ export class DeleteCategoryUseCase {
     @Inject(CATEGORY_REPOSITORY)
     private readonly categories: CategoryRepository,
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(id: string): Promise<void> {
@@ -33,5 +35,6 @@ export class DeleteCategoryUseCase {
     }
 
     await this.categories.delete(id);
+    this.realtime?.publish('inventory');
   }
 }

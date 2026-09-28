@@ -12,6 +12,11 @@ import {
   CreateCommunityEventInput,
 } from '../../domain/community-event-repository.port';
 import { CommunityNotifier } from '../../domain/community-notifier.port';
+import {
+  RealtimePublisher,
+  RealtimeReason,
+  RealtimeTopic,
+} from '../../../shared/realtime/realtime-publisher';
 
 let seq = 1;
 function nextId(): string {
@@ -148,6 +153,21 @@ export class FakeCommunityEventRepository implements CommunityEventRepository {
       .filter((e) => !type || e.type === type)
       .reverse()
       .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+  }
+}
+
+/** No-op/spy `RealtimePublisher` for use-case tests (ADR 0028). */
+export class FakeRealtimePublisher implements RealtimePublisher {
+  calls: {
+    topics: RealtimeTopic | RealtimeTopic[];
+    reason?: RealtimeReason;
+  }[] = [];
+
+  publish(
+    topics: RealtimeTopic | RealtimeTopic[],
+    reason?: RealtimeReason,
+  ): void {
+    this.calls.push({ topics, reason });
   }
 }
 

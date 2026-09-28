@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { User } from '../../auth/domain/user.entity';
 import {
@@ -15,6 +16,7 @@ import {
   PASSWORD_HASHER,
 } from '../../auth/domain/password-hasher.port';
 import { CreateStaffDto } from '../dto/create-staff.dto';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 @Injectable()
 export class ListStaffUseCase {
@@ -32,6 +34,7 @@ export class CreateStaffUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly passwordHasher: PasswordHasher,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(dto: CreateStaffDto, creatorEmail: string): Promise<User> {
@@ -43,7 +46,7 @@ export class CreateStaffUseCase {
     }
 
     const passwordHash = await this.passwordHasher.hash(dto.password);
-    return this.userRepository.create({
+    const user = await this.userRepository.create({
       email: dto.email,
       passwordHash,
       role: 'admin',
@@ -52,6 +55,8 @@ export class CreateStaffUseCase {
       mustChangePassword: true,
       createdBy: creatorEmail,
     });
+    this.realtime?.publish('staff');
+    return user;
   }
 }
 
@@ -59,6 +64,7 @@ export class CreateStaffUseCase {
 export class ToggleStaffStatusUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(
@@ -91,6 +97,8 @@ export class ToggleStaffStatusUseCase {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    this.realtime?.publish('staff');
+
     return updated;
   }
 }
@@ -100,6 +108,7 @@ export class ResetStaffPasswordUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(PASSWORD_HASHER) private readonly passwordHasher: PasswordHasher,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(targetId: string, newPasswordPlain: string): Promise<User> {
@@ -118,6 +127,8 @@ export class ResetStaffPasswordUseCase {
     if (!updated) {
       throw new NotFoundException('Usuario no encontrado');
     }
+
+    this.realtime?.publish('staff');
 
     return updated;
   }

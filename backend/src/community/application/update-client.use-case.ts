@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Client } from '../domain/client.entity';
 import {
   ClientRepository,
@@ -6,11 +6,13 @@ import {
   UpdateClientInput,
 } from '../domain/client-repository.port';
 import { ClientNotFoundError } from '../domain/community.errors';
+import { RealtimePublisher } from '../../shared/realtime/realtime-publisher';
 
 @Injectable()
 export class UpdateClientUseCase {
   constructor(
     @Inject(CLIENT_REPOSITORY) private readonly clients: ClientRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(id: string, input: UpdateClientInput): Promise<Client> {
@@ -22,6 +24,7 @@ export class UpdateClientUseCase {
     if (!updated) {
       throw new ClientNotFoundError(id);
     }
+    this.realtime?.publish('clients');
     return updated;
   }
 }

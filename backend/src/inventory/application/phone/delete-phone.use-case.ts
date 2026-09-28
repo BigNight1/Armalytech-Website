@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import {
   PhoneRepository,
   PHONE_REPOSITORY,
@@ -11,6 +11,7 @@ import {
   PhoneInUseError,
   PhoneNotFoundError,
 } from '../../domain/inventory.errors';
+import { RealtimePublisher } from '../../../shared/realtime/realtime-publisher';
 
 /** No cascade: blocks with 409 when any product still lists this phone as compatible. */
 @Injectable()
@@ -18,6 +19,7 @@ export class DeletePhoneUseCase {
   constructor(
     @Inject(PHONE_REPOSITORY) private readonly phones: PhoneRepository,
     @Inject(PRODUCT_REPOSITORY) private readonly products: ProductRepository,
+    @Optional() private readonly realtime?: RealtimePublisher,
   ) {}
 
   async execute(id: string): Promise<void> {
@@ -32,5 +34,6 @@ export class DeletePhoneUseCase {
     }
 
     await this.phones.delete(id);
+    this.realtime?.publish('inventory');
   }
 }
