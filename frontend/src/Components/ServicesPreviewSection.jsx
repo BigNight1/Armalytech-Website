@@ -1,48 +1,52 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getCategory, getDesde } from "../data/pricingData.js";
 
-const SERVICIOS = [
+// Cada tarjeta apunta a una categoría de data/pricingData.js (categoryId): de ahí salen el monto
+// "Desde" y el ancla de la sección en /precios, así que no pueden desalinearse.
+const TARJETAS = [
   {
     id: 1,
-    slug: "reparacion-pantalla",
+    categoryId: "reparacion-pantalla",
     title: "Reparación de pantalla",
     description: "Recupera la claridad de tu pantalla con reparación rápida y precisa.",
     image: "/precio/Reparaciónpantalla.webp",
-    precioPromedio: "120",
   },
   {
     id: 2,
-    slug: "cambio-bateria",
+    categoryId: "cambio-bateria",
     title: "Cambio de batería",
     description: "Recupera la duración de tu batería con reemplazos y pruebas confiables.",
     image: "/precio/Cambiobatería.webp",
-    precioPromedio: "115",
   },
   {
     id: 3,
-    slug: "puerto-carga",
+    categoryId: "puerto-carga",
     title: "Puerto de carga",
     description: "Reparamos y limpiamos el puerto de carga para que cargue bien.",
     image: "/precio/Reparaciónpuertocarga.webp",
-    precioPromedio: "85",
   },
   {
     id: 4,
-    slug: "daño-agua",
+    categoryId: "danio-agua",
     title: "Daño por agua",
     description: "Rescatamos tu equipo de la humedad con limpieza y reparación profesional.",
     image: "/precio/Restauracióndañoagua.webp",
-    precioPromedio: "90",
   },
   {
     id: 5,
-    slug: "software",
+    categoryId: "software",
     title: "Problemas de software",
     description: "Diagnóstico, actualizaciones y optimización del sistema.",
     image: "/precio/Problemassoftware.webp",
-    precioPromedio: "45",
   },
 ];
+
+const SERVICIOS = TARJETAS.map((card) => ({
+  ...card,
+  anchor: getCategory(card.categoryId).id, // mismo id que la <section> de /precios (falla en build si no existe)
+  precioDesde: getDesde(card.categoryId),
+}));
 
 const ServicesPreviewSection = () => {
   const [inicio, setInicio] = useState(0);
@@ -110,7 +114,7 @@ const ServicesPreviewSection = () => {
                 <div className="aspect-video w-full overflow-hidden bg-gray-100">
                   <img
                     src={card.image}
-                    alt=""
+                    alt={`${card.title} en ArmalyTech`}
                     width={400}
                     height={225}
                     className="w-full h-full object-cover"
@@ -125,11 +129,12 @@ const ServicesPreviewSection = () => {
                     {card.description}
                   </p>
                   <p className="text-gray-700 text-sm font-medium mb-4">
-                    Precio promedio: <span className="text-[#b8380a] font-semibold">S/ {card.precioPromedio}</span>
+                    Desde <span className="text-[#b8380a] font-semibold">S/ {card.precioDesde}</span>
+                    <span className="text-gray-500 font-normal"> · según el modelo</span>
                   </p>
                   <Link
                     to="/precios"
-                    state={{ scrollTo: card.slug }}
+                    state={{ scrollTo: card.anchor }}
                     className="inline-block w-full text-center px-5 py-3 bg-[#b8380a] text-white font-semibold rounded-lg hover:bg-[#9a2f09] transition-colors"
                   >
                     Ver precios

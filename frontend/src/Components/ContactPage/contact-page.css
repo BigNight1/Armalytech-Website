@@ -203,7 +203,8 @@
 }
 
 .contact-info__footer {
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   margin: 4.5rem auto 0;
   padding: 3rem 0 0;
   border-top: 1px solid rgba(0, 0, 0, 0.06);

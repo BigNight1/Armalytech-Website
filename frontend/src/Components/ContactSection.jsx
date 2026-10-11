@@ -4,8 +4,8 @@ import "./contact-section.css";
 // Placeholders: reemplazar con datos reales
 const PHONE = "+51 924 548 268";
 const PHONE_LINK = "tel:+51924548268";
-const ADDRESS = "Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja"; // Placeholder: reemplazar con dirección real
-const HORARIO = "Lun–Sáb 9AM – 7PM";
+const ADDRESS = "Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja";
+const HORARIO = "Lun–Sáb 10:00 – 20:00";
 
 
 const ContactSection = () => {

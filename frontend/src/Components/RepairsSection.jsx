@@ -1,39 +1,41 @@
+import { getDesde } from "../data/pricingData.js";
 import "./repairs-section.css";
 
+// Los montos "Desde" salen de data/pricingData.js (getDesde): aquí no se escribe ningún precio.
 const SERVICES = [
   {
     id: 1,
     title: "Cambio de batería",
     description: "Reemplazo con batería de calidad para que tu equipo recupere autonomía.",
-    price: 120,
+    price: getDesde("cambio-bateria"),
     img: "/reparaciones/baterylow.svg",
   },
   {
     id: 2,
     title: "Daño por agua",
     description: "Limpieza y secado profesional para rescatar tu equipo.",
-    price: 150,
+    price: getDesde("danio-agua"),
     img: "/reparaciones/aguadaño.svg",
   },
   {
     id: 3,
     title: "Pantalla rota",
     description: "Cambio de pantalla o cristal con repuestos de calidad.",
-    price: 110,
+    price: getDesde("reparacion-pantalla"),
     img: "/reparaciones/pantallarota.svg",
   },
   {
     id: 4,
     title: "Problemas de WiFi o Bluetooth",
     description: "Diagnóstico y reparación de conectividad inalámbrica.",
-    price: 140,
+    price: getDesde("adicionales", "wifi-bluetooth"),
     img: "/reparaciones/nowifiorblue.svg",
   },
   {
     id: 5,
     title: "Parlantes dañados",
     description: "Reemplazo de parlantes para recuperar el audio.",
-    price: 110,
+    price: getDesde("danio-agua", "parlante-microfono"),
     img: "/reparaciones/Parlantenotwork.svg",
   },
 ];
@@ -58,13 +60,16 @@ const RepairsSection = () => {
               <div className="repairs-section__featured-icon-wrap">
                 <img
                   src={FEATURED_SERVICE.img}
-                  alt=""
+                  alt={FEATURED_SERVICE.title}
                   className="repairs-section__featured-icon"
                 />
               </div>
               <h3 className="repairs-section__featured-title">{FEATURED_SERVICE.title}</h3>
               <p className="repairs-section__featured-desc">{FEATURED_SERVICE.description}</p>
-              <p className="repairs-section__featured-price">Desde S/ {FEATURED_SERVICE.price}</p>
+              <p className="repairs-section__featured-price">
+                Desde S/ {FEATURED_SERVICE.price}
+                <span className="repairs-section__price-note"> · según el modelo</span>
+              </p>
             </article>
           )}
         </div>
@@ -77,10 +82,16 @@ const RepairsSection = () => {
                 </div>
                 <h3 className="repairs-section__item-title">{service.title}</h3>
                 <p className="repairs-section__item-desc">{service.description}</p>
-                <p className="repairs-section__item-price">Desde S/ {service.price}</p>
+                <p className="repairs-section__item-price">
+                  Desde S/ {service.price}
+                  <span className="repairs-section__price-note"> · según el modelo</span>
+                </p>
               </article>
             ))}
           </div>
+          <p className="repairs-section__note">
+            Los precios &ldquo;desde&rdquo; son de referencia. El precio final depende del modelo de tu celular.
+          </p>
         </div>
       </div>
     </section>

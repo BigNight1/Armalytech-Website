@@ -8,20 +8,19 @@ import ContactSection from "../ContactSection.jsx";
 
 const PHONE = "+51 924 548 268";
 const PHONE_LINK = "tel:+51924548268";
-const ADDRESS = "Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja";
-const HORARIO = "Lun–Sáb 10AM – 8PM ";
+const ADDRESS = "Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja";
+const HORARIO = "Lun–Sáb 10:00 – 20:00";
 
 const SERVICIO_TERMS = [
-  { label: "Diagnóstico gratuito", desc: "Toda reparación comienza con un diagnóstico sin costo para identificar el problema con precisión." },
+  { label: "Diagnóstico gratuito", desc: "Toda reparación comienza con un diagnóstico sin costo, por WhatsApp o en tienda, para identificar el problema con precisión." },
   { label: "Precios transparentes", desc: "Recibirás un presupuesto detallado antes de iniciar cualquier trabajo, sin sorpresas ni cobros ocultos." },
   { label: "Repuestos de calidad", desc: "Usamos solo repuestos de alta calidad para asegurar el rendimiento y la durabilidad óptimos de tu equipo." },
-  { label: "Reparaciones rápidas", desc: "Nuestros técnicos se esfuerzan por completar las reparaciones en 1–2 días según el tipo de falla." },
+  { label: "Reparaciones rápidas", desc: "Cambiamos el puerto de carga en 1 a 2 horas y la pantalla en 2 a 3 horas; si dejas un adelanto, la pantalla se trae antes y el cambio toma menos de 1 hora. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito." },
 ];
 
 const WARRANTY_ITEMS = [
-  { label: "Garantía de calidad", desc: "Si presentas algún problema relacionado al componente reparado, trae tu equipo dentro de los 14 días para una reevaluación sin costo." },
-  { label: "Garantía de repuestos", desc: "Los repuestos utilizados tienen cobertura de 3 meses contra defectos de fabricación." },
-  { label: "Exclusiones", desc: "La garantía no cubre daños por accidentes, mal uso, líquidos o modificaciones no autorizadas." },
+  { label: "Garantía de 3 meses", desc: "El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola." },
+  { label: "Exclusiones", desc: "La garantía no cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros." },
 ];
 
 const CUSTOMER_ITEMS = [
@@ -33,11 +32,11 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Contáctanos | ArmalyTech — Reparación de Celulares en San Borja, Lima</title>
-        <meta name="description" content="Contáctanos para reparar tu celular en Lima. Estamos en Av. San Luis 1859, San Borja. Atención Lun–Sáb 10AM–8PM. Llama al +51 924 548 268 o escríbenos por WhatsApp." />
+        <title>Contacto y Ubicación en San Borja | ArmalyTech</title>
+        <meta name="description" content="Reparamos tu celular en Av. San Luis 1873, Tienda 127, San Borja, Lima. Lun–Sáb 10:00 – 20:00. Llama al +51 924 548 268 o escríbenos por WhatsApp." />
         <link rel="canonical" href="https://www.armalytech.com/contactanos" />
-        <meta property="og:title" content="Contacto | ArmalyTech San Borja Lima" />
-        <meta property="og:description" content="Visítanos en Av. San Luis 1859, San Borja. Atención Lun–Sáb 10AM–8PM. Llama o escríbenos por WhatsApp." />
+        <meta property="og:title" content="Contacto y Ubicación en San Borja | ArmalyTech" />
+        <meta property="og:description" content="Visítanos en Av. San Luis 1873, Tienda 127, San Borja. Atención Lun–Sáb 10:00 – 20:00. Llama o escríbenos por WhatsApp." />
         <meta property="og:url" content="https://www.armalytech.com/contactanos" />
         <meta property="og:type" content="website" />
       </Helmet>
@@ -102,6 +101,9 @@ const ContactPage = () => {
                 </li>
               ))}
             </ul>
+            <p className="contact-info__desc mt-4">
+              <Link to="/garantia" className="font-semibold text-[#ff5a2a] hover:underline">Ver la política de garantía completa</Link>
+            </p>
             <h3 className="contact-info__subtitle contact-info__subtitle--spaced">Atención al Cliente</h3>
             <ul className="contact-info__terms-list">
               {CUSTOMER_ITEMS.map((item) => (
@@ -120,6 +122,10 @@ const ContactPage = () => {
         <div className="contact-info__footer">
           <p className="contact-info__closing">
             Si tienes dudas, inquietudes o necesitas orientación, nuestro equipo está a un mensaje o llamada de distancia. Escríbenos para soporte post-reparación, consultas sobre tu equipo o para compartir tu experiencia. Estamos comprometidos con reparaciones excepcionales y un servicio al cliente sin igual. Tu confianza en ArmalyTech es importante; estamos aquí para que tu experiencia sea fluida y sin estrés. Contáctanos hoy.
+          </p>
+          <p className="contact-info__desc mt-4">
+            ¿Quieres saber cómo llegar o qué reparamos? Mira nuestra página de{" "}
+            <Link to="/reparacion-de-celulares-san-borja" className="font-semibold text-[#ff5a2a] hover:underline">reparación de celulares en San Borja</Link>.
           </p>
           <p className="contact-info__contact-line">
             <a href={PHONE_LINK}>{PHONE}</a> · {ADDRESS} · {HORARIO}

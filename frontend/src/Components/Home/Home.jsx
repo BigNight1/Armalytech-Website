@@ -12,6 +12,7 @@ import ContactSection from "../ContactSection.jsx";
 import Footer from "../Footer.jsx";
 import "react-whatsapp-widget/dist/index.css";
 import Navbar from "../Navbar/NavBar.jsx";
+import { getPriceRange } from "../../data/pricingData.js";
 
 const Home = () => {
   const { state } = useLocation();
@@ -31,11 +32,11 @@ const Home = () => {
   return (
     <div>
       <Helmet>
-        <title>Reparación de Celulares en Lima | ArmalyTech — San Borja</title>
-        <meta name="description" content="Servicio técnico de celulares en Lima. Cambiamos pantallas, baterías, puertos de carga y reparamos daño por agua. Diagnóstico gratuito en San Borja. ¡Llámanos!" />
+        <title>Reparación de Celulares en Lima: Diagnóstico Gratis</title>
+        <meta name="description" content="Servicio técnico de celulares en San Borja. Pantalla en 2–3 horas, batería el mismo día y 3 meses de garantía. Diagnóstico gratis por WhatsApp o en tienda." />
         <link rel="canonical" href="https://www.armalytech.com/" />
-        <meta property="og:title" content="Reparación de Celulares en Lima | ArmalyTech" />
-        <meta property="og:description" content="Servicio técnico de celulares en Lima. Diagnóstico gratuito, repuestos de calidad y garantía incluida. Visítanos en San Borja." />
+        <meta property="og:title" content="Reparación de Celulares en Lima: Diagnóstico Gratis" />
+        <meta property="og:description" content="Servicio técnico de celulares en San Borja. Pantalla en 2–3 horas, batería el mismo día y 3 meses de garantía. Diagnóstico gratis por WhatsApp o en tienda." />
         <meta property="og:url" content="https://www.armalytech.com/" />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify({
@@ -47,10 +48,10 @@ const Home = () => {
           "image": "https://www.armalytech.com/armalytech.webp",
           "description": "Servicio técnico especializado en reparación de celulares en Lima. Cambio de pantalla, batería, puerto de carga y restauración por daño de agua. Diagnóstico gratuito.",
           "telephone": "+51924548268",
-          "email": "armalytech@email.com",
+          "email": "armalycell@gmail.com",
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Av. San Luis 1859 - MultiMercado San Borja",
+            "streetAddress": "Av. San Luis 1873, Tienda 127 - MultiMercado San Borja",
             "addressLocality": "San Borja",
             "addressRegion": "Lima",
             "postalCode": "15021",
@@ -70,10 +71,10 @@ const Home = () => {
             }
           ],
           "sameAs": [
-            "https://instagram.com/armalytech",
-            "https://api.whatsapp.com/send/?phone=%2B51924548268"
+            "https://www.instagram.com/armalytech/",
+            "https://www.tiktok.com/@armalytech"
           ],
-          "priceRange": "S/ 30 – S/ 185",
+          "priceRange": getPriceRange(),
           "currenciesAccepted": "PEN",
           "paymentAccepted": "Efectivo, Transferencia bancaria, Pago digital",
           "areaServed": {

@@ -1,9 +1,17 @@
+import { Helmet } from "react-helmet-async";
 import "./redes.css";
 import FAQ from "./FAQ/FAQ";
 
 const Redes = () => {
   return (
     <div className="fondo">
+      <Helmet>
+        <title>Redes Sociales y Contacto | ArmalyTech Lima</title>
+        <meta name="description" content="Síguenos en Instagram y TikTok o escríbenos por WhatsApp. ArmalyTech, servicio técnico de celulares en San Borja, Lima. Diagnóstico gratuito." />
+        <link rel="canonical" href="https://www.armalytech.com/redes" />
+        <meta property="og:title" content="Redes Sociales y Contacto | ArmalyTech Lima" />
+        <meta property="og:url" content="https://www.armalytech.com/redes" />
+      </Helmet>
       <div className="Box_Redes">
         <div className="text-center">
           <div className="flex justify-center">
@@ -19,7 +27,7 @@ const Redes = () => {
           </div>
 
           <div className="sub-description">
-            <h3 className="color-titulo">ARMALY<span className="color-tech">TECH</span></h3>
+            <h1 className="color-titulo">ARMALY<span className="color-tech">TECH</span></h1>
             <span className="text-white">Servicio tecnico de celulares</span>
             <span className="text-white">Lima - Peru</span>
           </div>

@@ -1,8 +1,9 @@
-import { additionalServices } from "../data/pricingData.js";
+import { additionalServices, getDisplayItems } from "../data/pricingData.js";
 import "./additional-services-section.css";
 
 const AdditionalServicesSection = () => {
-  const { intro, items } = additionalServices;
+  const { intro } = additionalServices;
+  const items = getDisplayItems(additionalServices.id);
 
   return (
     <section className="additional-services">

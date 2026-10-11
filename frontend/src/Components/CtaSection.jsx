@@ -7,13 +7,13 @@ const CARDS = [
   {
     id: 1,
     title: "Servicio con garantía",
-    description: "Reparaciones con garantía según el servicio.",
+    description: "3 meses de garantía sobre el repuesto cambiado, válida cuando la pieza falla por sí sola.",
     img: "/reparaciones/baterylow.svg",
   },
   {
     id: 2,
     title: "Reparación rápida",
-    description: "Tiempos ágiles y atención clara.",
+    description: "Puerto de carga en 1 a 2 horas y pantalla en 2 a 3 horas.",
     img: "/reparaciones/pantallarota.svg",
   },
   {

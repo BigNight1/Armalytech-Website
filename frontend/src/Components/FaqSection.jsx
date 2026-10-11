@@ -6,13 +6,13 @@ const FAQ_ITEMS = [
     id: 1,
     question: "¿Cuánto demora una reparación típica?",
     answer:
-      "Depende del equipo y la falla, pero la mayoría se resuelve el mismo día o en 24–48 horas.",
+      "Depende del servicio. El puerto de carga toma de 1 a 2 horas y el cambio de pantalla de 2 a 3 horas; si dejas un adelanto, la pantalla se trae antes y el cambio toma menos de 1 hora. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito.",
   },
   {
     id: 2,
     question: "¿Ofrecen garantía por sus servicios?",
     answer:
-      "Sí, brindamos garantía según el tipo de reparación y los repuestos utilizados.",
+      "Sí. El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola. No cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros.",
   },
   {
     id: 3,

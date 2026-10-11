@@ -6,9 +6,13 @@ import PricingBlock from "./PricingBlock.jsx";
 import AdditionalServicesSection from "./AdditionalServicesSection.jsx";
 import Navbar from "./Navbar/NavBar.jsx";
 import Footer from "./Footer.jsx";
-import { pricingCategories } from "../data/pricingData.js";
+import { pricingCategories, getDesde, getDisplayItems, formatSoles } from "../data/pricingData.js";
 import ContactSection from "./ContactSection.jsx";
 import "./pricing-hero.css";
+
+const TITLE = "Precios de Reparación de Celulares en Lima (2026)";
+// Los montos "desde" salen de data/pricingData.js
+const DESCRIPTION = `Pantalla desde ${formatSoles(getDesde("reparacion-pantalla"))} y batería desde ${formatSoles(getDesde("cambio-bateria"))}; el precio final depende del modelo. Puerto de carga desde ${formatSoles(getDesde("puerto-carga"))}. Diagnóstico gratis y 3 meses de garantía.`;
 
 const PricingPage = () => {
   const { state } = useLocation();
@@ -28,11 +32,11 @@ const PricingPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Precios de Reparación de Celulares en Lima | ArmalyTech</title>
-        <meta name="description" content="Consulta nuestros precios de reparación de celulares en Lima: cambio de pantalla desde S/ 69, batería desde S/ 97, puerto de carga desde S/ 38. Cotización gratuita." />
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
         <link rel="canonical" href="https://www.armalytech.com/precios" />
-        <meta property="og:title" content="Precios de Reparación de Celulares | ArmalyTech Lima" />
-        <meta property="og:description" content="Precios claros y sin sorpresas. Cambio de pantalla, batería, puerto de carga y más. Diagnóstico gratis en San Borja, Lima." />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://www.armalytech.com/precios" />
         <meta property="og:type" content="website" />
       </Helmet>
@@ -56,7 +60,10 @@ const PricingPage = () => {
       {/* Aviso: precios en promedio */}
       <div className="pricing-disclaimer">
         <p className="pricing-disclaimer__text">
-          <span className="pricing-disclaimer__label">Promedio.</span> Los precios son de referencia y pueden variar según el modelo del equipo, la marca y el tipo de falla. Te damos una cotización exacta al revisar tu celular.
+          <span className="pricing-disclaimer__label">Precios &ldquo;desde&rdquo;.</span> Son valores de referencia: el precio final depende del modelo de tu equipo y del tipo de repuesto. Te damos la cotización exacta después del diagnóstico gratuito, antes de iniciar cualquier trabajo.
+        </p>
+        <p className="pricing-disclaimer__text">
+          <span className="pricing-disclaimer__label">¿Lo necesitas el mismo día?</span> Deja un adelanto de la mitad del costo del repuesto, lo traemos del almacén y, cuando llega, instalamos tu repuesto nuevo en menos de 1 hora. En el puerto de carga no hace falta adelanto: tenemos zócalos de carga en stock para la mayoría de modelos, así que la reparación se hace al momento.
         </p>
       </div>
 
@@ -76,7 +83,7 @@ const PricingPage = () => {
               id={category.id}
               title={category.title}
               image={category.image}
-              items={category.items}
+              items={getDisplayItems(category.id)}
               imageLeft={index % 2 === 0}
               link={serviceLinks[category.id]}
             />

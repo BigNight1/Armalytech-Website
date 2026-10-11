@@ -10,7 +10,7 @@ const PROCESS_STEPS = [
   {
     num: "01.",
     title: "Diagnóstico",
-    desc: "Evaluamos tu equipo sin costo para identificar el problema con precisión.",
+    desc: "Evaluamos tu equipo sin costo, por WhatsApp o en tienda, para identificar el problema con precisión.",
   },
   {
     num: "02.",
@@ -51,7 +51,7 @@ const FAQ_ITEMS = [
   {
     id: 4,
     question: "¿Ofrecen soporte después de la reparación?",
-    answer: "Sí. Contamos con garantía y soporte post-servicio en caso de cualquier inconveniente.",
+    answer: "Sí. El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola. No cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros.",
   },
   {
     id: 5,
@@ -70,8 +70,8 @@ const FAQ_ITEMS = [
   },
   {
     id: 8,
-    question: "¿Realizan reparaciones el mismo día?",
-    answer: "Dependiendo del tipo de falla y disponibilidad, podemos ofrecer reparaciones el mismo día.",
+    question: "¿Cuánto demora una reparación?",
+    answer: "Depende del servicio: el puerto de carga toma de 1 a 2 horas y el cambio de pantalla de 2 a 3 horas, o en menos de 1 hora si dejas un adelanto. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito.",
   },
 ];
 
@@ -125,7 +125,7 @@ const SobreNosotrosPage = () => {
               "name": "¿Ofrecen soporte después de la reparación?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Sí. Contamos con garantía y soporte post-servicio en caso de cualquier inconveniente."
+                "text": "Sí. El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola. No cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros."
               }
             },
             {
@@ -154,10 +154,10 @@ const SobreNosotrosPage = () => {
             },
             {
               "@type": "Question",
-              "name": "¿Realizan reparaciones el mismo día?",
+              "name": "¿Cuánto demora una reparación?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Dependiendo del tipo de falla y disponibilidad, podemos ofrecer reparaciones el mismo día."
+                "text": "Depende del servicio: el puerto de carga toma de 1 a 2 horas y el cambio de pantalla de 2 a 3 horas, o en menos de 1 hora si dejas un adelanto. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito."
               }
             }
           ]

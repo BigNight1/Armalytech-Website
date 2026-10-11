@@ -10,7 +10,7 @@ const STEPS = [
   {
     id: 2,
     label: "Trae tu equipo",
-    description: "Acércate a nuestro punto de atención para diagnóstico. Revisamos tu equipo y te damos una solución clara.",
+    description: "Haz el diagnóstico por WhatsApp o acércate a nuestro punto de atención. Revisamos tu equipo y te damos una solución clara.",
     img: "/trabajamos/segundo.svg",
   },
   {
@@ -56,7 +56,7 @@ const StepsSection = () => {
           <div className="steps-section__image-wrap">
             <img
               src="/howwework.webp"
-              alt="Como trabajamos"
+              alt="Técnico con guantes revisando un celular en la mesa de trabajo del taller de ArmalyTech"
               width={735}
               height={490}
               className="steps-section__image"

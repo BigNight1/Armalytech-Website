@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 
 const PageError = () => {
@@ -5,6 +6,12 @@ const PageError = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+      {/* The SPA fallback serves unknown routes with HTTP 200, so tell crawlers
+          not to index them (avoids soft 404s). */}
+      <Helmet>
+        <title>Página no encontrada | ArmalyTech</title>
+        <meta name="robots" content="noindex, follow" />
+      </Helmet>
       {/* Error Image */}
       <img
         src="/error 404.webp"

@@ -16,14 +16,14 @@ const Location = () => {
                   <span className="text-gray-900 dark:text-white font-semibold">
                     HORARIO:
                   </span>
-                  <p className="text-gray-700 dark:text-gray-300">10AM - 8PM</p>
+                  <p className="text-gray-700 dark:text-gray-300">Lun–Sáb 10:00 – 20:00</p>
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-gray-900 dark:text-white font-semibold">
                     UBICACIÓN:
                   </span>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Av. San Luis 1859, San Borja 15021 - MultiMercado San Borja
+                    Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja
                   </p>
                 </div>
               </div>

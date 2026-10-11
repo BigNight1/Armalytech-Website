@@ -185,3 +185,17 @@
   font-weight: 600;
   color: #1a1a1a;
 }
+
+/* "según el modelo" junto al precio "desde" */
+.repairs-section__price-note {
+  font-weight: 400;
+  color: #6b6b6b;
+}
+
+/* Aviso bajo el grid: los precios "desde" dependen del modelo */
+.repairs-section__note {
+  margin-top: clamp(1rem, 2vw, 1.5rem);
+  font-size: clamp(0.75rem, 1vw, 0.8125rem);
+  line-height: 1.5;
+  color: #6b6b6b;
+}

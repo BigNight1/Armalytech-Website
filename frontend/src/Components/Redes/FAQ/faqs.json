@@ -1,7 +1,7 @@
 [
   {
     "question": "¿Cuánto tiempo toma la reparación de un celular?",
-    "answer": "El tiempo de reparación varía según el problema, pero generalmente toma entre 1 y 2 horas."
+    "answer": "Depende del servicio. El puerto de carga toma de 1 a 2 horas y el cambio de pantalla de 2 a 3 horas; si dejas un adelanto, la pantalla se trae antes y el cambio toma menos de 1 hora. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito."
   },
   {
     "question": "¿Cómo puedo agendar una reparación?",
@@ -9,7 +9,7 @@
   },
   {
     "question": "¿Qué garantía ofrecen en las reparaciones?",
-    "answer": "Ofrecemos una garantía de 3 meses en todas nuestras reparaciones, cubriendo defectos relacionados con la reparación realizada."
+    "answer": "El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola. No cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros."
   },
   {
     "question": "¿Reparan todas las marcas de celulares?",
