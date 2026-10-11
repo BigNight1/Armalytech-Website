@@ -18,6 +18,10 @@ const BACKEND_PREFIXES = [
   'webhooks',
 ];
 
+// Single-path endpoints (no sub-routes): rewritten as exact matches.
+// `events` is the realtime SSE stream (ADR 0028, `GET /api/events`).
+const EXACT_PATHS = ['health', 'events'];
+
 // vercel.json can't read env vars, so the backend origin used to be hardcoded
 // as a literal placeholder (`REPLACE_WITH_BACKEND_URL`) that had to be edited
 // by hand before every deploy. vercel.ts is compiled at build/deploy time, so
@@ -35,10 +39,9 @@ const backendUrl = rawBackendUrl.replace(/\/+$/, '');
 
 export const config: VercelConfig = {
   rewrites: [
-    ...BACKEND_PREFIXES.map((prefix) =>
-      prefix === 'health'
-        ? routes.rewrite(`/api/${prefix}`, `${backendUrl}/api/${prefix}`)
-        : routes.rewrite(`/api/${prefix}/:path*`, `${backendUrl}/api/${prefix}/:path*`),
+    ...EXACT_PATHS.map((path) => routes.rewrite(`/api/${path}`, `${backendUrl}/api/${path}`)),
+    ...BACKEND_PREFIXES.filter((prefix) => !EXACT_PATHS.includes(prefix)).map((prefix) =>
+      routes.rewrite(`/api/${prefix}/:path*`, `${backendUrl}/api/${prefix}/:path*`),
     ),
     // SPA fallback: everything not under /api/ (including /api/contact,
     // which is handled by the frontend/api/contact.js serverless function
