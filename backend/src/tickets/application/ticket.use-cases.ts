@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   Optional,
 } from '@nestjs/common';
@@ -18,7 +19,12 @@ import {
   ITicketRepository,
   ListTicketsFilters,
   ListTicketsResult,
+  TICKET_REPOSITORY,
 } from '../domain/ticket.repository.port';
+import {
+  TicketWhatsAppError,
+  TicketWhatsAppService,
+} from './ticket-whatsapp.service';
 import { TicketCipherService } from '../infrastructure/crypto/ticket-cipher.service';
 import {
   CreateTicketDto,
@@ -47,7 +53,9 @@ import {
   RealtimeTopic,
 } from '../../shared/realtime/realtime-publisher';
 
-export const TICKET_REPOSITORY = 'ITicketRepository';
+// Re-exported so existing imports keep working; the token lives in the domain
+// so `TicketWhatsAppService` can use it without a circular import.
+export { TICKET_REPOSITORY };
 
 /** 3x3 pattern lock: 4 to 9 unique dots numbered 1-9, e.g. "1-5-9-6". */
 const PATTERN_REGEX = /^[1-9](-[1-9]){3,8}$/;
@@ -71,6 +79,8 @@ const SYSTEM_USER: Required<CurrentUser> = {
 
 @Injectable()
 export class TicketUseCases {
+  private readonly logger = new Logger(TicketUseCases.name);
+
   constructor(
     @Inject(TICKET_REPOSITORY)
     private readonly ticketRepository: ITicketRepository,
@@ -94,6 +104,8 @@ export class TicketUseCases {
     private readonly resolvePhone?: ResolvePhoneUseCase,
     @Optional()
     private readonly realtime?: RealtimePublisher,
+    @Optional()
+    private readonly ticketWhatsApp?: TicketWhatsAppService,
   ) {}
 
   async createTicket(
@@ -508,7 +520,47 @@ export class TicketUseCases {
     // applied for this transition.
     this.realtime?.publish(['tickets', 'inventory', 'sales']);
 
+    if (
+      nuevoEstado === TicketStatus.LISTO &&
+      this.ticketWhatsApp?.isAutoTicketListoEnabled()
+    ) {
+      await this.autoNotifyTicketListo(updated.id ?? id, user);
+    }
+
     return updated;
+  }
+
+  /**
+   * Optional automatic "ticket listo" WhatsApp (flag
+   * `WHATSAPP_AUTO_TICKET_LISTO`). Never blocks or reverts the status change:
+   * any failure is logged and swallowed, and a repeat is skipped silently.
+   */
+  private async autoNotifyTicketListo(
+    ticketId: string,
+    user?: CurrentUser,
+  ): Promise<void> {
+    try {
+      await this.ticketWhatsApp!.send(ticketId, 'ticket_listo', {
+        trigger: 'auto',
+        user,
+      });
+    } catch (error) {
+      if (
+        error instanceof TicketWhatsAppError &&
+        error.code === 'already_sent'
+      ) {
+        return;
+      }
+      const reason =
+        error instanceof TicketWhatsAppError
+          ? `${error.code}${error.detail ? ` (${error.detail})` : ''}`
+          : error instanceof Error
+            ? error.message
+            : 'unknown error';
+      this.logger.warn(
+        `Auto WhatsApp ticket_listo for ticket ${ticketId} not sent: ${reason}`,
+      );
+    }
   }
 
   /** precioTotal minus every non-annulled cobro already recorded for this ticket. */

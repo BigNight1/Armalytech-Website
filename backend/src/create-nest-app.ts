@@ -13,6 +13,8 @@ import { HttpExceptionFilter } from './shared/infrastructure/http-exception.filt
 export async function createNestApp(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log'],
+    // Kapso webhook signatures are computed over the exact raw bytes (ADR 0029).
+    rawBody: true,
   });
 
   app.setGlobalPrefix('api');

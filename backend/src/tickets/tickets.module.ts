@@ -29,6 +29,8 @@ import {
 import { CobroModel, CobroSchema } from './infrastructure/schemas/cobro.schema';
 import { InventoryModule } from '../inventory/inventory.module';
 import { CommunityModule } from '../community/community.module';
+import { WhatsappModule } from '../whatsapp/whatsapp.module';
+import { TicketWhatsAppService } from './application/ticket-whatsapp.service';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { CommunityModule } from '../community/community.module';
     ]),
     InventoryModule,
     CommunityModule,
+    WhatsappModule,
   ],
   controllers: [
     TicketsController,
@@ -57,6 +60,7 @@ import { CommunityModule } from '../community/community.module';
       provide: TICKET_REPOSITORY,
       useClass: TicketRepository,
     },
+    TicketWhatsAppService,
     TicketUseCases,
   ],
   exports: [

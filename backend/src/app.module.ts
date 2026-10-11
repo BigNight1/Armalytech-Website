@@ -13,6 +13,7 @@ import { StaffModule } from './staff/staff.module';
 import { AccountModule } from './account/account.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { RealtimeModule } from './shared/realtime/realtime.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { RealtimeModule } from './shared/realtime/realtime.module';
     CommunityModule,
     StaffModule,
     AccountModule,
+    WhatsappModule,
     TicketsModule,
   ],
   providers: [

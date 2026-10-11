@@ -1,5 +1,5 @@
 import { ValidationPipe, INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModuleBuilder } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../src/app.module';
@@ -12,6 +12,8 @@ import { HttpExceptionFilter } from '../src/shared/infrastructure/http-exception
  */
 export async function createTestApp(
   envOverrides: Record<string, string> = {},
+  /** Lets a spec swap providers (e.g. `.overrideProvider(WHATSAPP_SENDER)`). */
+  configure: (builder: TestingModuleBuilder) => TestingModuleBuilder = (b) => b,
 ): Promise<{
   app: INestApplication;
   mongod: MongoMemoryServer;
@@ -34,11 +36,14 @@ export async function createTestApp(
   process.env.ADMIN_PASSWORD = envOverrides.ADMIN_PASSWORD ?? 'test-password';
   process.env.SESSION_MAX_AGE_SECONDS = '43200';
 
-  const moduleRef = await Test.createTestingModule({
-    imports: [AppModule],
-  }).compile();
+  const moduleRef = await configure(
+    Test.createTestingModule({
+      imports: [AppModule],
+    }),
+  ).compile();
 
-  const app = moduleRef.createNestApplication();
+  // rawBody mirrors `createNestApp` (webhook signatures need the exact bytes).
+  const app = moduleRef.createNestApplication({ rawBody: true });
   app.setGlobalPrefix('api');
   // Cookies are verified as JWTs (ADR 0021), not via cookie-parser signing.
   app.use(cookieParser());

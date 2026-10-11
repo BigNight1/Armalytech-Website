@@ -1,5 +1,7 @@
 import { Ticket, TicketStatus } from './ticket.entity';
 
+export const TICKET_REPOSITORY = 'ITicketRepository';
+
 export interface ListTicketsFilters {
   q?: string; // search in codigo, cliente.telefono, cliente.nombre, equipo.modelo, equipo.imei
   estado?: TicketStatus;

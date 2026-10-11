@@ -14,6 +14,10 @@ import { Public } from '../../shared/infrastructure/public.decorator';
 import { CurrentAdmin } from '../../auth/infrastructure/current-admin.decorator';
 import { SessionPayload } from '../../auth/infrastructure/session.types';
 import { TicketUseCases } from '../application/ticket.use-cases';
+import { TicketWhatsAppService } from '../application/ticket-whatsapp.service';
+import { toWhatsAppMessageDto } from '../../whatsapp/infrastructure/dto/whatsapp-message.dto';
+import { SendTicketWhatsAppDto } from './dto/ticket-whatsapp.dto';
+import { toWhatsAppHttpException } from './ticket-whatsapp-http-error';
 import {
   AvailabilityQueryDto,
   CreateTicketDto,
@@ -25,7 +29,10 @@ import {
 
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketUseCases: TicketUseCases) {}
+  constructor(
+    private readonly ticketUseCases: TicketUseCases,
+    private readonly ticketWhatsApp: TicketWhatsAppService,
+  ) {}
 
   @Public()
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
@@ -38,7 +45,9 @@ export class TicketsController {
   @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('public/lookup')
   @HttpCode(HttpStatus.OK)
-  async lookupPublicTicket(@Body() body: { codigo?: string; telefono?: string }) {
+  async lookupPublicTicket(
+    @Body() body: { codigo?: string; telefono?: string },
+  ) {
     return this.ticketUseCases.lookupPublicTicket(body.codigo, body.telefono);
   }
 
@@ -130,6 +139,43 @@ export class TicketsController {
       usuarioId: session?.sub,
       usuarioEmail: session?.email,
     });
+  }
+
+  @Get(':id/whatsapp')
+  async getWhatsAppStatus(@Param('id') id: string) {
+    try {
+      const status = await this.ticketWhatsApp.getStatus(id);
+      return {
+        items: status.items.map(toWhatsAppMessageDto),
+        window: {
+          open: status.window.open,
+          lastInboundAt: status.window.lastInboundAt?.toISOString() ?? null,
+        },
+        marketing: status.marketing,
+      };
+    } catch (error) {
+      throw toWhatsAppHttpException(error);
+    }
+  }
+
+  // Each send is billed by Meta, so the route gets its own tight limit.
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Post(':id/whatsapp')
+  async sendWhatsApp(
+    @Param('id') id: string,
+    @Body() dto: SendTicketWhatsAppDto,
+    @CurrentAdmin() session: SessionPayload,
+  ) {
+    try {
+      const message = await this.ticketWhatsApp.send(id, dto.template, {
+        force: dto.force === true,
+        trigger: 'manual',
+        user: { usuarioId: session?.sub, usuarioEmail: session?.email },
+      });
+      return toWhatsAppMessageDto(message);
+    } catch (error) {
+      throw toWhatsAppHttpException(error);
+    }
   }
 
   @Patch(':id/piezas')

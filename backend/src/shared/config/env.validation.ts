@@ -5,6 +5,7 @@ import {
   IsNumberString,
   IsOptional,
   IsString,
+  ValidateIf,
   validateSync,
 } from 'class-validator';
 import { resolveJwtSecret, resolveTicketSecretKey } from './secrets';
@@ -59,6 +60,33 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   TICKET_SECRET_KEY?: string;
+
+  // WhatsApp via Kapso (ADR 0029). All optional: without credentials the
+  // backend boots with a no-op sender and sending answers 503.
+  @IsOptional()
+  @IsString()
+  KAPSO_API_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  KAPSO_PHONE_NUMBER_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  KAPSO_API_BASE_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  KAPSO_WEBHOOK_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  PUBLIC_SITE_URL?: string;
+
+  // An empty value counts as unset; anything else must be 'true' or 'false'.
+  @ValidateIf((_, value) => value !== undefined && value !== '')
+  @IsIn(['true', 'false'])
+  WHATSAPP_AUTO_TICKET_LISTO?: string;
 }
 
 /**
