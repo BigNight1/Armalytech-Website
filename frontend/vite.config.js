@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         // realtime SSE stream (ADR 0028, `GET /api/events`); Vite's proxy
         // (http-proxy) forwards it as a plain streamed response, so it needs
         // no extra options beyond the target.
-        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales|events)': {
+        '^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales|events|webhooks)': {
           target: backendUrl,
           changeOrigin: true,
         },

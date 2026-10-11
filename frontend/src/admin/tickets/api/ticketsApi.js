@@ -37,6 +37,18 @@ export const ticketsApi = {
 
   addNota: (id, nota) => httpClient.post(`/tickets/${id}/notas`, { nota }),
 
+  // WhatsApp template messages (odd/tasks/integracion-plantillas-whatsapp.md).
+  // `GET` returns `{ items, window, marketing }`; `POST` sends one template
+  // (`ticket_listo` | `resena_google`) and answers 201 with the stored message.
+  // `force: true` resends a template that was already sent.
+  getWhatsApp: (ticketId) => httpClient.get(`/tickets/${ticketId}/whatsapp`),
+
+  sendWhatsApp: (ticketId, { template, force } = {}) =>
+    httpClient.post(`/tickets/${ticketId}/whatsapp`, {
+      template,
+      ...(force ? { force: true } : {}),
+    }),
+
   getAvailability: ({ categoriaId, celularId, excludeTicketId, q, categoria } = {}) =>
     httpClient.get(`/tickets/availability${buildQuery({ categoriaId, celularId, excludeTicketId, q, categoria })}`),
 

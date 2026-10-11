@@ -56,6 +56,9 @@ export function useTickets(initialFilters = {}) {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ticketQueryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: ticketQueryKeys.detail(variables.id) });
+      // The status drives which WhatsApp template can be sent (and the backend
+      // may auto-send `ticket_listo`), so the WhatsApp section must refresh.
+      queryClient.invalidateQueries({ queryKey: ticketQueryKeys.whatsapp(variables.id) });
     },
   });
 

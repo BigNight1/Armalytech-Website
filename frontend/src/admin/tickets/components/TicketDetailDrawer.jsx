@@ -9,6 +9,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import TicketStatusBadge, { TICKET_ESTADO_CONFIG } from './TicketStatusBadge.jsx';
+import TicketWhatsAppSection from './TicketWhatsAppSection.jsx';
 import { formatLimaShort } from '../../shared/lib/time.js';
 import { formatPEN } from '../../shared/lib/money.js';
 import { ticketsApi } from '../api/ticketsApi.js';
@@ -43,6 +44,14 @@ const TRANSITION_LABELS = {
 };
 
 const CLAVE_HIDE_MS = 30_000;
+
+// Peruvian mobile numbers are 9 digits; the stored value normally omits the
+// country code, but tolerate one that already carries it (`51` + 9 digits).
+function toWhatsAppPhone(rawPhone) {
+  const digits = String(rawPhone || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('51')) return digits;
+  return `51${digits}`;
+}
 
 function trackingUrl(ticket) {
   return `${window.location.origin}/ticket/${ticket.publicToken}`;
@@ -276,8 +285,7 @@ export default function TicketDetailDrawer({
   }
 
   function handleSendWhatsApp() {
-    const rawPhone = clienteTelefono;
-    const phoneDigits = rawPhone.replace(/\D/g, '');
+    const waPhone = toWhatsAppPhone(clienteTelefono);
     const clientName = ticket.cliente?.nombre || 'estimado cliente';
     const publicUrl = trackingUrl(ticket);
 
@@ -291,7 +299,7 @@ export default function TicketDetailDrawer({
     }
     msg += `\nPuedes consultar el detalle y avance en tiempo real en:\n${publicUrl}`;
 
-    const waLink = `https://api.whatsapp.com/send/?phone=51${phoneDigits}&text=${encodeURIComponent(msg)}`;
+    const waLink = `https://api.whatsapp.com/send/?phone=${waPhone}&text=${encodeURIComponent(msg)}`;
     window.open(waLink, '_blank', 'noopener,noreferrer');
   }
 
@@ -709,7 +717,10 @@ export default function TicketDetailDrawer({
               </span>
             </section>
 
-            {/* 7. Notas internas (Solo panel) */}
+            {/* 7. WhatsApp (plantillas) */}
+            <TicketWhatsAppSection ticket={ticket} />
+
+            {/* 8. Notas internas (Solo panel) */}
             <section className="flex flex-col gap-2.5 border-t-2 border-ink pt-3">
               <div className="flex items-center gap-2.5">
                 <h3 className="m-0 text-lg font-extrabold text-ink">Notas internas</h3>
@@ -750,7 +761,7 @@ export default function TicketDetailDrawer({
               </div>
             </section>
 
-            {/* 8. Nota para el cliente */}
+            {/* 9. Nota para el cliente */}
             {ticket.notaCliente && (
               <section className="flex flex-col gap-2 border-t-2 border-ink pt-3">
                 <div className="flex items-center gap-2.5">
@@ -780,7 +791,7 @@ export default function TicketDetailDrawer({
                     e.target.style.display = 'none';
                   }}
                 />
-                <span>Enviar por WhatsApp</span>
+                <span>Abrir chat</span>
               </button>
               <button
                 type="button"
@@ -1218,7 +1229,7 @@ export default function TicketDetailDrawer({
                   onClick={handleSendWhatsApp}
                   className="min-h-[46px] flex items-center gap-2 px-4 bg-[#f97316] font-extrabold text-[15px] cursor-pointer"
                 >
-                  <span>Enviar por WhatsApp</span>
+                  <span>Abrir chat</span>
                 </button>
               </div>
               <button

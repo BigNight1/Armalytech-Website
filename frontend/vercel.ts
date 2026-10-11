@@ -15,6 +15,7 @@ const BACKEND_PREFIXES = [
   'technicians',
   'cobros',
   'sales',
+  'webhooks',
 ];
 
 // vercel.json can't read env vars, so the backend origin used to be hardcoded
