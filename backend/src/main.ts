@@ -1,25 +1,17 @@
 import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
-import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './shared/infrastructure/http-exception.filter';
+import { createNestApp } from './create-nest-app';
 import { applyDnsServersOverride } from './shared/config/dns';
 
 /**
- * Local dev entry point (`pnpm start:dev`). Vercel uses `api/index.ts`
- * instead, which builds the same Nest app but never calls `listen()`
- * (ADR 0002 / ADR 0011).
+ * Long-running entry point: local dev (`pnpm start:dev`) and the Dokploy
+ * container (`node dist/src/main.js`). Vercel uses `api/index.ts` instead,
+ * which never calls `listen()` (ADR 0002 / ADR 0011). Both share
+ * `createNestApp()` so options such as `rawBody` (Kapso webhook signatures,
+ * ADR 0029) cannot drift between runtimes.
  */
 async function bootstrap() {
   applyDnsServersOverride();
-  const app = await NestFactory.create(AppModule);
-
-  app.setGlobalPrefix('api');
-  // Cookies are verified as JWTs (ADR 0021), not via cookie-parser signing.
-  app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const app = await createNestApp();
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   await app.listen(port);
