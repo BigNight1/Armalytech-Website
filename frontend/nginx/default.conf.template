@@ -48,8 +48,34 @@ server {
         try_files $uri =404;
     }
 
+    # Legacy URLs that still receive impressions (mirrors vercel.ts redirects).
+    location = /prices {
+        return 301 /precios;
+    }
+    location = /p/precios {
+        return 301 /precios;
+    }
+
+    # Prerendered pages live at <route>.html (see scripts/prerender.mjs) and are
+    # served extensionless. Anything else (admin, tickets, registration, 404)
+    # falls back to the empty SPA shell, never to index.html, which is the
+    # prerendered home page.
+    location = / {
+        add_header Cache-Control "no-cache";
+        try_files /index.html =404;
+    }
+
     location / {
         add_header Cache-Control "no-cache";
-        try_files $uri $uri/ /index.html;
+
+        # One canonical URL per page: strip trailing slashes (mirrors
+        # trailingSlash: false in vercel.ts).
+        rewrite ^/(.+)/$ /$1 permanent;
+
+        # Files first, then <route>.html. Bare directory names (/servicios,
+        # /reparaciones) are deliberately not matched by "$uri/": the
+        # directory has no index.html, so nginx would answer 403 instead of
+        # serving the shell.
+        try_files $uri $uri.html /app-shell.html;
     }
 }

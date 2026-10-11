@@ -1,9 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import ScrollToTop from "./Components/ScrollToTop.jsx";
 import Home from "./Components/Home/Home.jsx";
 import PricingPage from "./Components/PricingPage.jsx";
 import ContactPage from "./Components/ContactPage/ContactPage.jsx";
+import PrivacyPage from "./Components/PrivacyPage/PrivacyPage.jsx";
+import WarrantyPage from "./Components/WarrantyPage/WarrantyPage.jsx";
+import SanBorjaPage from "./Components/ZonePage/SanBorjaPage.jsx";
 import SobreNosotrosPage from "./Components/SobreNosotrosPage.jsx";
 import Redes from "./Components/Redes/Redes.jsx";
 import PageError from "./Components/PageError/PageError.jsx";
@@ -39,6 +42,12 @@ function App() {
   const isRegisterRoute = location.pathname.startsWith('/registrar');
   const hideSiteChrome = isAdminRoute || isRegisterRoute;
 
+  // react-whatsapp-widget renders the current time (HH:MM) in its chat bubble,
+  // which can never match between the prerendered HTML (build time) and the
+  // first client render. Mount it only on the client, after hydration.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
   return (
     <div>
       <ScrollToTop />
@@ -48,6 +57,9 @@ function App() {
           <Route path="/precios" element={<PricingPage />} />
           <Route path="/sobre-nosotros" element={<SobreNosotrosPage />} />
           <Route path="/contactanos" element={<ContactPage />} />
+          <Route path="/garantia" element={<WarrantyPage />} />
+          <Route path="/privacidad" element={<PrivacyPage />} />
+          <Route path="/reparacion-de-celulares-san-borja" element={<SanBorjaPage />} />
           <Route path="/redes" element={<Redes />} />
           <Route path="/servicios/reparacion-de-pantalla" element={<ReparacionPantallaPage />} />
           <Route path="/servicios/cambio-de-bateria" element={<CambioBateriaPage />} />
@@ -96,7 +108,7 @@ function App() {
         </Routes>
       </main>
 
-      {!hideSiteChrome && (
+      {isMounted && !hideSiteChrome && (
         <div className="whatsapp-widget-wrapper fixed bottom-0 right-0 z-[99999]">
           <WhatsAppWidget
             phoneNumber="51924548268"

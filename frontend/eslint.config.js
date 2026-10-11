@@ -25,7 +25,7 @@ export default [
   {
     // Node-executed config files (CommonJS-style `require()` inside ESM configs,
     // loaded by their respective CLIs via a loader that provides it).
-    files: ["tailwind.config.js", "postcss.config.js", "vite.config.js"],
+    files: ["tailwind.config.js", "postcss.config.js", "vite.config.js", "scripts/**/*.mjs"],
     languageOptions: { globals: globals.node },
   },
   {

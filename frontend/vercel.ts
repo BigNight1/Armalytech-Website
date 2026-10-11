@@ -42,7 +42,22 @@ export const config: VercelConfig = {
     ),
     // SPA fallback: everything not under /api/ (including /api/contact,
     // which is handled by the frontend/api/contact.js serverless function
-    // and must NOT be rewritten to the backend) resolves to index.html.
-    routes.rewrite('/((?!api/).*)', '/'),
+    // and must NOT be rewritten to the backend) resolves to the empty SPA shell.
+    // Vercel checks the filesystem before applying rewrites, so prerendered
+    // pages (dist/precios.html, ...) are served first and only unknown routes
+    // (admin, tickets, registration, 404) fall through to the shell. The shell
+    // is dist/app-shell.html, written by scripts/prerender.mjs; index.html is
+    // the prerendered home page and must not be used as the fallback.
+    routes.rewrite('/((?!api/).*)', '/app-shell'),
+  ],
+  // Prerendered pages are emitted as <route>.html; serve them extensionless
+  // and keep one canonical URL per page (308 for /x.html and /x/).
+  cleanUrls: true,
+  trailingSlash: false,
+  redirects: [
+    // Legacy URLs that still receive impressions. 301 (not the 308 that
+    // `permanent: true` yields) to match the documented SEO behavior.
+    routes.redirect('/prices', '/precios', { statusCode: 301 }),
+    routes.redirect('/p/precios', '/precios', { statusCode: 301 }),
   ],
 };

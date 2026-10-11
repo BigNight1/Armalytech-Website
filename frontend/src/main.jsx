@@ -5,7 +5,9 @@ import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const container = document.getElementById('root')
+
+const tree = (
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter>
@@ -15,5 +17,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 
-// Dispara el evento que usa vite-plugin-prerender para saber cuándo el HTML está listo
-document.dispatchEvent(new Event('render-event'))
+// Prerendered public pages ship real markup inside #root: hydrate it.
+// The SPA shell (admin, tickets, registration, 404) has an empty #root: mount.
+if (container.hasChildNodes()) {
+  ReactDOM.hydrateRoot(container, tree)
+} else {
+  ReactDOM.createRoot(container).render(tree)
+}
