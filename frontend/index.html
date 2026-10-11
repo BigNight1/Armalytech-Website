@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Armalytech · Servicio Técnico y Accesorios</title>
+    <link rel="icon" type="image/png" href="/Armalytech_logo.png" />
+    <link rel="apple-touch-icon" href="/Armalytech_logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="google-site-verification"
+      content="CrbvXW-qUo0bNE4JRN6YJP2JNXsuPQyq70uf5qpHWGs"
+    />
+    <!-- OPEN GRAPH -->
+    <meta
+      property="og:title"
+      content="Armalytech - El Mejor Lugar para Reparar y Comprar Accesorios de Celulares en Lima, Perú"
+    />
+    <meta
+      property="og:description"
+      content="Reparación de celulares en Lima, venta de accesorios para celulares, servicio técnico confiable y repuestos originales."
+    />
+
+    <meta property="og:image" content="https://www.armalytech.com/armalytech.webp" />
+    <meta property="og:image:alt" content="Local de Armalytech en Lima, Perú" />
+
+
+
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fuentes: carga asíncrona para no bloquear el render (display=swap en URL) -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!-- Admin panel redesign (R1): Archivo 400/600/800, used only inside
+         `.admin-shell` (src/admin/shared/theme/tokens.css). Chosen as a
+         Google Fonts link — same async-load pattern as the public site's
+         other fonts above — over @fontsource, to avoid adding a new npm
+         dependency for a font family already served this way elsewhere in
+         this file. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Archivo:wght@400;600;800&display=swap" />
+    </noscript>
+
+    <!-- Google tag: carga después de idle para no competir con LCP -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      function loadGtag() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-HMN89LH95T';
+        script.onload = function () {
+          gtag('js', new Date());
+          gtag('config', 'G-HMN89LH95T');
+        };
+        document.head.appendChild(script);
+      }
+      if (window.requestIdleCallback) {
+        window.addEventListener('load', function () { requestIdleCallback(loadGtag, { timeout: 4000 }); });
+      } else {
+        window.addEventListener('load', function () { setTimeout(loadGtag, 2500); });
+      }
+    </script>
+
+  </head>
+  <body class="dark">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

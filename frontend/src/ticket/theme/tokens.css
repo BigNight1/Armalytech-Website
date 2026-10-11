@@ -1,0 +1,62 @@
+/*
+ * Public ticket page design tokens — light only ("solo modo claro" per the
+ * design board's caption). Source of truth: design/panel-admin/Rediseño
+ * panel administrativo/Panel Admin Rediseño.dc.html (the `/ticket/AT-2X9K4M`
+ * board) and odd/tasks/rediseno-panel.md "Design tokens" section.
+ *
+ * Scoped under `.ticket-page` only (never `body`/`:root`) so the public
+ * site's own global styles (index.css, navbar.css, footer.css, Tailwind
+ * defaults) are untouched — same isolation approach as
+ * `src/admin/shared/theme/tokens.css` uses for `.admin-shell`, kept as a
+ * separate file/class because this page ships in the public bundle, not the
+ * admin one, and must not import anything from `src/admin/shared/theme/`.
+ */
+
+.ticket-page {
+  --tk-accent-100: #ffedd5;
+  --tk-accent-500: #f97316;
+  --tk-accent-600: #ea580c;
+  --tk-accent-ink: #c2410c;
+  --tk-on-accent: #0f172a;
+
+  --tk-bg: #f8fafc;
+  --tk-surface: #eef2f7;
+  --tk-text: #0f172a;
+  --tk-muted: #475569;
+  --tk-divider: rgba(15, 23, 42, 0.2);
+  --tk-divider-soft: rgba(15, 23, 42, 0.12);
+
+  --tk-danger: #dc2626;
+  --tk-danger-bg: #fef2f2;
+  --tk-danger-ink: #b91c1c;
+
+  background: var(--tk-bg);
+  color: var(--tk-text);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* Headings: Archivo 800, -0.015em tracking — wrapped in `:where()` so the
+   selector keeps only the plain element's specificity (0,0,1) and a
+   Tailwind utility like `text-[52px]` always wins without `!` overrides. */
+:where(.ticket-page) h1,
+:where(.ticket-page) h2,
+:where(.ticket-page) h3,
+:where(.ticket-page) h4 {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  margin: 0;
+}
+
+.ticket-page :focus-visible {
+  outline: 2px solid var(--tk-accent-500);
+  outline-offset: 2px;
+}
+
+@keyframes tk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}

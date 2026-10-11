@@ -1,0 +1,62 @@
+/*
+ * Theme-aware scrollbars for Glide Data Grid's own scroller (it ignores
+ * Tailwind) — `.historial-grid` lives inside `.admin-shell`, so the
+ * `--admin-*` custom properties resolve to the current light/dark theme
+ * automatically (R2c, was hardcoded to the old permanent-dark palette).
+ */
+.historial-grid .dvn-scroller {
+  scrollbar-color: var(--admin-muted) var(--admin-bg);
+  scrollbar-width: thin;
+}
+
+.historial-grid .dvn-scroller::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.historial-grid .dvn-scroller::-webkit-scrollbar-track {
+  background: var(--admin-bg);
+}
+
+.historial-grid .dvn-scroller::-webkit-scrollbar-thumb {
+  background: var(--admin-muted);
+  border: 2px solid var(--admin-bg);
+  border-radius: 9999px;
+}
+
+/*
+ * Glide's cell editor is portaled outside the grid container, so these rules
+ * can't be scoped under `.historial-grid`. Flowbite / Tailwind form base
+ * styles give every text input padding, a border and a blue focus ring,
+ * which made the editor grow past the cell. `.gdg-input` is Glide-only.
+ */
+.gdg-input,
+.gdg-input:focus {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  background-color: transparent !important;
+  font-size: var(--gdg-editor-font-size) !important;
+  line-height: 16px !important;
+  color: var(--gdg-text-dark) !important;
+}
+
+/*
+ * The overlay sizes itself to `max-content`, and a bare <input> reports an
+ * intrinsic width of ~20 characters, so the money editor came out wider than
+ * the cell. A zero intrinsic width plus `min-width: 100%` makes it take
+ * exactly the cell's width (the overlay's own min-width).
+ */
+input.gdg-input {
+  width: 0 !important;
+  min-width: 100% !important;
+}
+
+textarea.gdg-input {
+  resize: none !important;
+}

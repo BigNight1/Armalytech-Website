@@ -1,0 +1,44 @@
+[
+  {
+    "question": "¿Cuánto tiempo toma la reparación de un celular?",
+    "answer": "Depende del servicio. El puerto de carga toma de 1 a 2 horas y el cambio de pantalla de 2 a 3 horas; si dejas un adelanto, la pantalla se trae antes y el cambio toma menos de 1 hora. En el resto de servicios, confirmamos el tiempo después del diagnóstico gratuito."
+  },
+  {
+    "question": "¿Cómo puedo agendar una reparación?",
+    "answer": "Puedes agendar una reparación contactándonos a través de WhatsApp."
+  },
+  {
+    "question": "¿Qué garantía ofrecen en las reparaciones?",
+    "answer": "El repuesto que cambiamos tiene 3 meses de garantía, válida cuando la pieza falla por sí sola. No cubre equipos rotos, golpeados o caídos, contacto con agua u otros líquidos, ni mal uso o manipulación por terceros."
+  },
+  {
+    "question": "¿Reparan todas las marcas de celulares?",
+    "answer": "Sí, reparamos todas las marcas de celulares, incluyendo Apple, Samsung, Xiaomi, Huawei y más."
+  },
+  {
+    "question": "¿Qué métodos de pago aceptan?",
+    "answer": "Aceptamos pagos en efectivo, Yape, Plin y transferencias bancarias."
+  },
+
+  {
+    "question": "¿Qué pasa si no logran reparar mi celular?",
+    "answer": "Si no logramos reparar tu celular, no te cobramos nada. Te lo devolvemos sin costo alguno."
+  },
+  {
+    "question": "¿Hacen reparaciones de celulares mojados?",
+    "answer": "Sí, reparamos celulares mojados. Te recomendamos no intentar encenderlo y traerlo lo más pronto posible."
+  },
+  {
+    "question": "¿Reparan celulares con la pantalla rota?",
+    "answer": "Sí, reparamos celulares con la pantalla rota. Contamos con repuestos originales y de calidad."
+  },
+  {
+    "question": "¿Reparan celulares con problemas de carga?",
+    "answer": "Sí, reparamos celulares con problemas de carga. Contamos con repuestos originales y de calidad."
+  },
+
+  {
+    "question": "¿Hacen reparaciones a domicilio?",
+    "answer": "Por ahora no ofrecemos reparaciones a domicilio, pero puedes traer tu equipo a nuestra tienda."
+  }
+]

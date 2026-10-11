@@ -1,0 +1,81 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Docker's embedded DNS; resolving per request lets nginx start even when
+    # the backend is not up yet.
+    resolver 127.0.0.11 valid=30s ipv6=off;
+
+    # Realtime panel sync (ADR 0028): dedicated exact-match block, evaluated
+    # before the prefix regex below, so this long-lived SSE connection never
+    # gets buffered, compressed, or timed out like a normal short request.
+    location = /api/events {
+        set $backend_upstream ${BACKEND_URL};
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+        chunked_transfer_encoding on;
+    }
+
+    # Admin panel backend prefixes. Keep in sync with vercel.ts BACKEND_PREFIXES
+    # and the vite.config.js dev proxy.
+    location ~ ^/api/(health|auth|inventory|cash-closings|community|staff|account|tickets|technicians|cobros|sales|webhooks)(/|$) {
+        set $backend_upstream ${BACKEND_URL};
+        proxy_pass $backend_upstream;
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+    }
+
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Legacy URLs that still receive impressions (mirrors vercel.ts redirects).
+    location = /prices {
+        return 301 /precios;
+    }
+    location = /p/precios {
+        return 301 /precios;
+    }
+
+    # Prerendered pages live at <route>.html (see scripts/prerender.mjs) and are
+    # served extensionless. Anything else (admin, tickets, registration, 404)
+    # falls back to the empty SPA shell, never to index.html, which is the
+    # prerendered home page.
+    location = / {
+        add_header Cache-Control "no-cache";
+        try_files /index.html =404;
+    }
+
+    location / {
+        add_header Cache-Control "no-cache";
+
+        # One canonical URL per page: strip trailing slashes (mirrors
+        # trailingSlash: false in vercel.ts).
+        rewrite ^/(.+)/$ /$1 permanent;
+
+        # Files first, then <route>.html. Bare directory names (/servicios,
+        # /reparaciones) are deliberately not matched by "$uri/": the
+        # directory has no index.html, so nginx would answer 403 instead of
+        # serving the shell.
+        try_files $uri $uri.html /app-shell.html;
+    }
+}

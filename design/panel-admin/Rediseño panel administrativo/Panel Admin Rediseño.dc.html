@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-4f88adac-ccf9-4434-bae3-42bfb4042a46/styles.css">
+<script src="_ds/modernist-4f88adac-ccf9-4434-bae3-42bfb4042a46/_ds_bundle.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#d6dbe2}
+a{color:#c2410c;text-decoration:none}
+a:hover{color:#ea580c}
+@keyframes at-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</helmet>
+<div style="padding:72px;display:flex;flex-direction:column;gap:56px;font-family:var(--font-body);width:3100px">
+
+  <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;border-bottom:2px solid #0f172a;padding-bottom:24px;color:#0f172a">
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:1200px">
+      <span style="font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#c2410c;font-weight:700">ArmalyTech · Rediseño UX/UI</span>
+      <h1 style="margin:0;font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1">Panel administrativo y vista pública de ticket</h1>
+      <p style="margin:0;font-size:17px;line-height:1.55;color:#475569;text-wrap:pretty">Misma funcionalidad y stack (React 18 · React Router 7 · TanStack Query · Tailwind · Glide Data Grid). Estructura Modernist (Archivo, reglas de 2px, esquinas rectas) con los colores de la marca: naranja #f97316 como color principal, azul marino para el menú y el modo oscuro, y rojo solo para errores y acciones peligrosas. Texto de lectura mínimo 15 px.</p>
+    </div>
+    <button type="button" onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:10px;padding:14px 20px;background:#0f172a;color:#e2e8f0;border:0;font:700 15px var(--font-body);cursor:pointer;flex:none" style-hover="background:#1e293b">
+      <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+      <sc-if value="{{ light }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+      <span>{{ themeLabel }}</span>
+    </button>
+  </header>
+
+  <div style="{{ themeVars }}">
+  <div style="display:flex;flex-wrap:wrap;gap:88px 72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px;font-family:ui-monospace,Menlo,monospace">
+        <span style="font-size:24px;font-weight:600;color:#0f172a">/admin/login</span>
+        <span style="font-size:15px;color:#475569">Inicio de sesión · pública</span>
+      </div>
+      <div style="width:1440px;height:900px;position:relative;overflow:hidden;display:grid;grid-template-columns:7fr 5fr;background:var(--color-bg);color:var(--color-text);box-shadow:0 30px 60px rgba(15,23,42,.18)">
+        <div style="position:relative;background:var(--side-bg);color:#e2e8f0;padding:48px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden">
+          <div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);pointer-events:none">
+            <div style="border-right:1px solid rgba(226,232,240,.08)"></div><div style="border-right:1px solid rgba(226,232,240,.08)"></div><div style="border-right:1px solid rgba(226,232,240,.08)"></div><div style="border-right:1px solid rgba(226,232,240,.08)"></div><div style="border-right:1px solid rgba(226,232,240,.08)"></div><div></div>
+          </div>
+          <div style="position:relative;display:flex;align-items:center;gap:14px">
+            <img src="assets/Armalytech_logo.png" alt="ArmalyTech" style="width:48px;height:48px;object-fit:contain">
+            <span style="font-size:22px;font-weight:800;letter-spacing:-.01em;color:#fff">ArmalyTech</span>
+          </div>
+          <div style="position:relative;display:flex;flex-direction:column;gap:24px">
+            <span style="font-size:14px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#fdba74">Uso interno</span>
+            <h1 style="margin:0;font-size:112px;line-height:.92;font-weight:800;letter-spacing:-.035em;color:#fff">Panel de<br>adminis-<br>tración<span style="color:#f97316">.</span></h1>
+          </div>
+          <div style="position:relative;display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid #f97316;padding-top:18px;gap:24px">
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8">Hora Lima</span><span style="font-family:ui-monospace,Menlo,monospace;font-size:24px;font-weight:600;color:#fff">{{ clockTime }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8">Fecha</span><span style="font-size:16px;font-weight:600;text-transform:capitalize;color:#fff">{{ clockDate }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8">Tienda</span><span style="font-size:16px;font-weight:600;color:#fff">San Borja, Lima</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;padding:48px 64px">
+          <div style="display:flex;justify-content:flex-end">
+            <button type="button" onClick="{{ toggleTheme }}" aria-label="Cambiar tema" style="display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;background:transparent;color:var(--color-text);border:1px solid var(--color-divider);font:600 15px var(--font-body);cursor:pointer" style-hover="border-color:var(--color-accent)">
+              <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+              <sc-if value="{{ light }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+              <span>{{ themeLabel }}</span>
+            </button>
+          </div>
+          <form onSubmit="{{ submitLogin }}" style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;max-width:420px;width:100%">
+            <div style="display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--color-divider);padding-bottom:24px">
+              <span style="font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Acceso del personal</span>
+              <h2 style="margin:0;font-size:44px;font-weight:800;letter-spacing:-.02em;line-height:1">Ingresar</h2>
+              <p style="margin:0;font-size:16px;line-height:1.55;color:var(--muted)">Usa el correo y la contraseña que te asignó el administrador principal.</p>
+            </div>
+            <div class="field">
+              <label style="font-size:14px;color:var(--muted)">Correo electrónico</label>
+              <input class="input" type="email" name="email" autocomplete="email" placeholder="ejemplo@armalytech.com" value="{{ email }}" onChange="{{ onEmail }}" style="min-height:50px;font-size:16px">
+            </div>
+            <div class="field">
+              <label style="font-size:14px;color:var(--muted)">Contraseña</label>
+              <div style="position:relative">
+                <input class="input" type="{{ passType }}" name="password" autocomplete="current-password" placeholder="••••••••" value="{{ password }}" onChange="{{ onPassword }}" style="min-height:50px;font-size:16px;padding-right:50px">
+                <button type="button" onClick="{{ togglePass }}" aria-label="Mostrar contraseña" style="position:absolute;right:0;top:0;width:50px;height:50px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--muted);cursor:pointer" style-hover="color:var(--ink-accent)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+            </div>
+            <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:var(--danger-bg);border-top:2px solid var(--danger);font-size:15px;color:var(--danger-ink)">
+                <svg width="18" height="18" viewBox="0 0 24 24" style="flex:none;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                <span>{{ loginError }}</span>
+              </div>
+            </sc-if>
+            <button type="submit" class="btn btn-primary" style="min-height:54px;justify-content:space-between;padding:0 18px;font-size:17px;color:#0f172a;width:100%">
+              <span>{{ loginLabel }}</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+            </button>
+            <p style="margin:0;font-size:15px;line-height:1.5;color:var(--muted)">¿Olvidaste tu contraseña? El administrador principal puede asignarte una clave temporal desde Personal.</p>
+          </form>
+          <div style="font-size:14px;color:var(--muted);display:flex;justify-content:space-between;border-top:1px solid var(--color-divider);padding-top:16px">
+            <span>© 2026 ArmalyTech</span><span>armalytech.com/admin</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <sc-for list="{{ screens }}" as="s" hint-placeholder-count="6">
+      <div style="display:flex;flex-direction:column">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px;font-family:ui-monospace,Menlo,monospace">
+          <span style="font-size:24px;font-weight:600;color:#0f172a">{{ s.route }}</span>
+          <span style="font-size:15px;color:#475569">{{ s.caption }}</span>
+        </div>
+        <div style="width:1440px;height:900px;position:relative;overflow:hidden;display:flex;background:var(--color-bg);color:var(--color-text);box-shadow:0 30px 60px rgba(15,23,42,.18)">
+
+          <aside style="width:264px;flex:none;display:flex;flex-direction:column;background:var(--side-bg);color:#e2e8f0;position:relative">
+            <div style="height:76px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:2px solid rgba(226,232,240,.12)">
+              <img src="assets/Armalytech_logo.png" alt="ArmalyTech" style="width:38px;height:38px;object-fit:contain">
+              <div style="display:flex;flex-direction:column;line-height:1.15">
+                <span style="font-size:18px;font-weight:800;letter-spacing:-.01em;color:#fff">ArmalyTech</span>
+                <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fdba74;font-weight:600">Panel</span>
+              </div>
+            </div>
+            <nav style="flex:1;display:flex;flex-direction:column;gap:2px;padding:20px 12px">
+              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;font-weight:600;padding:0 12px 8px">Operación</span>
+              <a href="#" style="{{ s.navInv }}" style-hover="background:rgba(226,232,240,.08)">
+                <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path><path d="m7.5 4.27 9 5.15"></path></svg>
+                <span>Inventario</span>
+              </a>
+              <a href="#" style="{{ s.navHis }}" style-hover="background:rgba(226,232,240,.08)">
+                <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                <span>Historial de caja</span>
+              </a>
+              <a href="#" style="{{ s.navCli }}" style-hover="background:rgba(226,232,240,.08)">
+                <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Clientes</span>
+              </a>
+              <span style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;font-weight:600;padding:24px 12px 8px">Administración</span>
+              <a href="#" style="{{ s.navPer }}" style-hover="background:rgba(226,232,240,.08)">
+                <svg width="19" height="19" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                <span>Personal</span>
+                <span style="margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border:1px solid rgba(226,232,240,.25);color:#cbd5e1">Owner</span>
+              </a>
+            </nav>
+
+            <sc-if value="{{ s.menuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:12px;right:12px;bottom:88px;background:var(--side-pop);border:1px solid rgba(226,232,240,.2);box-shadow:0 18px 44px rgba(2,6,23,.5);z-index:5">
+                <div style="padding:14px 16px;border-bottom:2px solid rgba(226,232,240,.12);display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:15px;font-weight:700;color:#fff">Jhon M.</span>
+                  <span style="font-size:14px;color:#94a3b8">jhon@armalytech.com</span>
+                </div>
+                <div style="display:flex;flex-direction:column;padding:6px 0">
+                  <button type="button" onClick="{{ s.goPerfil }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">
+                    <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>Perfil</span>
+                  </button>
+                  <button type="button" onClick="{{ s.goConfig }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">
+                    <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.730.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>Configuración</span>
+                  </button>
+                  <button type="button" onClick="{{ toggleTheme }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;background:transparent;border:0;color:#e2e8f0;font:500 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(226,232,240,.08)">
+                    <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                    <span>Modo oscuro</span>
+                    <span style="{{ switchTrack }}"><span style="{{ switchKnob }}"></span></span>
+                  </button>
+                </div>
+                <button type="button" onClick="{{ s.logout }}" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;background:transparent;border:0;border-top:2px solid rgba(226,232,240,.12);color:#fca5a5;font:600 15px var(--font-body);cursor:pointer;text-align:left" style-hover="background:rgba(239,68,68,.14)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+                  <span>Cerrar sesión</span>
+                </button>
+              </div>
+            </sc-if>
+
+            <button type="button" onClick="{{ s.toggleMenu }}" style="height:80px;display:flex;align-items:center;gap:12px;padding:0 16px 0 20px;background:transparent;border:0;border-top:2px solid rgba(226,232,240,.12);color:#e2e8f0;cursor:pointer;text-align:left;font-family:var(--font-body)" style-hover="background:rgba(226,232,240,.06)">
+              <span style="width:42px;height:42px;flex:none;display:flex;align-items:center;justify-content:center;background:#f97316;color:#0f172a;font-size:15px;font-weight:800">JM</span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:15px;font-weight:700;color:#fff">Jhon M.</span>
+                <span style="font-size:13px;color:#94a3b8">Principal · Owner</span>
+              </span>
+              <svg width="17" height="17" viewBox="0 0 24 24" style="flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.7"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+            </button>
+          </aside>
+
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+            <header style="height:76px;flex:none;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:2px solid var(--color-divider)">
+              <div style="display:flex;align-items:center;gap:10px;font-size:15px">
+                <span style="color:var(--muted)">Panel</span>
+                <span style="color:var(--muted)">/</span>
+                <span style="font-weight:700">{{ s.crumb }}</span>
+              </div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:20px">
+                <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2">
+                  <span style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:600">{{ clockTime }}</span>
+                  <span style="font-size:13px;text-transform:capitalize;color:var(--muted)">{{ clockDate }} · Lima</span>
+                </div>
+                <button type="button" onClick="{{ toggleTheme }}" aria-label="Cambiar tema" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)">
+                  <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+                  <sc-if value="{{ light }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+                </button>
+              </div>
+            </header>
+
+            <main style="flex:1;min-height:0;overflow:hidden;padding:30px 40px;display:flex;flex-direction:column;gap:22px">
+
+              <sc-if value="{{ s.isInv }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Operación</span>
+                    <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Inventario</h1>
+                  </div>
+                  <button type="button" onClick="{{ newProduct }}" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;gap:10px;font-size:15px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5v14"></path></svg>
+                    <span>Nuevo producto</span>
+                  </button>
+                </div>
+                <div style="display:flex;gap:28px;border-bottom:2px solid var(--color-divider)">
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid var(--color-accent);color:var(--color-text);font:700 15px var(--font-body);cursor:pointer">Productos <span style="font-weight:500;color:var(--muted)">42</span></button>
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 15px var(--font-body);cursor:pointer" style-hover="color:var(--color-text)">Catálogo</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                  <div style="position:relative;width:340px">
+                    <svg width="17" height="17" viewBox="0 0 24 24" style="position:absolute;left:12px;top:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    <input class="input" placeholder="Buscar por celular (ej. A54) o producto..." style="min-height:42px;padding-left:38px;font-size:15px">
+                  </div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+                      <button type="button" onClick="{{ c.select }}" style="{{ c.style }}">{{ c.label }}</button>
+                    </sc-for>
+                    <button type="button" onClick="{{ toggleLow }}" style="{{ lowChip }}">
+                      <span style="width:8px;height:8px;background:var(--danger)"></span>
+                      <span>Stock bajo</span>
+                    </button>
+                  </div>
+                  <label style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer">
+                    <input type="checkbox" checked="{{ showArchived }}" onChange="{{ toggleArchived }}" style="accent-color:#f97316;width:17px;height:17px">
+                    <span>Archivados</span>
+                  </label>
+                </div>
+                <div style="border-top:2px solid var(--color-text)">
+                  <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                    <thead>
+                      <tr style="font-size:13px">
+                        <th style="padding:11px 12px 11px 0;font-size:13px">Producto</th><th style="font-size:13px">Categoría</th><th style="font-size:13px">Compatible con</th><th style="font-size:13px">Stock</th><th style="text-align:right;font-size:13px">Costo</th><th style="text-align:right;font-size:13px">Precio</th><th style="text-align:right;font-size:13px">Ganancia</th><th style="text-align:right;padding-right:0;font-size:13px">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+                        <tr style="{{ p.rowStyle }}">
+                          <td style="padding:8px 12px 8px 0">
+                            <div style="font-weight:700">{{ p.name }}</div>
+                            <div style="font-size:14px;color:var(--muted)">{{ p.sub }}</div>
+                          </td>
+                          <td>{{ p.category }}</td>
+                          <td>
+                            <div style="display:flex;flex-wrap:wrap;gap:4px;max-width:200px">
+                              <sc-for list="{{ p.phones }}" as="ph" hint-placeholder-count="2">
+                                <span style="font-size:13px;padding:2px 7px;border:1px solid var(--color-divider);white-space:nowrap">{{ ph }}</span>
+                              </sc-for>
+                              <span style="font-size:13px;padding:2px 0;color:var(--muted)">{{ p.more }}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                              <div style="display:flex;align-items:center;border:1px solid var(--color-divider)">
+                                <button type="button" onClick="{{ p.dec }}" aria-label="Restar stock" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--color-text);cursor:pointer" style-hover="background:var(--row-hover)"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"><path d="M5 12h14"></path></svg></button>
+                                <span style="width:36px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;border-left:1px solid var(--color-divider);border-right:1px solid var(--color-divider);line-height:30px">{{ p.stock }}</span>
+                                <button type="button" onClick="{{ p.inc }}" aria-label="Sumar stock" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--color-text);cursor:pointer" style-hover="background:var(--row-hover)"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round"><path d="M5 12h14M12 5v14"></path></svg></button>
+                              </div>
+                              <sc-if value="{{ p.low }}" hint-placeholder-val="{{ false }}">
+                                <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 7px;background:var(--danger-bg);color:var(--danger-ink);white-space:nowrap">Bajo</span>
+                              </sc-if>
+                            </div>
+                          </td>
+                          <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap">{{ p.cost }}</td>
+                          <td style="text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap">{{ p.price }}</td>
+                          <td style="{{ p.profitStyle }}">{{ p.profit }}</td>
+                          <td style="text-align:right;padding-right:0">
+                            <sc-if value="{{ p.archived }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ p.restore }}" class="btn btn-secondary" style="min-height:34px;font-size:14px">Restaurar</button></sc-if>
+                            <div style="{{ p.actsStyle }}">
+                              <button type="button" title="Editar" onClick="{{ p.edit }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg></button>
+                              <button type="button" title="Movimientos" onClick="{{ p.mov }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg></button>
+                              <button type="button" title="Archivar" onClick="{{ p.archive }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--danger);color:var(--danger-ink)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg></button>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:15px;color:var(--muted)">
+                  <span>Mostrando 1–7 de 42 productos</span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <button type="button" class="btn btn-secondary" disabled style="min-height:38px;font-size:15px">Anterior</button>
+                    <span style="padding:0 8px;color:var(--color-text);font-weight:600">Página 1 de 6</span>
+                    <button type="button" class="btn btn-secondary" style="min-height:38px;font-size:15px">Siguiente</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isCat }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Operación</span>
+                  <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Inventario</h1>
+                </div>
+                <div style="display:flex;gap:28px;border-bottom:2px solid var(--color-divider)">
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 15px var(--font-body);cursor:pointer" style-hover="color:var(--color-text)">Productos <span style="font-weight:500">42</span></button>
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid var(--color-accent);color:var(--color-text);font:700 15px var(--font-body);cursor:pointer">Catálogo</button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--color-text);flex:1;min-height:0">
+                  <sc-for list="{{ catalog }}" as="panel" hint-placeholder-count="3">
+                    <section style="{{ panel.style }}">
+                      <div style="display:flex;align-items:baseline;justify-content:space-between">
+                        <h2 style="margin:0;font-size:24px;font-weight:800">{{ panel.title }}</h2>
+                        <span style="font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums">{{ panel.count }}</span>
+                      </div>
+                      <sc-if value="{{ panel.hasFilter }}" hint-placeholder-val="{{ false }}">
+                        <select class="input" style="min-height:42px;font-size:15px">
+                          <option>Todas las marcas</option><option>Apple</option><option>Samsung</option><option>Xiaomi</option><option>Motorola</option>
+                        </select>
+                      </sc-if>
+                      <div style="display:flex">
+                        <input class="input" placeholder="{{ panel.placeholder }}" value="{{ panel.newVal }}" onChange="{{ panel.onNew }}" style="min-height:42px;border-right:0;font-size:15px">
+                        <button type="button" onClick="{{ panel.add }}" class="btn btn-primary" style="min-height:42px;padding:0 14px;color:#0f172a;font-size:15px">Agregar</button>
+                      </div>
+                      <ul style="list-style:none;margin:0;padding:0;border-top:2px solid var(--color-divider)">
+                        <sc-for list="{{ panel.items }}" as="it" hint-placeholder-count="6">
+                          <li style="display:flex;align-items:center;gap:10px;padding:8px 0;min-height:52px;border-bottom:1px solid var(--color-divider);font-size:15px">
+                            <span style="font-size:14px;color:var(--muted);min-width:70px">{{ it.pre }}</span>
+                            <sc-if value="{{ it.editing }}" hint-placeholder-val="{{ false }}">
+                              <input class="input" value="{{ it.editVal }}" onChange="{{ it.onEditVal }}" style="flex:1;min-width:0;min-height:36px;font-size:15px;border-color:var(--color-accent)">
+                              <button type="button" onClick="{{ it.save }}" class="btn btn-primary" style="min-height:36px;padding:0 12px;color:#0f172a;font-size:14px">Guardar</button>
+                              <button type="button" onClick="{{ it.cancel }}" class="btn btn-secondary" style="min-height:36px;padding:0 10px;font-size:14px">Cancelar</button>
+                            </sc-if>
+                            <sc-if value="{{ it.viewing }}" hint-placeholder-val="{{ true }}">
+                              <span style="flex:1;font-weight:600">{{ it.name }}</span>
+                              <button type="button" title="Renombrar" onClick="{{ it.startEdit }}" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--muted);cursor:pointer" style-hover="color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg></button>
+                              <button type="button" title="Eliminar" onClick="{{ it.del }}" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--muted);cursor:pointer" style-hover="color:var(--danger-ink)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                            </sc-if>
+                          </li>
+                        </sc-for>
+                      </ul>
+                    </section>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isHis }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Cierre de día</span>
+                    <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Historial de caja</h1>
+                  </div>
+                  <div style="display:flex;align-items:stretch;border:1px solid var(--color-divider)">
+                    <button type="button" aria-label="Día anterior" style="width:46px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-right:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="color:var(--ink-accent)"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg></button>
+                    <button type="button" style="display:flex;align-items:center;gap:10px;padding:0 16px;height:46px;background:transparent;border:0;color:var(--color-text);font:600 15px var(--font-body);cursor:pointer;text-transform:capitalize">
+                      <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                      <span>{{ clockDate }}</span>
+                    </button>
+                    <span style="display:flex;align-items:center;padding:0 12px;background:var(--color-accent);color:#0f172a;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Hoy</span>
+                    <button type="button" disabled aria-label="Día siguiente" style="width:46px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-left:1px solid var(--color-divider);color:var(--color-text);opacity:.35"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg></button>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;flex:1;min-height:0">
+                  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+                    <div style="border:2px solid var(--color-text);font-size:15px">
+                      <div style="display:grid;grid-template-columns:44px 1fr 1fr 1.6fr 1fr 1fr 1.6fr 100px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:800">
+                        <div></div>
+                        <div style="grid-column:span 3;padding:8px 12px;background:var(--color-accent);color:#0f172a">Ingresos</div>
+                        <div style="grid-column:span 3;padding:8px 12px;background:var(--color-text);color:var(--color-bg)">Gastos</div>
+                        <div></div>
+                      </div>
+                      <div style="display:grid;grid-template-columns:44px 1fr 1fr 1.6fr 1fr 1fr 1.6fr 100px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:2px solid var(--color-text);background:var(--color-surface)">
+                        <div style="padding:10px 0;text-align:center;border-right:1px solid var(--color-divider)">#</div>
+                        <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Efectivo</div>
+                        <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Yape</div>
+                        <div style="padding:10px 12px;border-right:2px solid var(--color-text)">Detalle</div>
+                        <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Efectivo</div>
+                        <div style="padding:10px 12px;border-right:1px solid var(--color-divider);text-align:right">Yape</div>
+                        <div style="padding:10px 12px;border-right:1px solid var(--color-divider)">Detalle</div>
+                        <div style="padding:10px 12px">Estado</div>
+                      </div>
+                      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+                        <div style="display:grid;grid-template-columns:44px 1fr 1fr 1.6fr 1fr 1fr 1.6fr 100px;border-bottom:1px solid var(--color-divider);font-variant-numeric:tabular-nums">
+                          <div style="padding:11px 0;text-align:center;border-right:1px solid var(--color-divider);font-size:14px;color:var(--muted)">{{ r.n }}</div>
+                          <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ci }}</div>
+                          <div style="{{ r.yiStyle }}">{{ r.yi }}</div>
+                          <div style="padding:11px 12px;border-right:2px solid var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.di }}</div>
+                          <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ce }}</div>
+                          <div style="padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right">{{ r.ye }}</div>
+                          <div style="padding:11px 12px;border-right:1px solid var(--color-divider);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.de }}</div>
+                          <div style="{{ r.statusStyle }}">{{ r.status }}</div>
+                        </div>
+                      </sc-for>
+                      <div style="display:grid;grid-template-columns:44px 1fr 1fr 1.6fr 1fr 1fr 1.6fr 100px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--color-surface);border-top:2px solid var(--color-text)">
+                        <div style="border-right:1px solid var(--color-divider)"></div>
+                        <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">265.00</div>
+                        <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">260.00</div>
+                        <div style="padding:12px;border-right:2px solid var(--color-text);font-size:13px;letter-spacing:.1em;text-transform:uppercase">Total</div>
+                        <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">25.00</div>
+                        <div style="padding:12px;text-align:right;border-right:1px solid var(--color-divider)">60.00</div>
+                        <div style="padding:12px;border-right:1px solid var(--color-divider)"></div>
+                        <div></div>
+                      </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <button type="button" class="btn btn-secondary" style="min-height:42px;gap:8px;font-size:15px">
+                        <svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5v14"></path></svg>
+                        <span>Agregar fila</span>
+                      </button>
+                      <span style="font-size:14px;color:var(--muted)">Tab, Enter o flechas para moverte · pega directo desde Excel</span>
+                    </div>
+                  </div>
+                  <aside style="display:flex;flex-direction:column;gap:18px;align-self:start;border-top:2px solid var(--color-text);padding-top:16px">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--color-divider)">
+                      <sc-for list="{{ sumTabs }}" as="t" hint-placeholder-count="3">
+                        <button type="button" onClick="{{ t.select }}" style="{{ t.style }}">{{ t.label }}</button>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <h3 style="margin:0;font-size:22px;font-weight:800">{{ sum.title }}</h3>
+                      <span style="font-size:14px;color:var(--muted)">{{ sum.range }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;background:var(--color-accent);color:#0f172a;padding:18px">
+                      <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:800">Ingreso neto</span>
+                      <span style="font-size:42px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1">{{ sum.net }}</span>
+                      <span style="font-size:15px;font-weight:600">Bruto {{ sum.gross }}</span>
+                    </div>
+                    <sc-for list="{{ sum.blocks }}" as="b" hint-placeholder-count="2">
+                      <div style="display:flex;flex-direction:column;border-top:2px solid var(--color-divider);padding-top:10px">
+                        <h4 style="margin:0 0 6px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">{{ b.title }}</h4>
+                        <div style="display:flex;justify-content:space-between;font-size:15px;padding:4px 0"><span>Ingreso</span><span style="font-variant-numeric:tabular-nums">{{ b.inc }}</span></div>
+                        <div style="display:flex;justify-content:space-between;font-size:15px;padding:4px 0"><span>Gasto</span><span style="font-variant-numeric:tabular-nums">− {{ b.exp }}</span></div>
+                        <div style="display:flex;justify-content:space-between;font-size:16px;padding:6px 0 0;font-weight:800;border-top:1px solid var(--color-divider);margin-top:4px"><span>Total</span><span style="font-variant-numeric:tabular-nums">{{ b.total }}</span></div>
+                      </div>
+                    </sc-for>
+                  </aside>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isCli }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Fidelización</span>
+                    <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Clientes</h1>
+                  </div>
+                  <button type="button" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;gap:10px;font-size:15px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5v14"></path></svg>
+                    <span>Registrar visita</span>
+                  </button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-divider)">
+                  <div style="padding:14px 20px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">248</span><span style="font-size:15px;color:var(--muted)">Clientes</span></div>
+                  <div style="padding:14px 20px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:4px"><span style="font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink-accent)">7</span><span style="font-size:15px;color:var(--muted)">Visitas hoy</span></div>
+                  <div style="padding:14px 20px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:4px"><span style="font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">176</span><span style="font-size:15px;color:var(--muted)">Con consentimiento</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:28px;border-bottom:2px solid var(--color-divider)">
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid var(--color-accent);color:var(--color-text);font:700 15px var(--font-body);cursor:pointer">Clientes y sellos</button>
+                  <button type="button" style="padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 15px var(--font-body);cursor:pointer" style-hover="color:var(--color-text)">Actividad</button>
+                  <div style="margin-left:auto;display:flex;gap:12px;padding-bottom:10px">
+                    <div style="position:relative;width:300px">
+                      <svg width="17" height="17" viewBox="0 0 24 24" style="position:absolute;left:12px;top:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                      <input class="input" placeholder="Nombre, apellido o número..." style="min-height:40px;padding-left:38px;font-size:15px">
+                    </div>
+                    <select class="input" style="min-height:40px;width:230px;font-size:15px">
+                      <option>Promociones: Todos</option><option>Aprobó</option><option>Descartó</option>
+                    </select>
+                  </div>
+                </div>
+                <table class="table" style="width:100%;border-collapse:collapse;font-size:15px;margin-top:-10px">
+                  <thead>
+                    <tr><th style="padding-left:0;font-size:13px">Cliente</th><th style="font-size:13px">Número</th><th style="font-size:13px">Fidelización</th><th style="font-size:13px">Promociones</th><th style="text-align:right;font-size:13px">Visitas</th><th style="font-size:13px">Última visita</th><th style="font-size:13px">Canal</th><th style="text-align:right;padding-right:0;font-size:13px">Acción</th></tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ clients }}" as="c" hint-placeholder-count="8">
+                      <tr onClick="{{ c.open }}" style="{{ c.rowStyle }}">
+                        <td style="padding:11px 8px 11px 0;font-weight:700">{{ c.name }}</td>
+                        <td style="font-variant-numeric:tabular-nums;white-space:nowrap">{{ c.phone }}</td>
+                        <td>
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <div style="display:flex;gap:3px">
+                              <sc-for list="{{ c.stamps }}" as="st" hint-placeholder-count="5">
+                                <span style="{{ st.style }}">{{ st.glyph }}</span>
+                              </sc-for>
+                            </div>
+                            <span style="{{ c.stampLabelStyle }}">{{ c.stampLabel }}</span>
+                          </div>
+                        </td>
+                        <td><span style="{{ c.consentStyle }}">{{ c.consent }}</span></td>
+                        <td style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ c.visits }}</td>
+                        <td style="color:var(--muted);white-space:nowrap">{{ c.last }}</td>
+                        <td style="font-size:14px;color:var(--muted)">{{ c.channel }}</td>
+                        <td style="text-align:right;padding-right:0">
+                          <button type="button" onClick="{{ c.addVisit }}" style="height:34px;padding:0 12px;display:inline-flex;align-items:center;background:transparent;border:1px solid var(--color-accent);color:var(--ink-accent);font:700 14px var(--font-body);cursor:pointer;white-space:nowrap" style-hover="background:var(--color-accent);color:#0f172a">+1 visita</button>
+                        </td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </sc-if>
+
+              <sc-if value="{{ s.isPer }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:6px;max-width:680px">
+                    <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Administración</span>
+                    <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">Personal del panel</h1>
+                    <p style="margin:6px 0 0;font-size:16px;color:var(--muted)">Gestiona los accesos del equipo, crea credenciales temporales o desactiva usuarios.</p>
+                  </div>
+                  <button type="button" onClick="{{ openStaffModal }}" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;gap:10px;font-size:15px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12h14M12 5v14"></path></svg>
+                    <span>Nuevo personal</span>
+                  </button>
+                </div>
+                <div style="border-top:2px solid var(--color-text)">
+                  <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                    <thead><tr><th style="padding-left:0;font-size:13px">Correo electrónico</th><th style="font-size:13px">Rol</th><th style="font-size:13px">Estado</th><th style="font-size:13px">Creado por</th><th style="font-size:13px;white-space:nowrap">Registro</th><th style="text-align:right;padding-right:0;font-size:13px">Acciones</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ staff }}" as="m" hint-placeholder-count="4">
+                        <tr style="{{ m.rowStyle }}">
+                          <td style="padding:14px 8px 14px 0">
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                              <span style="width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--color-surface);border:1px solid var(--color-divider);font-size:14px;font-weight:800">{{ m.initials }}</span>
+                              <span style="font-weight:700">{{ m.email }}</span>
+                              <sc-if value="{{ m.self }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;background:var(--color-accent);color:#0f172a">Tú</span></sc-if>
+                              <sc-if value="{{ m.temp }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--color-accent);color:var(--ink-accent)">Clave temporal</span></sc-if>
+                            </div>
+                          </td>
+                          <td><span style="{{ m.roleStyle }}">{{ m.role }}</span></td>
+                          <td>
+                            <span style="display:inline-flex;align-items:center;gap:8px;font-weight:600">
+                              <span style="{{ m.dotStyle }}"></span>
+                              <span>{{ m.status }}</span>
+                            </span>
+                          </td>
+                          <td style="color:var(--muted)">{{ m.createdBy }}</td>
+                          <td style="color:var(--muted);font-variant-numeric:tabular-nums">{{ m.date }}</td>
+                          <td style="text-align:right;padding-right:0">
+                            <div style="display:flex;justify-content:flex-end;gap:6px">
+                              <button type="button" onClick="{{ m.reset }}" class="btn btn-secondary" style="min-height:36px;gap:8px;font-size:14px;white-space:nowrap">
+                                <svg width="15" height="15" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5"></circle></svg>
+                                <span>Resetear clave</span>
+                              </button>
+                              <sc-if value="{{ m.canToggle }}" hint-placeholder-val="{{ false }}">
+                                <button type="button" onClick="{{ m.toggle }}" style="{{ m.toggleStyle }}">{{ m.toggleLabel }}</button>
+                              </sc-if>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.isCue }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Mi cuenta</span>
+                  <h1 style="margin:0;font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1">{{ cuentaTitle }}</h1>
+                  <p style="margin:6px 0 0;font-size:16px;color:var(--muted)">Gestiona tu correo de acceso y tus credenciales de seguridad.</p>
+                </div>
+                <div style="display:flex;gap:28px;border-bottom:2px solid var(--color-divider)">
+                  <button type="button" onClick="{{ goPerfilTab }}" style="{{ tabPerfil }}">Perfil</button>
+                  <button type="button" onClick="{{ goConfigTab }}" style="{{ tabConfig }}">Configuración</button>
+                </div>
+                <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:2px solid var(--color-text)">
+                    <section style="padding:24px 32px 24px 0;display:flex;flex-direction:column;gap:18px">
+                      <h2 style="margin:0;font-size:22px;font-weight:800">Datos de la sesión</h2>
+                      <div style="display:flex;align-items:center;gap:16px">
+                        <span style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:var(--color-accent);color:#0f172a;font-size:22px;font-weight:800">JM</span>
+                        <div style="display:flex;flex-direction:column;gap:6px">
+                          <span style="font-size:18px;font-weight:700">Jhon M.</span>
+                          <span style="font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;background:var(--color-accent);color:#0f172a;align-self:flex-start">Principal · Owner</span>
+                        </div>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--color-divider)">
+                        <div style="padding:14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;color:var(--muted)">Correo actual</span><span style="font-size:16px;font-weight:600">jhon@armalytech.com</span></div>
+                        <div style="padding:14px 0 14px 20px;border-left:1px solid var(--color-divider);display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;color:var(--muted)">Rol en el panel</span><span style="font-size:16px;font-weight:600">Principal (Owner)</span></div>
+                      </div>
+                    </section>
+                    <section style="padding:24px 0 24px 32px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:16px">
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <h2 style="margin:0;font-size:22px;font-weight:800">Cambiar correo electrónico</h2>
+                        <p style="margin:0;font-size:15px;color:var(--muted)">Ingresa tu nuevo correo y confirma con tu contraseña actual.</p>
+                      </div>
+                      <div class="field"><label style="font-size:14px">Nuevo correo electrónico</label><input class="input" type="email" placeholder="nuevo@armalytech.com" style="min-height:46px;font-size:15px"></div>
+                      <div class="field"><label style="font-size:14px">Contraseña actual</label><input class="input" type="password" placeholder="••••••••" style="min-height:46px;font-size:15px"></div>
+                      <button type="button" class="btn btn-primary" style="min-height:46px;justify-content:flex-start;padding:0 18px;color:#0f172a;font-size:15px;align-self:flex-start">Guardar nuevo correo</button>
+                    </section>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ isConfig }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:2px solid var(--color-text)">
+                    <section style="padding:24px 32px 24px 0;display:flex;flex-direction:column;gap:16px">
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <h2 style="margin:0;font-size:22px;font-weight:800">Cambiar contraseña</h2>
+                        <p style="margin:0;font-size:15px;color:var(--muted)">Al cambiar tu contraseña, cualquier otra sesión abierta en otros dispositivos se cerrará por seguridad.</p>
+                      </div>
+                      <div class="field"><label style="font-size:14px">Contraseña actual</label><input class="input" type="password" placeholder="••••••••" style="min-height:46px;font-size:15px"></div>
+                      <div class="field"><label style="font-size:14px">Nueva contraseña (mínimo 8 caracteres)</label><input class="input" type="password" placeholder="••••••••" style="min-height:46px;font-size:15px"></div>
+                      <div class="field"><label style="font-size:14px">Confirmar nueva contraseña</label><input class="input" type="password" placeholder="••••••••" style="min-height:46px;font-size:15px"></div>
+                      <button type="button" class="btn btn-primary" style="min-height:46px;justify-content:flex-start;padding:0 18px;color:#0f172a;font-size:15px;align-self:flex-start">Actualizar contraseña</button>
+                    </section>
+                    <section style="padding:24px 0 24px 32px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:16px">
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <h2 style="margin:0;font-size:22px;font-weight:800">Apariencia</h2>
+                        <p style="margin:0;font-size:15px;color:var(--muted)">Se guarda en este navegador.</p>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <button type="button" onClick="{{ setLight }}" style="{{ optLight }}">
+                          <span style="height:96px;display:flex;background:#f8fafc;border:1px solid rgba(15,23,42,.2)"><span style="width:28%;background:#0f172a"></span><span style="flex:1;padding:10px;display:flex;flex-direction:column;gap:6px"><span style="height:8px;width:60%;background:#0f172a"></span><span style="height:8px;width:30%;background:#f97316"></span></span></span>
+                          <span style="font-size:15px;font-weight:700">Claro</span>
+                        </button>
+                        <button type="button" onClick="{{ setDark }}" style="{{ optDark }}">
+                          <span style="height:96px;display:flex;background:#0f172a;border:1px solid rgba(15,23,42,.2)"><span style="width:28%;background:#020617"></span><span style="flex:1;padding:10px;display:flex;flex-direction:column;gap:6px"><span style="height:8px;width:60%;background:#e2e8f0"></span><span style="height:8px;width:30%;background:#f97316"></span></span></span>
+                          <span style="font-size:15px;font-weight:700">Oscuro</span>
+                        </button>
+                      </div>
+                    </section>
+                  </div>
+                </sc-if>
+              </sc-if>
+            </main>
+          </div>
+
+
+          <sc-if value="{{ s.showPf }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closePf }}" style="position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:rgba(2,6,23,.5)">
+              <div onClick="{{ stop }}" style="width:620px;height:100%;background:var(--color-bg);color:var(--color-text);border-left:4px solid var(--color-accent);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)">
+                <div style="height:84px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px;border-bottom:2px solid var(--color-divider)">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">{{ pf.kicker }}</span><h2 style="margin:0;font-size:26px;font-weight:800">{{ pf.title }}</h2></div>
+                  <button type="button" onClick="{{ closePf }}" aria-label="Cerrar" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="flex:1;overflow:auto;padding:24px 28px;display:flex;flex-direction:column;gap:18px">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Categoría</label>
+                      <select class="input" value="{{ pf.category }}" onChange="{{ pf.onCategory }}" style="min-height:46px;font-size:15px"><option value="Pantallas">Pantallas</option><option value="Baterías">Baterías</option><option value="Puertos de carga">Puertos de carga</option><option value="Flex">Flex</option><option value="Carcasas">Carcasas</option><option value="Accesorios">Accesorios</option></select>
+                    </div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Marca (opcional)</label>
+                      <select class="input" value="{{ pf.brand }}" onChange="{{ pf.onBrand }}" style="min-height:46px;font-size:15px"><option value="">Sin marca</option><option value="Apple">Apple</option><option value="Samsung">Samsung</option><option value="Xiaomi">Xiaomi</option><option value="Motorola">Motorola</option><option value="Honor">Honor</option></select>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Nombre</label><input class="input" value="{{ pf.name }}" onChange="{{ pf.onName }}" placeholder="Ej: Mica de vidrio 9H" style="{{ pf.nameStyle }}"></div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Modelo (opcional)</label><input class="input" value="{{ pf.model }}" onChange="{{ pf.onModel }}" placeholder="Ej: Tipo C 1m" style="min-height:46px;font-size:15px"></div>
+                  </div>
+                  <sc-if value="{{ pf.error }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--danger-ink);margin-top:-10px">{{ pf.error }}</span></sc-if>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">{{ pf.stockLabel }}</label>
+                      <sc-if value="{{ pf.isEdit }}" hint-placeholder-val="{{ true }}"><div style="min-height:46px;display:flex;align-items:center;padding:0 10px;background:var(--color-surface);border:1px dashed var(--color-divider);font-size:16px;font-weight:800">{{ pf.stock }}</div></sc-if>
+                      <sc-if value="{{ pf.isCreate }}" hint-placeholder-val="{{ false }}"><input class="input" type="number" min="0" value="{{ pf.stock }}" onChange="{{ pf.onStock }}" style="min-height:46px;font-size:15px"></sc-if>
+                    </div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Costo (S/)</label><input class="input" type="number" step="0.01" value="{{ pf.cost }}" onChange="{{ pf.onCost }}" style="min-height:46px;font-size:15px"></div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Precio venta (S/)</label><input class="input" type="number" step="0.01" value="{{ pf.price }}" onChange="{{ pf.onPrice }}" style="min-height:46px;font-size:15px"></div>
+                    <div class="field"><label style="font-size:14px;color:var(--muted)">Stock mínimo</label><input class="input" type="number" min="0" value="{{ pf.min }}" onChange="{{ pf.onMin }}" style="min-height:46px;font-size:15px"></div>
+                  </div>
+                  <sc-if value="{{ pf.isEdit }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;color:var(--muted);margin-top:-8px">El stock se cambia con los botones + / − de la tabla.</span></sc-if>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-divider)">
+                    <div style="padding:14px 0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;color:var(--muted)">Ganancia por unidad</span><span style="{{ pf.profitStyle }}">{{ pf.profit }}</span></div>
+                    <div style="padding:14px 0 14px 20px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;color:var(--muted)">Margen sobre venta</span><span style="font-size:28px;font-weight:800">{{ pf.margin }}</span></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <span style="font-size:14px;color:var(--muted)">Compatible con</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ pf.phones }}" as="ph" hint-placeholder-count="2">
+                        <span style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 6px 0 10px;border:1px solid var(--color-text);font-size:14px;font-weight:600">{{ ph.name }}<button type="button" onClick="{{ ph.remove }}" aria-label="Quitar" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;border:0;color:var(--muted);cursor:pointer" style-hover="color:var(--danger-ink)"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span>
+                      </sc-for>
+                    </div>
+                    <select class="input" value="" onChange="{{ pf.onAddPhone }}" style="min-height:46px;font-size:15px"><option value="">+ Agregar celular compatible…</option><option>iPhone 11</option><option>iPhone 12</option><option>iPhone 12 Pro</option><option>iPhone 13</option><option>iPhone 14</option><option>iPhone 15</option><option>Galaxy A14</option><option>Galaxy A24</option><option>Galaxy A54</option><option>Galaxy S23</option><option>Redmi Note 12</option><option>Redmi Note 13</option><option>Poco X5</option><option>Moto G52</option></select>
+                  </div>
+                </div>
+                <div style="flex:none;display:flex;justify-content:flex-end;gap:8px;padding:18px 28px;border-top:2px solid var(--color-divider)">
+                  <button type="button" onClick="{{ closePf }}" class="btn btn-secondary" style="min-height:46px;font-size:15px">Cancelar</button>
+                  <button type="button" onClick="{{ pf.save }}" class="btn btn-primary" style="min-height:46px;padding:0 20px;color:#0f172a;font-size:15px">{{ pf.saveLabel }}</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.showMov }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeMov }}" style="position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.5)">
+              <div onClick="{{ stop }}" style="width:820px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--color-accent);box-shadow:var(--shadow-lg);display:flex;flex-direction:column">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 28px;border-bottom:2px solid var(--color-divider)">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Movimientos · kardex</span><h2 style="margin:0;font-size:26px;font-weight:800">{{ mov.title }}</h2></div>
+                  <button type="button" onClick="{{ closeMov }}" aria-label="Cerrar" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="padding:8px 28px 24px">
+                  <table class="table" style="width:100%;border-collapse:collapse;font-size:15px">
+                    <thead><tr><th style="padding-left:0;font-size:13px">Fecha</th><th style="font-size:13px">Tipo</th><th style="text-align:right;font-size:13px">Cantidad</th><th style="text-align:right;font-size:13px">Stock después</th><th style="font-size:13px">Motivo</th><th style="font-size:13px;padding-right:0">Usuario</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ mov.rows }}" as="mv" hint-placeholder-count="6">
+                        <tr><td style="padding:11px 8px 11px 0;white-space:nowrap">{{ mv.date }}</td><td style="font-weight:600">{{ mv.type }}</td><td style="{{ mv.qtyStyle }}">{{ mv.qty }}</td><td style="text-align:right;font-variant-numeric:tabular-nums">{{ mv.after }}</td><td style="color:var(--muted)">{{ mv.reason }}</td><td style="color:var(--muted);padding-right:0">{{ mv.user }}</td></tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.showConfirm }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeConfirm }}" style="position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.55)">
+              <div onClick="{{ stop }}" style="{{ confirm.boxStyle }}">
+                <div style="display:flex;align-items:flex-start;gap:14px">
+                  <span style="{{ confirm.iconStyle }}"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4M12 17h.01"></path></svg></span>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <h2 style="margin:0;font-size:24px;font-weight:800">{{ confirm.title }}</h2>
+                    <p style="margin:0;font-size:16px;line-height:1.55;color:var(--muted)">{{ confirm.message }}</p>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--color-divider);padding-top:18px">
+                  <button type="button" onClick="{{ closeConfirm }}" class="btn btn-secondary" style="min-height:44px;font-size:15px">Cancelar</button>
+                  <button type="button" onClick="{{ confirm.run }}" style="{{ confirm.btnStyle }}">{{ confirm.label }}</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.showCl }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeCl }}" style="position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:rgba(2,6,23,.5)">
+              <div onClick="{{ stop }}" style="width:640px;height:100%;background:var(--color-bg);color:var(--color-text);border-left:4px solid var(--color-accent);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)">
+                <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 28px;border-bottom:2px solid var(--color-divider)">
+                  <div style="display:flex;align-items:center;gap:16px">
+                    <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--color-text);color:var(--color-bg);font-size:20px;font-weight:800">{{ cli.initials }}</span>
+                    <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Detalle del cliente</span><h2 style="margin:0;font-size:26px;font-weight:800">{{ cli.name }}</h2><span style="font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums">{{ cli.phone }} · {{ cli.channel }}</span></div>
+                  </div>
+                  <button type="button" onClick="{{ closeCl }}" aria-label="Cerrar" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <div style="flex:1;overflow:auto;padding:22px 28px 28px;display:flex;flex-direction:column;gap:22px">
+                  <section style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                      <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)">Programa de fidelización</span>
+                      <sc-if value="{{ cli.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:800;padding:3px 8px;background:var(--color-accent);color:#0f172a">{{ cli.badge }}</span></sc-if>
+                      <span style="margin-left:auto;font-size:15px;font-weight:800">{{ cli.count }}</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+                      <sc-for list="{{ cli.stamps }}" as="st" hint-placeholder-count="5">
+                        <div style="{{ st.style }}"><span style="font-size:22px;font-weight:800;line-height:1">{{ st.glyph }}</span><span style="font-size:13px;font-weight:600">{{ st.sub }}</span></div>
+                      </sc-for>
+                    </div>
+                    <p style="margin:0;font-size:15px;line-height:1.5;color:var(--muted)">{{ cli.loyaltyText }}</p>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                      <button type="button" onClick="{{ cli.addVisit }}" class="btn btn-secondary" style="min-height:44px;font-size:15px;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M5 12h14M12 5v14"></path></svg><span>Registrar 1 visita</span></button>
+                      <sc-if value="{{ cli.canClaim }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ cli.claim }}" class="btn btn-primary" style="min-height:44px;font-size:15px;color:#0f172a">★ Canjear 20% de descuento</button></sc-if>
+                      <span style="margin-left:auto;font-size:14px;color:var(--muted)">Ciclo <strong style="color:var(--color-text)">#{{ cli.cycle }}</strong> · Canjeados <strong style="color:var(--color-text)">{{ cli.claimed }}</strong></span>
+                    </div>
+                    <sc-if value="{{ cli.msg }}" hint-placeholder-val="{{ false }}"><div style="{{ cli.msgStyle }}">{{ cli.msg }}</div></sc-if>
+                  </section>
+                  <section style="display:flex;flex-direction:column;gap:12px;border-top:2px solid var(--color-text);padding-top:16px">
+                    <h3 style="margin:0;font-size:18px;font-weight:800">Mensajería por WhatsApp</h3>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                      <button type="button" onClick="{{ cli.sendPromo }}" style="{{ cli.msgBtn }}"><span style="font-weight:800">Enviar promo 20%</span><span style="font-size:13px;color:var(--muted)">Recordatorio de descuento</span></button>
+                      <button type="button" onClick="{{ cli.sendReview }}" style="{{ cli.msgBtn }}"><span style="font-weight:800">Pedir reseña</span><span style="font-size:13px;color:var(--muted)">5 estrellas en Google Maps</span></button>
+                      <button type="button" onClick="{{ cli.sendBack }}" style="{{ cli.msgBtn }}"><span style="font-weight:800">Invitar a volver</span><span style="font-size:13px;color:var(--muted)">Mantenimiento de equipo</span></button>
+                    </div>
+                    <sc-if value="{{ cli.noConsent }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:14px;color:var(--ink-accent)">El cliente descartó promociones. Activa “Acepta promociones” abajo y guarda si pide recibir mensajes.</p></sc-if>
+                  </section>
+                  <section style="display:flex;flex-direction:column;gap:14px;border-top:2px solid var(--color-text);padding-top:16px">
+                    <h3 style="margin:0;font-size:18px;font-weight:800">Datos</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Nombre</label><input class="input" value="{{ cli.first }}" onChange="{{ cli.onFirst }}" style="min-height:46px;font-size:15px"></div>
+                      <div class="field"><label style="font-size:14px;color:var(--muted)">Apellido</label><input class="input" value="{{ cli.last }}" onChange="{{ cli.onLast }}" style="min-height:46px;font-size:15px"></div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                      <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer"><input type="checkbox" checked="{{ cli.consent }}" onChange="{{ cli.onConsent }}" style="accent-color:#f97316;width:18px;height:18px"><span>Acepta promociones</span><span style="{{ cli.consentStyle }}">{{ cli.consentLabel }}</span></label>
+                      <button type="button" onClick="{{ cli.save }}" class="btn btn-primary" style="min-height:44px;color:#0f172a;font-size:15px">Guardar cambios</button>
+                    </div>
+                  </section>
+                  <section style="display:flex;flex-direction:column;border-top:2px solid var(--color-text);padding-top:16px">
+                    <h3 style="margin:0 0 8px;font-size:18px;font-weight:800">Historial de visitas y eventos</h3>
+                    <sc-for list="{{ cli.events }}" as="ev" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:15px">
+                        <span style="{{ ev.dot }}"></span><span style="flex:1;font-weight:600">{{ ev.label }}</span><span style="color:var(--muted);font-size:14px;white-space:nowrap">{{ ev.date }}</span>
+                      </div>
+                    </sc-for>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.showReset }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeReset }}" style="position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.55)">
+              <div onClick="{{ stop }}" style="width:500px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--color-accent);box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:18px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent);font-weight:700">Resetear contraseña</span><h2 style="margin:0;font-size:22px;font-weight:800">{{ resetEmail }}</h2></div>
+                  <button type="button" onClick="{{ closeReset }}" aria-label="Cerrar" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--ink-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Asigna una nueva clave temporal. Las sesiones activas de este usuario se cerrarán y se le pedirá cambiarla al ingresar.</p>
+                <div class="field"><label style="font-size:14px;color:var(--muted)">Nueva contraseña temporal</label><input class="input" type="text" placeholder="Mínimo 6 caracteres" style="min-height:46px;font-size:15px"></div>
+                <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--color-divider);padding-top:18px">
+                  <button type="button" onClick="{{ closeReset }}" class="btn btn-secondary" style="min-height:44px;font-size:15px">Cancelar</button>
+                  <button type="button" onClick="{{ doReset }}" class="btn btn-primary" style="min-height:44px;color:#0f172a;font-size:15px">Asignar clave</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ s.showModal }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:rgba(2,6,23,.55);display:flex;align-items:center;justify-content:center;z-index:10">
+              <form style="width:480px;background:var(--color-bg);color:var(--color-text);border-top:4px solid var(--color-accent);box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:18px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+                  <h2 style="margin:0;font-size:24px;font-weight:800">Crear nuevo personal</h2>
+                  <button type="button" onClick="{{ closeStaffModal }}" aria-label="Cerrar" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);cursor:pointer" style-hover="border-color:var(--color-accent)"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+                </div>
+                <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Crea una cuenta con una contraseña temporal. En su primer ingreso, el sistema le exigirá crear su propia contraseña privada.</p>
+                <div class="field"><label style="font-size:14px">Correo electrónico</label><input class="input" type="email" placeholder="ejemplo@armalytech.com" style="min-height:46px;font-size:15px"></div>
+                <div class="field"><label style="font-size:14px">Contraseña temporal</label><input class="input" type="text" placeholder="Mínimo 6 caracteres" style="min-height:46px;font-size:15px"></div>
+                <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--color-divider);padding-top:18px">
+                  <button type="button" onClick="{{ closeStaffModal }}" class="btn btn-secondary" style="min-height:44px;font-size:15px">Cancelar</button>
+                  <button type="button" onClick="{{ closeStaffModal }}" class="btn btn-primary" style="min-height:44px;color:#0f172a;font-size:15px">Crear personal</button>
+                </div>
+              </form>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-for>
+
+  </div>
+  </div>
+
+  <div style="{{ lightVars }}">
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px;font-family:ui-monospace,Menlo,monospace">
+        <span style="font-size:24px;font-weight:600;color:#0f172a">/ticket/{{ codigo }}</span>
+        <span style="font-size:15px;color:#475569">Vista pública del ticket · cliente · solo modo claro</span>
+      </div>
+      <div style="width:1440px;background:var(--color-bg);color:var(--color-text);box-shadow:0 30px 60px rgba(15,23,42,.18)">
+
+        <div style="background:#0f172a;color:#e2e8f0">
+          <div style="max-width:1280px;margin:0 auto;padding:18px 40px;display:flex;align-items:center;gap:40px">
+            <img src="assets/logoarmalytech.webp" alt="ArmalyTech" style="height:44px">
+            <nav style="display:flex;gap:32px;font-size:16px;font-weight:600">
+              <a href="#" style="color:#cbd5e1" style-hover="color:#fff">Nosotros</a>
+              <a href="#" style="color:#cbd5e1" style-hover="color:#fff">Precios</a>
+              <a href="#" style="color:#cbd5e1" style-hover="color:#fff">Servicios</a>
+              <a href="#" style="color:#cbd5e1" style-hover="color:#fff">Contacto</a>
+            </nav>
+            <a href="tel:+51924548268" style="margin-left:auto;color:#cbd5e1;font-size:16px;font-variant-numeric:tabular-nums" style-hover="color:#fff">+51 924 548 268</a>
+            <a href="#" class="btn btn-primary" style="min-height:46px;padding:0 18px;color:#0f172a;font-size:15px">Solicitar cotización</a>
+          </div>
+        </div>
+
+        <div style="max-width:1280px;margin:0 auto;padding:56px 40px 40px;display:grid;grid-template-columns:7fr 5fr;gap:48px;align-items:end;border-bottom:2px solid var(--color-text)">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <nav style="font-size:15px;color:var(--muted);display:flex;gap:10px" aria-label="Breadcrumb">
+              <a href="#" style="color:var(--muted)">Inicio</a><span>/</span><a href="#" style="color:var(--muted)">Mi ticket</a><span>/</span><span style="color:var(--ink-accent);font-weight:700">{{ codigo }}</span>
+            </nav>
+            <h1 style="margin:0;font-size:80px;font-weight:800;letter-spacing:-.03em;line-height:.95">Estado de tu<br>reparación<span style="color:var(--color-accent)">.</span></h1>
+          </div>
+          <p style="margin:0;font-size:17px;line-height:1.6;color:var(--muted);text-wrap:pretty"><strong style="color:var(--color-text)">Enlace privado.</strong> Guarda esta página: se actualiza sola cuando tu equipo cambia de estado. No necesitas contraseña.</p>
+        </div>
+
+        <main style="max-width:1280px;margin:0 auto;padding:32px 40px 64px;display:flex;flex-direction:column;gap:32px">
+          <sc-if value="{{ mostrarSelector }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px dashed var(--color-divider)">
+              <span style="font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Demo · ver estado</span>
+              <sc-for list="{{ estadoBtns }}" as="eb" hint-placeholder-count="3">
+                <button type="button" onClick="{{ eb.select }}" style="{{ eb.style }}">{{ eb.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <section style="display:grid;grid-template-columns:7fr 5fr;border:2px solid var(--color-text)">
+            <div style="{{ tk.heroStyle }}">
+              <span style="font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase">Ticket {{ codigo }}</span>
+              <h2 style="margin:0;font-size:52px;font-weight:800;letter-spacing:-.02em;line-height:1">{{ tk.titulo }}</h2>
+              <p style="margin:0;font-size:18px;line-height:1.55;max-width:46ch">{{ tk.subtitulo }}</p>
+              <span style="{{ tk.chipStyle }}"><span style="{{ tk.dotStyle }}"></span>{{ tk.etiqueta }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;border-left:2px solid var(--color-text)">
+              <sc-for list="{{ tk.info }}" as="inf" hint-placeholder-count="6">
+                <div style="padding:20px 22px;border-bottom:1px solid var(--color-divider);border-right:1px solid var(--color-divider);display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">{{ inf.label }}</span>
+                  <span style="{{ inf.style }}">{{ inf.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--color-text)">
+            <sc-for list="{{ tk.pasos }}" as="p" hint-placeholder-count="3">
+              <div style="{{ p.cell }}">
+                <div style="{{ p.bar }}"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="{{ p.numStyle }}">{{ p.num }}</span>
+                  <span style="{{ p.marcaStyle }}">{{ p.marca }}</span>
+                </div>
+                <img src="{{ p.icono }}" alt="" style="{{ p.iconoStyle }}">
+                <h3 style="{{ p.tituloStyle }}">{{ p.titulo }}</h3>
+                <p style="{{ p.descStyle }}">{{ p.desc }}</p>
+              </div>
+            </sc-for>
+          </section>
+
+          <sc-if value="{{ tk.hayNota }}" hint-placeholder-val="{{ true }}">
+            <section style="display:grid;grid-template-columns:260px 1fr;border-top:4px solid var(--color-accent);background:var(--color-surface)">
+              <div style="padding:24px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--color-divider)">
+                <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#0f172a;color:#fff;font-size:16px;font-weight:800">JM</span>
+                <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:700">Jhon M.</span><span style="font-size:15px;color:var(--muted)">Técnico asignado</span><span style="font-size:14px;color:var(--muted)">{{ tk.notaFecha }}</span></div>
+              </div>
+              <div style="padding:24px 28px;display:flex;flex-direction:column;gap:10px">
+                <span style="font-size:14px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-accent)">{{ tk.notaTitulo }}</span>
+                <p style="margin:0;font-size:17px;line-height:1.65;max-width:70ch">{{ tk.notaTexto }}</p>
+              </div>
+            </section>
+          </sc-if>
+
+          <section style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--color-text)">
+            <div style="padding:28px 32px 28px 0;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+              <h3 style="margin:0;font-size:24px;font-weight:800">¿Dudas con tu reparación?</h3>
+              <p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted)">Responde este mismo enlace por WhatsApp y te contestamos con el ticket a la vista.</p>
+              <a href="https://api.whatsapp.com/send/?phone=%2B51924548268" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="min-height:50px;padding:0 20px;gap:10px;color:#0f172a;font-size:16px"><img src="assets/redes/whatsapp.svg" alt="" style="width:20px;height:20px"><span>Consultar por WhatsApp</span></a>
+            </div>
+            <div style="padding:28px 0 28px 32px;border-left:2px solid var(--color-divider);display:flex;flex-direction:column;gap:8px">
+              <h3 style="margin:0 0 4px;font-size:24px;font-weight:800">Recoge en tienda</h3>
+              <p style="margin:0;font-size:16px;line-height:1.6">Av. San Borja Norte 1234, San Borja — Lima</p>
+              <p style="margin:0;font-size:16px;line-height:1.6">Lun a Sáb · 10:00 a. m. – 8:00 p. m.</p>
+              <p style="margin:4px 0 0;font-size:15px;color:var(--muted)">Presenta este enlace o tu DNI al recoger el equipo.</p>
+            </div>
+          </section>
+          <p style="margin:0;font-size:14px;color:var(--muted)">Enlace privado del ticket {{ codigo }} · armalytech.com/ticket/{{ codigo }}</p>
+        </main>
+
+        <footer style="background:#020617;color:#cbd5e1;padding:48px 40px 28px">
+          <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:28px;border-bottom:1px solid rgba(226,232,240,.12)">
+            <div style="display:flex;flex-direction:column;gap:16px;max-width:22rem">
+              <img src="assets/logoarmalytech.webp" alt="ArmalyTech" style="height:44px;align-self:flex-start">
+              <p style="margin:0;font-size:15px;line-height:1.55;color:#94a3b8">Reparación de celulares y equipos tecnológicos en Lima. Calidad y garantía en cada servicio.</p>
+              <div style="display:flex;gap:8px">
+                <a href="#" aria-label="Instagram" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:#f97316" style-hover="background:#ea580c"><img src="assets/redes/instagram.svg" alt="" style="width:20px;height:20px;filter:brightness(0)"></a>
+                <a href="#" aria-label="TikTok" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:#f97316" style-hover="background:#ea580c"><img src="assets/redes/tik-tok.svg" alt="" style="width:20px;height:20px;filter:brightness(0)"></a>
+                <a href="#" aria-label="WhatsApp" style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:#f97316" style-hover="background:#ea580c"><img src="assets/redes/whatsapp.svg" alt="" style="width:20px;height:20px;filter:brightness(0)"></a>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><h4 style="margin:0 0 6px;font-size:15px;font-weight:800;color:#fff;padding-bottom:8px;border-bottom:2px solid #f97316;align-self:flex-start">Enlaces útiles</h4><a href="#" style="color:#94a3b8">Nosotros</a><a href="#" style="color:#94a3b8">Servicios</a><a href="#" style="color:#94a3b8">Precios</a><a href="#" style="color:#94a3b8">Redes</a></div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><h4 style="margin:0 0 6px;font-size:15px;font-weight:800;color:#fff;padding-bottom:8px;border-bottom:2px solid #f97316;align-self:flex-start">Servicios</h4><a href="#" style="color:#94a3b8">Cambio de pantalla</a><a href="#" style="color:#94a3b8">Cambio de batería</a><a href="#" style="color:#94a3b8">Puerto de carga</a><a href="#" style="color:#94a3b8">Daño por agua</a></div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><h4 style="margin:0 0 6px;font-size:15px;font-weight:800;color:#fff;padding-bottom:8px;border-bottom:2px solid #f97316;align-self:flex-start">Soporte</h4><a href="#" style="color:#94a3b8">Garantía</a><a href="#" style="color:#94a3b8">Términos</a><a href="#" style="color:#94a3b8">Ayuda</a><a href="#" style="color:#94a3b8">Contacto</a></div>
+          </div>
+          <p style="margin:20px auto 0;max-width:1200px;font-size:14px;color:#64748b">© 2026 ArmalyTech. Todos los derechos reservados.</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;temaInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claro&quot;,&quot;oscuro&quot;],&quot;default&quot;:&quot;claro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Panel&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pendiente&quot;,&quot;trabajando&quot;,&quot;finalizado&quot;],&quot;default&quot;:&quot;trabajando&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ticket&quot;},&quot;codigo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;AT-2X9K4M&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ticket&quot;},&quot;mostrarSelector&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ticket&quot;}}">
+class Component extends DCLogic {
+  state = {
+    dark: null, menu: 'inventario', now: new Date(), showPass: false, email: '', password: '', loginError: '', submitting: false,
+    fcat: 'all', low: false, showArchived: false, sumTab: 'day', staffModal: false, cuentaTab: 'perfil', estado: null,
+    prods: [
+      { id: 'p1', name: 'Pantalla OLED', brand: 'Apple', model: 'iPhone 12', category: 'Pantallas', phones: ['iPhone 12', 'iPhone 12 Pro'], stock: 4, min: 2, cost: 180, price: 320 },
+      { id: 'p2', name: 'Batería', brand: 'Samsung', model: 'EB-BA546', category: 'Baterías', phones: ['Galaxy A54'], stock: 1, min: 3, cost: 45, price: 110 },
+      { id: 'p3', name: 'Puerto de carga USB-C', brand: 'Xiaomi', model: '', category: 'Puertos de carga', phones: ['Redmi Note 12', 'Poco X5', 'Redmi Note 13'], stock: 12, min: 4, cost: 8, price: 35 },
+      { id: 'p4', name: 'Pantalla LCD', brand: 'Samsung', model: '', category: 'Pantallas', phones: ['Galaxy A14', 'Galaxy A24'], stock: 0, min: 2, cost: 60, price: 150 },
+      { id: 'p5', name: 'Batería', brand: 'Apple', model: 'iPhone 11', category: 'Baterías', phones: ['iPhone 11'], stock: 6, min: 2, cost: 55, price: 140 },
+      { id: 'p6', name: 'Mica templada 9D', brand: '', model: 'Genérico', category: 'Accesorios', phones: ['iPhone 13', 'iPhone 14', 'iPhone 15', 'Galaxy S23', 'Galaxy A54'], stock: 40, min: 10, cost: 2.5, price: 15 },
+      { id: 'p7', name: 'Flex de encendido', brand: 'Motorola', model: '', category: 'Flex', phones: ['Moto G52'], stock: 2, min: 2, cost: 12, price: 10 }
+    ],
+    pf: null, movId: null, confirm: null,
+    catData: {
+      marcas: ['Apple', 'Samsung', 'Xiaomi', 'Motorola', 'Honor'],
+      celulares: [['Apple', 'iPhone 11'], ['Apple', 'iPhone 12'], ['Apple', 'iPhone 13'], ['Samsung', 'Galaxy A14'], ['Samsung', 'Galaxy A54'], ['Xiaomi', 'Redmi Note 12']],
+      categorias: ['Pantallas', 'Baterías', 'Puertos de carga', 'Flex', 'Carcasas', 'Accesorios']
+    },
+    catEdit: null, catNew: {},
+    cl: [
+      { id: 'c1', first: 'Andrea', last: 'Salazar', phone: '+51 987 654 321', stamps: 4, consent: true, visits: 4, lastAt: '25 set · 10:12', channel: 'QR', cycle: 1, claimed: 0 },
+      { id: 'c2', first: 'Luis', last: 'Quispe', phone: '+51 912 345 678', stamps: 5, consent: true, visits: 5, lastAt: '25 set · 09:40', channel: 'NFC', cycle: 1, claimed: 0 },
+      { id: 'c3', first: 'María', last: 'Fernández', phone: '+51 956 112 334', stamps: 2, consent: false, visits: 2, lastAt: '23 set · 17:05', channel: 'Manual', cycle: 1, claimed: 0 },
+      { id: 'c4', first: 'Carlos', last: 'Huamán', phone: '+51 944 870 221', stamps: 1, consent: true, visits: 1, lastAt: '22 set · 12:30', channel: 'QR', cycle: 1, claimed: 0 },
+      { id: 'c5', first: 'Rosa', last: 'Mendoza', phone: '+51 998 223 104', stamps: 3, consent: true, visits: 3, lastAt: '20 set · 16:48', channel: 'QR', cycle: 1, claimed: 0 },
+      { id: 'c6', first: 'Diego', last: 'Torres', phone: '+51 933 450 876', stamps: 0, consent: false, visits: 0, lastAt: '—', channel: 'Manual', cycle: 1, claimed: 0 },
+      { id: 'c7', first: 'Valeria', last: 'Rojas', phone: '+51 961 007 452', stamps: 2, consent: true, visits: 7, lastAt: '18 set · 11:20', channel: 'NFC', cycle: 2, claimed: 1 },
+      { id: 'c8', first: 'Jorge', last: 'Paredes', phone: '+51 975 338 690', stamps: 3, consent: false, visits: 3, lastAt: '15 set · 18:02', channel: 'QR', cycle: 1, claimed: 0 }
+    ],
+    clSel: null, clForm: null, clMsg: null, clEvents: {},
+    staffActive: {}, resetId: null
+  };
+
+  componentDidMount() { this.t = setInterval(() => this.setState({ now: new Date() }), 1000); }
+  componentWillUnmount() { clearInterval(this.t); }
+
+  get dark() { return this.state.dark ?? (this.props.temaInicial === 'oscuro'); }
+
+  vars(dark) {
+    const ramp = '--color-accent:#f97316;--color-accent-100:#ffedd5;--color-accent-200:#fed7aa;--color-accent-300:#fdba74;--color-accent-400:#fb923c;--color-accent-500:#f97316;--color-accent-600:#ea580c;--color-accent-700:#c2410c;--color-accent-800:#9a3412;--color-accent-900:#7c2d12;';
+    return ramp + (dark
+      ? '--color-bg:#0f172a;--color-surface:#1e293b;--color-text:#e2e8f0;--color-divider:rgba(226,232,240,.2);--muted:#94a3b8;--ink-accent:#fdba74;--side-bg:#020617;--side-pop:#0f172a;--danger:#ef4444;--danger-ink:#fca5a5;--danger-bg:rgba(239,68,68,.14);--row-hover:rgba(226,232,240,.06);--shadow-lg:0 0 0 1px rgba(226,232,240,.08),0 18px 44px rgba(0,0,0,.55)'
+      : '--color-bg:#f8fafc;--color-surface:#eef2f7;--color-text:#0f172a;--color-divider:rgba(15,23,42,.2);--muted:#475569;--ink-accent:#c2410c;--side-bg:#0f172a;--side-pop:#1e293b;--danger:#dc2626;--danger-ink:#b91c1c;--danger-bg:#fef2f2;--row-hover:rgba(15,23,42,.05);--shadow-lg:0 16px 40px rgba(15,23,42,.2)');
+  }
+
+  money(n) { return 'S/ ' + (Number(n) || 0).toFixed(2); }
+
+  nav(active) {
+    return 'display:flex;align-items:center;gap:12px;padding:11px 12px;font-size:15px;font-weight:600;text-decoration:none;' +
+      (active ? 'background:rgba(249,115,22,.16);color:#fdba74' : 'color:#cbd5e1');
+  }
+
+  tabStyle(on) {
+    return 'padding:10px 0;margin-bottom:-2px;background:transparent;border:0;border-bottom:3px solid ' + (on ? 'var(--color-accent)' : 'transparent') +
+      ';color:' + (on ? 'var(--color-text)' : 'var(--muted)') + ';font:' + (on ? 700 : 600) + ' 15px var(--font-body);cursor:pointer';
+  }
+
+  hm() { return new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); }
+  updProd(id, patch) { this.setState(s => ({ prods: s.prods.map(p => p.id === id ? Object.assign({}, p, patch) : p) })); }
+  updCl(id, patch) { this.setState(s => ({ cl: s.cl.map(c => c.id === id ? Object.assign({}, c, typeof patch === 'function' ? patch(c) : patch) : c) })); }
+  addEvent(id, label) { this.setState(s => ({ clEvents: Object.assign({}, s.clEvents, { [id]: [{ label, date: 'Hoy · ' + this.hm() }].concat(s.clEvents[id] || []) }) })); }
+
+  addVisit(id) {
+    const c = this.state.cl.find(x => x.id === id);
+    const stamps = Math.min(5, c.stamps + 1);
+    this.updCl(id, { stamps, visits: c.visits + 1, lastAt: 'Hoy · ' + this.hm() });
+    this.addEvent(id, 'Visita registrada · Manual');
+    const msg = stamps === 4 ? { type: 'reward', text: '¡Sello 4 alcanzado! Se envió el recordatorio por WhatsApp para la promo del 20%.' }
+      : stamps === 5 ? { type: 'reward', text: '¡5 sellos acumulados! El 20% de descuento está listo para canjear.' }
+      : { type: 'success', text: 'Visita registrada. Sellos actuales: ' + stamps + '/5.' };
+    if (this.state.clSel === id) this.setState({ clMsg: msg });
+  }
+
+  runConfirm() {
+    const c = this.state.confirm;
+    if (!c) return;
+    if (c.kind === 'archive') this.updProd(c.id, { archived: true });
+    if (c.kind === 'catDel') this.setState(s => ({ catData: Object.assign({}, s.catData, { [c.panel]: s.catData[c.panel].filter((_, i) => i !== c.index) }) }));
+    if (c.kind === 'staff') this.setState(s => ({ staffActive: Object.assign({}, s.staffActive, { [c.id]: !c.active }) }));
+    this.setState({ confirm: null });
+  }
+
+  renderVals() {
+    const dark = this.dark;
+    const S = this.state;
+    const set = (o) => () => this.setState(o);
+    const openConfirm = (c) => this.setState({ confirm: c });
+
+    const lima = (o) => new Intl.DateTimeFormat('es-PE', Object.assign({ timeZone: 'America/Lima' }, o)).format(S.now);
+    const clockTime = lima({ hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const clockDate = lima({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const defs = [
+      { key: 'inventario', route: '/admin/inventario', caption: 'Productos · clic en editar, movimientos o archivar', crumb: 'Inventario', nav: 'inv' },
+      { key: 'catalogo', route: '/admin/inventario', caption: 'Catálogo · renombrar, eliminar y agregar', crumb: 'Inventario / Catálogo', nav: 'inv' },
+      { key: 'historial', route: '/admin/historial', caption: 'Cierre de caja diario + resumen', crumb: 'Historial de caja', nav: 'his' },
+      { key: 'clientes', route: '/admin/clientes', caption: 'Clic en un cliente para ver su detalle', crumb: 'Clientes', nav: 'cli' },
+      { key: 'personal', route: '/admin/personal', caption: 'Solo owner · nuevo, resetear clave, activar/desactivar', crumb: 'Personal', nav: 'per' },
+      { key: 'cuenta', route: '/admin/cuenta', caption: 'Perfil y Configuración (desde el menú de usuario)', crumb: 'Mi cuenta', nav: 'cue' }
+    ];
+    const screens = defs.map(d => ({
+      route: d.route, caption: d.caption, crumb: d.key === 'cuenta' ? 'Mi cuenta / ' + (S.cuentaTab === 'perfil' ? 'Perfil' : 'Configuración') : d.crumb,
+      navInv: this.nav(d.nav === 'inv'), navHis: this.nav(d.nav === 'his'), navCli: this.nav(d.nav === 'cli'), navPer: this.nav(d.nav === 'per'),
+      isInv: d.key === 'inventario', isCat: d.key === 'catalogo', isHis: d.key === 'historial', isCli: d.key === 'clientes', isPer: d.key === 'personal', isCue: d.key === 'cuenta',
+      showModal: d.key === 'personal' && S.staffModal,
+      showPf: d.key === 'inventario' && !!S.pf,
+      showMov: d.key === 'inventario' && !!S.movId,
+      showConfirm: !!S.confirm && S.confirm.screen === d.key,
+      showCl: d.key === 'clientes' && !!S.clSel,
+      showReset: d.key === 'personal' && !!S.resetId,
+      menuOpen: S.menu === d.key,
+      toggleMenu: () => this.setState({ menu: S.menu === d.key ? null : d.key }),
+      goPerfil: () => this.setState({ cuentaTab: 'perfil', menu: null }),
+      goConfig: () => this.setState({ cuentaTab: 'config', menu: null }),
+      logout: () => this.setState({ menu: null })
+    }));
+
+    const cats = [['all', 'Todas'], ['Pantallas', 'Pantallas'], ['Baterías', 'Baterías'], ['Puertos de carga', 'Puertos de carga'], ['Accesorios', 'Accesorios'], ['Flex', 'Flex']];
+    const chipBase = 'display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;font:600 14px var(--font-body);cursor:pointer;border:1px solid var(--color-divider);';
+    const chips = cats.map(([k, l]) => ({ label: l, select: set({ fcat: k }),
+      style: chipBase + (S.fcat === k ? 'background:var(--color-text);color:var(--color-bg);border-color:var(--color-text)' : 'background:transparent;color:var(--color-text)') }));
+    const lowChip = chipBase + (S.low ? 'background:var(--danger-bg);color:var(--danger-ink);border-color:var(--danger)' : 'background:transparent;color:var(--color-text)');
+
+    const products = S.prods.map(p => {
+      const profit = p.price - p.cost;
+      const hide = (S.fcat !== 'all' && S.fcat !== p.category) || (S.low && p.stock > p.min) || (p.archived && !S.showArchived);
+      return { name: p.name, sub: [p.brand, p.model].filter(Boolean).join(' · ') || '—', category: p.category,
+        phones: p.phones.slice(0, 2), more: p.phones.length > 2 ? '+' + (p.phones.length - 2) : '',
+        stock: p.stock, low: p.stock <= p.min && !p.archived, archived: !!p.archived,
+        rowStyle: hide ? 'display:none' : p.archived ? 'opacity:.55' : '',
+        actsStyle: p.archived ? 'display:none' : 'display:flex;justify-content:flex-end;gap:4px',
+        cost: this.money(p.cost), price: this.money(p.price), profit: this.money(profit),
+        profitStyle: 'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;color:' + (profit < 0 ? 'var(--danger-ink)' : 'var(--color-text)'),
+        dec: () => this.updProd(p.id, { stock: Math.max(0, p.stock - 1) }),
+        inc: () => this.updProd(p.id, { stock: p.stock + 1 }),
+        edit: () => this.setState({ pf: { mode: 'edit', id: p.id, name: p.name, brand: p.brand, model: p.model, category: p.category, stock: String(p.stock), cost: String(p.cost), price: String(p.price), min: String(p.min), phones: p.phones.slice(), error: '' } }),
+        mov: () => this.setState({ movId: p.id }),
+        archive: () => openConfirm({ screen: 'inventario', kind: 'archive', id: p.id, danger: true, title: 'Archivar producto', message: 'Se archivará "' + p.name + '". Podrás restaurarlo marcando "Archivados".', label: 'Archivar' }),
+        restore: () => this.updProd(p.id, { archived: false }) };
+    });
+
+    let pf = null;
+    if (S.pf) {
+      const f = S.pf;
+      const fld = (k) => (ev) => { const v = ev.target.value; this.setState(s => ({ pf: Object.assign({}, s.pf, { [k]: v, error: '' }) })); };
+      const pr = (Number(f.price) || 0) - (Number(f.cost) || 0);
+      pf = Object.assign({}, f, {
+        isEdit: f.mode === 'edit', isCreate: f.mode !== 'edit',
+        kicker: f.mode === 'edit' ? 'Inventario · editar' : 'Inventario · nuevo',
+        title: f.mode === 'edit' ? 'Editar producto' : 'Nuevo producto',
+        saveLabel: f.mode === 'edit' ? 'Guardar cambios' : 'Crear producto',
+        stockLabel: f.mode === 'edit' ? 'Stock' : 'Stock inicial',
+        nameStyle: 'min-height:46px;font-size:15px;' + (f.error ? 'border-color:var(--danger)' : ''),
+        onName: fld('name'), onModel: fld('model'), onCategory: fld('category'), onBrand: fld('brand'), onStock: fld('stock'), onCost: fld('cost'), onPrice: fld('price'), onMin: fld('min'),
+        profit: this.money(pr),
+        profitStyle: 'font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:' + (pr < 0 ? 'var(--danger-ink)' : 'var(--ink-accent)'),
+        margin: (Number(f.price) > 0 ? Math.round(pr / Number(f.price) * 100) : 0) + ' %',
+        phones: f.phones.map(n => ({ name: n, remove: () => this.setState(s => ({ pf: Object.assign({}, s.pf, { phones: s.pf.phones.filter(x => x !== n) }) })) })),
+        onAddPhone: (ev) => { const v = ev.target.value; if (v) this.setState(s => ({ pf: Object.assign({}, s.pf, { phones: s.pf.phones.includes(v) ? s.pf.phones : s.pf.phones.concat(v) }) })); },
+        save: () => {
+          if (!f.name.trim()) { this.setState({ pf: Object.assign({}, f, { error: 'El nombre es obligatorio' }) }); return; }
+          const data = { name: f.name.trim(), brand: f.brand, model: f.model.trim(), category: f.category, cost: Number(f.cost) || 0, price: Number(f.price) || 0, min: parseInt(f.min, 10) || 0, phones: f.phones };
+          if (f.mode === 'edit') this.updProd(f.id, data);
+          else this.setState(s => ({ prods: [Object.assign({ id: 'n' + Date.now(), stock: parseInt(f.stock, 10) || 0 }, data)].concat(s.prods) }));
+          this.setState({ pf: null });
+        }
+      });
+    }
+
+    let mov = null;
+    if (S.movId) {
+      const p = S.prods.find(x => x.id === S.movId);
+      const M = [['25 set · 10:14', 'Venta', -1, 'Mostrador', 'Karla R.'], ['24 set · 17:40', 'Salida', -1, 'Ticket AT-2X9K4M', 'Jhon M.'], ['23 set · 12:02', 'Entrada', 5, 'Compra a proveedor', 'Jhon M.'], ['20 set · 09:30', 'Devolución', 1, 'Garantía', 'Pedro V.'], ['18 set · 15:22', 'Venta', -2, 'Mostrador', 'Karla R.'], ['15 set · 11:05', 'Salida', -1, 'Ajuste por merma', 'Jhon M.']];
+      let cur = p.stock;
+      mov = { title: p.name + (p.model ? ' · ' + p.model : ''), rows: M.map(([date, type, q, reason, user]) => {
+        const r = { date, type, reason, user, qty: (q > 0 ? '+' : '') + q, after: Math.max(0, cur),
+          qtyStyle: 'text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:' + (q > 0 ? 'var(--ink-accent)' : 'var(--danger-ink)') };
+        cur -= q; return r;
+      }) };
+    }
+
+    const confirm = S.confirm ? Object.assign({}, S.confirm, {
+      run: () => this.runConfirm(),
+      boxStyle: 'width:500px;background:var(--color-bg);color:var(--color-text);border-top:4px solid ' + (S.confirm.danger ? 'var(--danger)' : 'var(--color-accent)') + ';box-shadow:var(--shadow-lg);padding:28px;display:flex;flex-direction:column;gap:20px',
+      iconStyle: 'width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;' + (S.confirm.danger ? 'background:var(--danger-bg);color:var(--danger-ink)' : 'background:var(--color-accent-100);color:#9a3412'),
+      btnStyle: 'min-height:44px;padding:0 18px;border:0;font:700 15px var(--font-body);cursor:pointer;' + (S.confirm.danger ? 'background:var(--danger);color:#fff' : 'background:var(--color-accent);color:#0f172a')
+    }) : null;
+
+    const panelStyle = (i) => 'padding:22px ' + (i === 2 ? '0' : '24px') + ' 22px ' + (i === 0 ? '0' : '24px') + ';display:flex;flex-direction:column;gap:14px;min-width:0;' + (i > 0 ? 'border-left:2px solid var(--color-divider)' : '');
+    const panels = [['marcas', 'Marcas', 'la marca', 'marcas', 'Nueva marca', false], ['celulares', 'Celulares', 'el celular', 'modelos', 'Nuevo modelo (ej. Galaxy A55)', true], ['categorias', 'Categorías', 'la categoría', 'categorías', 'Nueva categoría', false]];
+    const catalog = panels.map(([key, title, one, many, placeholder, hasFilter], pi) => {
+      const list = S.catData[key];
+      return { title, placeholder, hasFilter, style: panelStyle(pi), count: list.length + ' ' + many,
+        newVal: S.catNew[key] || '',
+        onNew: (ev) => { const v = ev.target.value; this.setState(s => ({ catNew: Object.assign({}, s.catNew, { [key]: v }) })); },
+        add: () => { const v = (S.catNew[key] || '').trim(); if (!v) return;
+          this.setState(s => ({ catData: Object.assign({}, s.catData, { [key]: s.catData[key].concat([key === 'celulares' ? ['Nuevo', v] : v]) }), catNew: Object.assign({}, s.catNew, { [key]: '' }) })); },
+        items: list.map((it, i) => {
+          const name = Array.isArray(it) ? it[1] : it;
+          const editing = !!S.catEdit && S.catEdit.key === key && S.catEdit.i === i;
+          return { pre: Array.isArray(it) ? it[0] : '', name, editing, viewing: !editing,
+            editVal: editing ? S.catEdit.val : name,
+            onEditVal: (ev) => { const v = ev.target.value; this.setState(s => ({ catEdit: Object.assign({}, s.catEdit, { val: v }) })); },
+            startEdit: () => this.setState({ catEdit: { key, i, val: name } }),
+            cancel: () => this.setState({ catEdit: null }),
+            save: () => this.setState(s => {
+              const v = s.catEdit.val.trim() || name;
+              const arr = s.catData[key].map((x, j) => j !== i ? x : (Array.isArray(x) ? [x[0], v] : v));
+              return { catData: Object.assign({}, s.catData, { [key]: arr }), catEdit: null };
+            }),
+            del: () => openConfirm({ screen: 'catalogo', kind: 'catDel', panel: key, index: i, danger: true, title: 'Eliminar ' + one.split(' ')[1], message: 'Se eliminará "' + name + '" del catálogo. Esta acción no se puede deshacer.', label: 'Eliminar' }) };
+        }) };
+    });
+
+    const R = [
+      ['50.00', '', 'Cambio pantalla Galaxy A14', '', '', '', 'Guardado'],
+      ['', '120.00', 'Batería iPhone 11', '', '', '', 'Guardado'],
+      ['35.00', '', 'Mica + instalación', '', '', '', 'Guardado'],
+      ['', '', '', '25.00', '', 'Movilidad proveedor', 'Guardado'],
+      ['180.00', '140.00', 'Pantalla iPhone 12 (adelanto)', '', '60.00', 'Compra repuesto Xiaomi', 'Guardando…'],
+      ['', '', '', '', '', '', '']
+    ];
+    const rows = R.map((r, i) => ({ n: i + 1, ci: r[0], yi: r[1], di: r[2], ce: r[3], ye: r[4], de: r[5], status: r[6],
+      yiStyle: 'padding:11px 12px;border-right:1px solid var(--color-divider);text-align:right;' + (i === 4 ? 'outline:2px solid var(--color-accent);outline-offset:-2px;background:color-mix(in srgb,var(--color-accent) 10%,transparent);font-weight:700' : ''),
+      statusStyle: 'padding:11px 12px;font-size:14px;font-weight:600;color:' + (r[6] === 'Guardando…' ? 'var(--ink-accent)' : 'var(--muted)') }));
+
+    const sums = {
+      day: { title: 'Resumen del día', range: clockDate, net: 'S/ 440.00', gross: 'S/ 525.00', blocks: [['Efectivo', 265, 25], ['Yape / Plin', 260, 60]] },
+      week: { title: 'Semana', range: '22 – 28 set 2026', net: 'S/ 2,184.50', gross: 'S/ 2,760.00', blocks: [['Efectivo', 1480, 312.5], ['Yape / Plin', 1280, 263]] },
+      month: { title: 'Mes', range: 'Setiembre 2026', net: 'S/ 8,912.00', gross: 'S/ 11,340.00', blocks: [['Efectivo', 6120, 1418], ['Yape / Plin', 5220, 1010]] }
+    };
+    const sm = sums[S.sumTab];
+    const sum = { title: sm.title, range: sm.range, net: sm.net, gross: sm.gross,
+      blocks: sm.blocks.map(([t, a, b]) => ({ title: t, inc: this.money(a), exp: this.money(b), total: this.money(a - b) })) };
+    const sumTabs = [['day', 'Día'], ['week', 'Semana'], ['month', 'Mes']].map(([k, l], i) => ({ label: l, select: set({ sumTab: k }),
+      style: 'height:40px;border:0;' + (i ? 'border-left:1px solid var(--color-divider);' : '') + 'font:700 14px var(--font-body);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;' +
+        (S.sumTab === k ? 'background:var(--color-accent);color:#0f172a' : 'background:transparent;color:var(--muted)') }));
+
+    const smallStamps = (st) => [1, 2, 3, 4, 5].map(n => {
+      const f = st >= n, tgt = n === 5;
+      return { glyph: tgt ? (f ? '★' : '5') : (f ? '✓' : n),
+        style: 'width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;' +
+          (tgt && f ? 'background:var(--color-text);color:var(--color-accent)' : f ? 'background:var(--color-accent);color:#0f172a' : tgt ? 'border:1px dashed var(--color-accent);color:var(--ink-accent)' : 'border:1px solid var(--color-divider);color:var(--muted)') };
+    });
+    const consentTag = (ok) => 'font-size:13px;font-weight:700;padding:3px 8px;white-space:nowrap;' + (ok ? 'background:var(--color-accent-100);color:#9a3412' : 'border:1px solid var(--color-divider);color:var(--muted)');
+    const clients = S.cl.map(c => { const st = c.stamps; return {
+      name: c.first + ' ' + c.last, phone: c.phone, visits: c.visits, last: c.lastAt, channel: c.channel,
+      rowStyle: 'cursor:pointer;' + (S.clSel === c.id ? 'background:color-mix(in srgb,var(--color-accent) 12%,transparent)' : ''),
+      consent: c.consent ? 'Aprobó' : 'Descartó', consentStyle: consentTag(c.consent),
+      stampLabel: st >= 5 ? '20% OFF' : st === 4 ? '¡A 1 visita!' : st + '/5',
+      stampLabelStyle: 'font-size:14px;white-space:nowrap;font-weight:' + (st >= 4 ? 800 : 500) + ';color:' + (st >= 4 ? 'var(--ink-accent)' : 'var(--muted)'),
+      stamps: smallStamps(st),
+      open: () => this.setState({ clSel: c.id, clForm: { first: c.first, last: c.last, consent: c.consent }, clMsg: null }),
+      addVisit: (ev) => { ev.stopPropagation(); this.addVisit(c.id); } }; });
+
+    let cli = null;
+    const sel = S.cl.find(x => x.id === S.clSel);
+    if (sel && S.clForm) {
+      const st = sel.stamps, F = S.clForm;
+      const send = (label) => () => {
+        if (!sel.consent) { this.setState({ clMsg: { type: 'error', text: 'El cliente no ha aprobado el envío de promociones/mensajes.' } }); return; }
+        this.addEvent(sel.id, 'WhatsApp enviado · ' + label);
+        this.setState({ clMsg: { type: 'success', text: 'WhatsApp abierto con el mensaje "' + label + '" y evento registrado.' } });
+      };
+      const D = ['25 set · 10:12', '12 set · 16:30', '28 ago · 11:05', '09 ago · 18:20', '21 jul · 10:45', '02 jul · 13:10', '15 jun · 12:00'];
+      const base = [];
+      for (let i = 0; i < Math.min(sel.visits, 5); i++) base.push({ label: 'Visita registrada · ' + sel.channel, date: D[i] });
+      if (sel.claimed) base.splice(1, 0, { label: 'Premio 20% canjeado', date: D[1] });
+      base.push({ label: 'Registro en la comunidad · ' + sel.channel, date: D[Math.min(sel.visits, 5)] || D[6] });
+      const events = (S.clEvents[sel.id] || []).concat(base).slice(0, 7).map((e, i) => Object.assign({}, e, {
+        dot: 'width:10px;height:10px;flex:none;background:' + (i === 0 ? 'var(--color-accent)' : 'var(--color-divider)') }));
+      const msgColors = { success: 'border-top:2px solid var(--color-text);background:var(--color-surface);color:var(--color-text)', reward: 'border-top:2px solid var(--color-accent);background:var(--color-accent-100);color:#7c2d12;font-weight:700', error: 'border-top:2px solid var(--danger);background:var(--danger-bg);color:var(--danger-ink)' };
+      cli = {
+        initials: (sel.first[0] || '') + (sel.last[0] || ''), name: sel.first + ' ' + sel.last, phone: sel.phone, channel: sel.channel,
+        count: st + ' / 5 sellos', cycle: sel.cycle, claimed: sel.claimed, canClaim: st >= 5,
+        badge: st >= 5 ? '¡20% OFF desbloqueado!' : st === 4 ? '¡A 1 visita del premio!' : '',
+        loyaltyText: st >= 5 ? 'Completó 5 visitas. Puede canjear su 20% de descuento en esta reparación.' : st === 4 ? 'Se envió recordatorio por WhatsApp. En su próxima visita gana 20% de descuento.' : 'Acumula 5 visitas de reparación o servicio para ganar 20% de descuento.',
+        stamps: [1, 2, 3, 4, 5].map(n => {
+          const f = st >= n, tgt = n === 5;
+          return { glyph: tgt ? (f ? '★' : '5') : (f ? '✓' : String(n)), sub: tgt ? '20%' : 'Visita ' + n,
+            style: 'height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;' +
+              (tgt && f ? 'background:var(--color-text);color:var(--color-accent)' : f ? 'background:var(--color-accent);color:#0f172a' : tgt ? 'border:2px dashed var(--color-accent);color:var(--ink-accent)' : 'border:1px solid var(--color-divider);color:var(--muted)') };
+        }),
+        addVisit: () => this.addVisit(sel.id),
+        claim: () => { this.updCl(sel.id, c => ({ stamps: 0, cycle: c.cycle + 1, claimed: c.claimed + 1 })); this.addEvent(sel.id, 'Premio 20% canjeado'); this.setState({ clMsg: { type: 'reward', text: '¡Premio de 20% canjeado! El ciclo de sellos se reinició a 0.' } }); },
+        msg: S.clMsg ? S.clMsg.text : '', msgStyle: 'padding:12px 14px;font-size:15px;' + (S.clMsg ? msgColors[S.clMsg.type] : ''),
+        noConsent: !sel.consent,
+        msgBtn: 'display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px;text-align:left;background:transparent;border:1px solid var(--color-divider);color:var(--color-text);font:15px var(--font-body);' + (sel.consent ? 'cursor:pointer' : 'opacity:.45;cursor:not-allowed'),
+        sendPromo: send('Promo 20%'), sendReview: send('Reseña Google Maps'), sendBack: send('Invitar a volver'),
+        first: F.first, last: F.last, consent: F.consent, consentLabel: F.consent ? 'Aprobó' : 'Descartó', consentStyle: consentTag(F.consent),
+        onFirst: (ev) => { const v = ev.target.value; this.setState(s => ({ clForm: Object.assign({}, s.clForm, { first: v }) })); },
+        onLast: (ev) => { const v = ev.target.value; this.setState(s => ({ clForm: Object.assign({}, s.clForm, { last: v }) })); },
+        onConsent: (ev) => { const v = ev.target.checked; this.setState(s => ({ clForm: Object.assign({}, s.clForm, { consent: v }) })); },
+        save: () => { this.updCl(sel.id, { first: F.first.trim() || sel.first, last: F.last.trim() || sel.last, consent: F.consent }); this.setState({ clMsg: { type: 'success', text: 'Cambios guardados.' } }); },
+        events
+      };
+    }
+
+    const MS = [
+      ['m1', 'JM', 'jhon@armalytech.com', 'owner', true, false, true, 'Sistema (Bootstrap)', '02/03/2026'],
+      ['m2', 'KR', 'karla@armalytech.com', 'admin', true, false, false, 'Jhon M.', '14/05/2026'],
+      ['m3', 'PV', 'pedro@armalytech.com', 'admin', true, true, false, 'Jhon M.', '19/09/2026'],
+      ['m4', 'SL', 'sofia@armalytech.com', 'admin', false, false, false, 'Jhon M.', '08/01/2026']
+    ];
+    const staff = MS.map(([id, initials, email, role, active0, temp, self, createdBy, date]) => {
+      const active = S.staffActive[id] ?? active0;
+      return { initials, email, temp, self, createdBy, date,
+        role: role === 'owner' ? 'Principal (Owner)' : 'Personal (Admin)',
+        roleStyle: 'font-size:13px;font-weight:700;padding:3px 8px;white-space:nowrap;' + (role === 'owner' ? 'background:var(--color-accent);color:#0f172a' : 'border:1px solid var(--color-divider)'),
+        status: active ? 'Activo' : 'Inactivo',
+        dotStyle: 'width:9px;height:9px;background:' + (active ? 'var(--color-text)' : 'var(--danger)'),
+        rowStyle: active ? '' : 'opacity:.7',
+        canToggle: !self,
+        toggleLabel: active ? 'Desactivar' : 'Activar',
+        toggleStyle: 'min-height:36px;padding:0 12px;white-space:nowrap;font:700 14px var(--font-body);cursor:pointer;background:transparent;border:1px solid ' + (active ? 'var(--danger);color:var(--danger-ink)' : 'var(--color-divider);color:var(--color-text)'),
+        reset: () => this.setState({ resetId: email }),
+        toggle: () => openConfirm({ screen: 'personal', kind: 'staff', id, active, danger: active,
+          title: active ? 'Desactivar personal' : 'Activar personal',
+          message: active ? '¿Estás seguro de desactivar a ' + email + '? No podrá iniciar sesión y sus sesiones activas serán revocadas.' : '¿Deseas reactivar el acceso para ' + email + '?',
+          label: active ? 'Desactivar' : 'Activar' }) };
+    });
+
+    const opt = (on) => 'display:flex;flex-direction:column;gap:10px;padding:12px;background:transparent;color:var(--color-text);cursor:pointer;text-align:left;font-family:var(--font-body);border:2px solid ' + (on ? 'var(--color-accent)' : 'var(--color-divider)');
+
+    const e = S.estado || this.props.estado || 'trabajando';
+    const idx = { pendiente: 0, trabajando: 1, finalizado: 2 }[e];
+    const fin = e === 'finalizado';
+    const hero = { pendiente: 'background:var(--color-surface);color:var(--color-text)', trabajando: 'background:#f97316;color:#0f172a', finalizado: 'background:#0f172a;color:#fff' }[e];
+    const PD = [
+      ['Pendiente', 'assets/trabajamos/primero.svg', 'Equipo recibido, registrado y guardado con tu ticket. En cola para diagnóstico.', ['08 set · 10:24 a. m.', '08 set · 10:24 a. m.', '08 set · 10:24 a. m.']],
+      ['Trabajando', 'assets/trabajamos/segundo.svg', 'El técnico desmonta el equipo, coloca la pantalla nueva y prueba táctil, sensores y cámara frontal.', ['En espera', 'En curso', '09 set · 09:10 a. m.']],
+      ['Finalizado', 'assets/trabajamos/tercero.svg', 'Reparación probada y lista para recoger, con 90 días de garantía sobre el repuesto.', ['En espera', 'En espera', '09 set · 04:35 p. m.']]
+    ];
+    const pasos = PD.map(([titulo, icono, desc, marcas], i) => {
+      const done = i < idx || (fin && i === idx), act = i === idx && !fin, on = done || act;
+      return { titulo, icono, desc, num: '0' + (i + 1), marca: marcas[idx],
+        cell: 'position:relative;padding:28px ' + (i === 2 ? '0' : '28px') + ' 28px ' + (i === 0 ? '0' : '28px') + ';display:flex;flex-direction:column;gap:14px;' + (i ? 'border-left:1px solid var(--color-divider)' : ''),
+        bar: 'position:absolute;left:0;right:0;top:-2px;height:4px;background:' + (done ? '#0f172a' : act ? '#f97316' : 'transparent'),
+        numStyle: 'font-size:36px;font-weight:800;letter-spacing:-.02em;color:' + (on ? 'var(--color-text)' : 'var(--muted)'),
+        marcaStyle: 'font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;' + (act ? 'background:#f97316;color:#0f172a' : done ? 'background:#0f172a;color:#fff' : 'border:1px solid var(--color-divider);color:var(--muted)'),
+        iconoStyle: 'width:56px;height:56px;object-fit:contain;' + (on ? '' : 'opacity:.35;filter:grayscale(1)'),
+        tituloStyle: 'margin:0;font-size:24px;font-weight:800;color:' + (on ? 'var(--color-text)' : 'var(--muted)'),
+        descStyle: 'margin:0;font-size:16px;line-height:1.6;color:' + (on ? 'var(--color-text)' : 'var(--muted)') };
+    });
+    const nota = {
+      pendiente: null,
+      trabajando: { t: 'Hubo una complicación', f: '09 set · 11:42 a. m.', x: 'Al abrir el equipo encontramos el marco ligeramente doblado por el golpe, así que hay que enderezarlo antes de montar la pantalla nueva. Esto suma medio día de trabajo, sin costo extra para ti. Nueva entrega estimada: mañana 10 de setiembre por la tarde.' },
+      finalizado: { t: 'Nota del técnico', f: '09 set · 04:35 p. m.', x: 'Pantalla original cambiada y probada: táctil, True Tone, sensor de proximidad y cámara frontal funcionando. Enderezamos el marco sin costo. Tu equipo te espera en tienda con 90 días de garantía.' }
+    }[e];
+    const valStyle = (accent) => 'font-size:17px;font-weight:700;' + (accent ? 'color:var(--ink-accent)' : '');
+    const tk = {
+      heroStyle: 'padding:36px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;' + hero,
+      titulo: { pendiente: 'Recibimos tu equipo.', trabajando: 'Tu equipo está en reparación.', finalizado: 'Tu equipo está listo.' }[e],
+      subtitulo: { pendiente: 'Está registrado y en cola de diagnóstico. Te avisamos apenas un técnico lo tome.', trabajando: 'Un técnico está trabajando en el cambio de pantalla. Esta página se actualiza sola.', finalizado: 'Reparación terminada y probada. Puedes recogerlo en tienda cuando quieras.' }[e],
+      etiqueta: { pendiente: 'Pendiente', trabajando: 'Trabajando', finalizado: 'Finalizado' }[e],
+      chipStyle: 'display:inline-flex;align-items:center;gap:10px;padding:8px 14px;font-size:15px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;' +
+        { pendiente: 'border:2px solid #0f172a', trabajando: 'background:#0f172a;color:#fff', finalizado: 'background:#f97316;color:#0f172a' }[e],
+      dotStyle: 'width:10px;height:10px;background:' + { pendiente: '#64748b', trabajando: '#f97316', finalizado: '#0f172a' }[e] + (e === 'trabajando' ? ';animation:at-pulse 1.4s ease-in-out infinite' : ''),
+      info: [
+        { label: 'Cliente', value: 'Andrea Salazar' }, { label: 'Equipo', value: 'iPhone 12 · Negro' },
+        { label: 'Servicio', value: 'Cambio de pantalla' }, { label: 'Ingreso', value: '08 set · 10:24 a. m.' },
+        { label: fin ? 'Listo desde' : 'Entrega estimada', value: { pendiente: '09 set · fin del día', trabajando: '10 set · por la tarde', finalizado: '09 set · 04:35 p. m.' }[e], accent: e !== 'pendiente' },
+        { label: 'Costo acordado', value: 'S/ 189.00' }
+      ].map(i => ({ label: i.label, value: i.value, style: valStyle(i.accent) })),
+      pasos, hayNota: !!nota, notaTitulo: nota && nota.t, notaFecha: nota && nota.f, notaTexto: nota && nota.x
+    };
+    const estadoBtns = ['pendiente', 'trabajando', 'finalizado'].map(k => ({ label: k[0].toUpperCase() + k.slice(1), select: set({ estado: k }),
+      style: 'height:36px;padding:0 14px;font:700 14px var(--font-body);cursor:pointer;border:1px solid ' + (e === k ? '#0f172a;background:#0f172a;color:#fff' : 'var(--color-divider);background:transparent;color:var(--color-text)') }));
+
+    return {
+      dark, light: !dark, themeLabel: dark ? 'Modo claro' : 'Modo oscuro',
+      toggleTheme: () => this.setState({ dark: !dark }),
+      themeVars: this.vars(dark), lightVars: this.vars(false),
+      switchTrack: 'margin-left:auto;width:34px;height:18px;padding:2px;display:flex;background:' + (dark ? '#f97316' : 'rgba(226,232,240,.25)') + ';justify-content:' + (dark ? 'flex-end' : 'flex-start'),
+      switchKnob: 'width:14px;height:14px;background:' + (dark ? '#0f172a' : '#e2e8f0'),
+      clockTime, clockDate,
+      email: S.email, password: S.password, passType: S.showPass ? 'text' : 'password',
+      onEmail: (ev) => this.setState({ email: ev.target.value, loginError: '' }),
+      onPassword: (ev) => this.setState({ password: ev.target.value, loginError: '' }),
+      togglePass: () => this.setState({ showPass: !S.showPass }),
+      loginError: S.loginError, loginLabel: S.submitting ? 'Ingresando…' : 'Ingresar',
+      submitLogin: (ev) => {
+        ev.preventDefault();
+        if (!S.email || !S.password) { this.setState({ loginError: 'Ingresa tu correo y contraseña.' }); return; }
+        this.setState({ submitting: true });
+        setTimeout(() => this.setState({ submitting: false, loginError: 'Correo o contraseña incorrectos.' }), 1200);
+      },
+      stop: (ev) => ev.stopPropagation(),
+      screens, chips, lowChip, toggleLow: set({ low: !S.low }), products,
+      showArchived: S.showArchived, toggleArchived: set({ showArchived: !S.showArchived }),
+      newProduct: set({ pf: { mode: 'create', name: '', brand: '', model: '', category: 'Pantallas', stock: '0', cost: '', price: '', min: '0', phones: [], error: '' } }),
+      pf, closePf: set({ pf: null }), mov, closeMov: set({ movId: null }), confirm, closeConfirm: set({ confirm: null }),
+      catalog, rows, sum, sumTabs, clients, cli, closeCl: set({ clSel: null, clMsg: null }),
+      staff, openStaffModal: set({ staffModal: true }), closeStaffModal: set({ staffModal: false }),
+      resetEmail: S.resetId, closeReset: set({ resetId: null }), doReset: set({ resetId: null }),
+      cuentaTitle: S.cuentaTab === 'perfil' ? 'Perfil' : 'Configuración',
+      isPerfil: S.cuentaTab === 'perfil', isConfig: S.cuentaTab === 'config',
+      tabPerfil: this.tabStyle(S.cuentaTab === 'perfil'), tabConfig: this.tabStyle(S.cuentaTab === 'config'),
+      goPerfilTab: set({ cuentaTab: 'perfil' }), goConfigTab: set({ cuentaTab: 'config' }),
+      setLight: set({ dark: false }), setDark: set({ dark: true }), optLight: opt(!dark), optDark: opt(dark),
+      codigo: this.props.codigo ?? 'AT-2X9K4M', mostrarSelector: this.props.mostrarSelector ?? true,
+      tk, estadoBtns
+    };
+  }
+}
+</script>
+</body>
+</html>
