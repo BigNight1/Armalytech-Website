@@ -54,10 +54,18 @@ test.describe('Panel: flujo de taller', () => {
       await expect(page.getByRole('heading', { name: 'Aprobar ticket' })).toBeVisible();
       await page.getByRole('button', { name: 'Aprobar y descontar' }).click();
 
-      await expect(drawer.getByText('Aprobado', { exact: true })).toBeVisible();
-      // "Iniciar trabajo" is only offered from `aprobado` (ADR 0007).
+      // Assert on the transition buttons, not on the status label.
+      //
+      // The label is NOT a safe anchor: once the ticket is approved, "Aprobado"
+      // appears twice inside the drawer (the status badge and the timeline
+      // entry), and Playwright's strict mode refuses to pick one. It also raced
+      // in CI, where the timeline repaints before the assertion runs. Which
+      // transition button is offered is a function of the state (ADR 0007), so
+      // it is unambiguous: "Iniciar trabajo" only exists in `aprobado` and
+      // "Marcar como listo" only exists in `trabajando`.
+      await expect(drawer.getByRole('button', { name: 'Iniciar trabajo' })).toBeVisible();
       await drawer.getByRole('button', { name: 'Iniciar trabajo' }).click();
-      await expect(drawer.getByText('En taller', { exact: true })).toBeVisible();
+      await expect(drawer.getByRole('button', { name: 'Marcar como listo' })).toBeVisible();
 
       // Assert — the customer's view, with no session at all.
       const clientContext = await browser.newContext();

@@ -79,3 +79,10 @@ Si agregas tests, **no agregues logins**.
 - Selectores por rol o por `id` estable (`#ticket-codigo`, `#login-email`), no por clases CSS.
 - Un test que falla se investiga; no se relaja la expectativa. Si el flujo cambió a propósito, se
   actualiza el test y se dice por qué en el mensaje del commit.
+- **No ancles aserciones al texto de estado dentro del drawer.** Un estado como "Aprobado" aparece
+  dos veces —el badge y la línea de tiempo— y Playwright en modo estricto falla en vez de elegir;
+  además la línea de tiempo puede repintarse después del badge, así que la aserción se vuelve una
+  carrera (pasó en CI, no en local). Ancla al **botón de transición**, que existe solo en ese estado:
+  "Iniciar trabajo" en `aprobado`, "Marcar como listo" en `trabajando` (ADR 0007).
+- Si un selector puede coincidir con más de un elemento, sé explícito (`.first()`, un `filter`, o un
+  rol con nombre exacto) en vez de confiar en el orden del DOM.
