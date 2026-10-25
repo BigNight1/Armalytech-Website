@@ -12,6 +12,21 @@ import { getDemoTicket } from './fixtures/demoTicket.js';
 import './theme/tokens.css';
 
 /**
+ * How often the public page re-reads the ticket while it is open.
+ *
+ * The page tells the customer "esta página se actualiza sola" (TicketHero
+ * subtitles, `ticketPresenter.js`), so that promise has to be true: the client
+ * leaves the link open on their phone and expects to see the repair advance
+ * without refreshing. Polling is deliberate over SSE here — `/api/events`
+ * requires an admin session (ADR 0028) and this page is anonymous; a 30 s
+ * read of a single document is cheap and needs no server state.
+ *
+ * Overridable so the Playwright suite can assert the refresh without waiting
+ * 30 s (`frontend/.env.e2e` sets it to 2000).
+ */
+const REFRESH_MS = Number(import.meta.env.VITE_TICKET_REFRESH_MS) || 30_000;
+
+/**
  * Public ticket status page — `/ticket/:token` (ADR 0006 `publicToken`,
  * unguessable; the human-readable `codigo`, e.g. "AT-000148", is display-only
  * and never used to look the ticket up). No session, no admin chrome: reuses
@@ -44,22 +59,39 @@ export default function TicketPage() {
     }
 
     let cancelled = false;
-    setStatus('loading');
-    ticketApi
-      .getPublicTicket(token)
-      .then((data) => {
+
+    // `silent` refreshes keep the last good snapshot on screen: a transient
+    // network blip must not replace a valid ticket with the "not found" page.
+    const load = async (silent = false) => {
+      if (!silent) setStatus('loading');
+      try {
+        const data = await ticketApi.getPublicTicket(token);
         if (cancelled) return;
         setTicket(data);
         setStatus('ready');
-      })
-      .catch(() => {
-        // Backend module doesn't exist yet — every real request lands here
-        // today (404/network error alike). See api/ticketApi.js contract.
+      } catch {
         if (cancelled) return;
-        setStatus('notFound');
-      });
+        // Only a first load can become "not found"; a failed background
+        // refresh leaves what the customer is already reading.
+        setStatus((previous) => (previous === 'ready' ? 'ready' : 'notFound'));
+      }
+    };
+
+    load();
+
+    const refresh = () => {
+      if (!document.hidden) load(true);
+    };
+    const intervalId = setInterval(refresh, REFRESH_MS);
+    // Also refresh immediately when the tab becomes visible again: phones
+    // suspend timers in background tabs, so a returning customer would
+    // otherwise keep seeing a stale status for up to REFRESH_MS.
+    document.addEventListener('visibilitychange', refresh);
+
     return () => {
       cancelled = true;
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', refresh);
     };
   }, [token, demoEstado]);
 
