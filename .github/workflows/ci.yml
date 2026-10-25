@@ -1,0 +1,146 @@
+name: CI
+
+# Runs on every push and pull request. Three independent jobs so a frontend-only
+# change does not wait for the backend suite, and vice versa:
+#
+#   backend  – lint (no --fix), build, unit tests, Jest e2e against in-memory Mongo
+#   frontend – lint (--max-warnings 0), production build + prerender
+#   e2e      – the Playwright suite (boots its own backend + Vite dev server)
+#
+# The Playwright job is the one that proves the product works as a product: it
+# drives a real browser through the ticket flow described in PRD.md.
+
+on:
+  push:
+    branches: [main, cambiosNuevos]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '11'
+  # Fail fast if the frontend build ever stops accepting an explicit backend origin.
+  CI: 'true'
+
+jobs:
+  backend:
+    name: Backend (lint · build · unit · e2e)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `pnpm lint` runs eslint with --fix locally; CI must not rewrite files.
+      - name: Lint
+        run: pnpm exec eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: Build
+        run: pnpm build
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: E2E tests (Jest + supertest + mongodb-memory-server)
+        run: pnpm test:e2e
+
+  frontend:
+    name: Frontend (lint · build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      # `pnpm build` = vite build + scripts/prerender.mjs. BACKEND_URL is only
+      # needed by vercel.ts at deploy time, not by the Vite build, so the
+      # placeholder below exists purely so the step documents the requirement.
+      - name: Build
+        run: pnpm build
+        env:
+          BACKEND_URL: ${{ vars.BACKEND_URL || 'https://backend.example.invalid' }}
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    # The suite boots the backend itself; installing both workspaces is enough.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: |
+            backend/pnpm-lock.yaml
+            frontend/pnpm-lock.yaml
+            e2e/pnpm-lock.yaml
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Install E2E dependencies
+        working-directory: e2e
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright suite
+        working-directory: e2e
+        run: pnpm test
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7

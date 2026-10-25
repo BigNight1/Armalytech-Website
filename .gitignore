@@ -3,6 +3,8 @@ node_modules
 .env
 .env.*
 !.env.example
+# The Playwright suite needs this one committed (no secrets, just a port).
+!.env.e2e
 dist
 .claude/worktrees/
 .claude

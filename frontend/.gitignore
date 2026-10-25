@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# Committed on purpose: it points the dev-server proxy at the disposable
+# Playwright backend instead of a developer's `.env` (see e2e/README.md).
+!.env.e2e
