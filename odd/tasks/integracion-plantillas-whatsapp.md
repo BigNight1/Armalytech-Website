@@ -154,7 +154,7 @@ Sección **"WhatsApp"** en `TicketDetailDrawer`:
 | T1 | Backend fase 1: módulo `whatsapp`, adaptador Kapso + Noop, `whatsapp_messages`, `TicketWhatsAppService`, endpoints, auto `listo` con flag, env validation, tests | delegado (escritor backend) | `backend/**` | — |
 | T2 | Backend fase 2: webhook Kapso, firma, lotes, idempotencia, estados, bajas, `whatsapp_contacts`, tests | delegado (mismo escritor, después de T1) | `backend/**` | T1 |
 | T3 | Frontend: API client, hooks, sección WhatsApp en el drawer, confirmación de reenvío | delegado (escritor frontend) | `frontend/src/admin/tickets/**` | contrato |
-| T4 | ADR 0029 + README/.env.example | inline (orquestador) | `frontend/adrs/`, docs | — |
+| T4 | ADR 0029 + README/.env.example | inline (orquestador) | `docs/adrs/`, docs | — |
 | T5 | QA: checks completos, lectura de diffs, prueba en navegador | orquestador | — | T1–T3 |
 
 - [x] T1 — delegado. Módulo `backend/src/whatsapp/` (puerto, Kapso, Noop, 3 esquemas, repos),
@@ -172,7 +172,7 @@ Sección **"WhatsApp"** en `TicketDetailDrawer`:
   Evidencia: `pnpm lint` sin errores (re-ejecutado por el orquestador); `vite build` OK (agente).
   Aclaración de contrato enviada al backend: errores con `{ message: código, code: código }` y
   `detail` en `whatsapp_send_failed` (el filtro global lo expone en `error.detail`).
-- [x] T4 — `frontend/adrs/0029-plantillas-whatsapp-via-kapso.md` escrito (inline). `.env.example` lo
+- [x] T4 — `docs/adrs/0029-plantillas-whatsapp-via-kapso.md` escrito (inline). `.env.example` lo
   completa el escritor backend.
 - [~] T5 — checks automáticos re-ejecutados por el orquestador (2026-10-10):
   backend `pnpm build` OK · `eslint` sin salida · `pnpm test` 28 suites / 226 tests OK ·

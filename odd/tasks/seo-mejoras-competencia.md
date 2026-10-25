@@ -5,6 +5,10 @@ Implementar en el código del sitio público las mejoras priorizadas del informe
 
 ## Problema
 - La dirección del sitio y del schema (`Av. San Luis 1859`) no coincide con la ficha de Google e Instagram. El dueño confirmó la correcta: **Av. San Luis 1873, Tienda 127** (MultiMercado San Borja).
+  - **Actualización 2026-10-25 (decisión del dueño):** la dirección correcta es **Av. San Luis 1849-1851**.
+    Reemplaza al 1873 que se usó en esta tanda y al 1859 anterior. Se unificó en todo el producto, incluidos
+    la página pública del ticket y el comprobante (que en esta tanda quedaron fuera de alcance). Ver
+    [seguridad-hardening-2026-10-25.md](seguridad-hardening-2026-10-25.md), C8.
 - No existe una página de garantía con plazo, cobertura y exclusiones; los textos actuales se contradicen (Contacto: 14 días de reevaluación + 3 meses en repuestos; FAQ de `/redes`: 3 meses en todas las reparaciones).
 - `/precios` tiene 11.501 impresiones y CTR de 0,6 % (Search Console, 3 meses).
 - Las páginas de servicio son delgadas (~100–150 palabras propias) y 4 URLs están "Descubierta: actualmente sin indexar".

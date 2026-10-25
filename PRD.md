@@ -78,6 +78,13 @@ etapa de diseño detallado del ticket, a definir con el usuario. -->
   como hoy.
 - No incluye notificaciones automáticas por WhatsApp/SMS cuando cambia el estado del
   ticket — el cliente debe entrar al enlace cuando quiera revisar.
+  - **Actualización 2026-10-25 (decisión del usuario):** el envío por WhatsApp sí entra en
+    alcance, pero acotado al hito acordado, no a cada transición. Se hace por plantillas
+    desde el detalle del ticket como envío manual (ADR 0027) y, con
+    `WHATSAPP_AUTO_TICKET_LISTO` activo, como aviso automático al pasar a `listo`
+    (ADR 0026 / ADR 0029). Sigue fuera de alcance avisar `pendiente`, `aprobado`,
+    `trabajando`, `entregado` o `cancelado`, y sigue fuera de alcance que el cliente
+    responda dentro del sistema.
 - No incluye login o cuenta de usuario para el cliente — el enlace público es
   suficiente, sin contraseña.
 - No incluye gestión multi-sucursal.

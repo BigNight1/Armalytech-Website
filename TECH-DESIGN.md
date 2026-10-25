@@ -3,9 +3,10 @@
 **Tipo de proyecto:** Brownfield — repos existentes revisados: `frontend/` (SPA React + Vite +
 Tailwind, `vercel.json`, función serverless `api/contact.js`). Estructura actual:
 `frontend/` (SPA existente) + `backend/` (Nuevo, NestJS).
-**Design.md disponible:** No — el modelo de datos se derivó del PRD.md. Se usa el PRD y las
-decisiones del usuario; la definición del inventario requiere revisar el proyecto de escritorio
-Invetario-Armalytech (ADR 0008).
+**Design.md disponible:** Sí — [DESIGN.md](DESIGN.md) documenta el sistema visual (tokens, componentes,
+los 7 estados del ticket en la interfaz y los tres contextos de producto). Este documento parte de
+[PRD.md](PRD.md) y de ese sistema de diseño; la definición del inventario requirió además revisar el
+proyecto de escritorio Invetario-Armalytech (ADR 0008).
 
 ## Resumen
 
@@ -60,7 +61,7 @@ de visitas, panel con secciones **Clientes** e **Historial de registro**, y mens
   backend (registro creado, ticket entregado) y llama a la Meta
   WhatsApp Business API (bienvenida, campañas, pedido de reseña)
 · Script one-off de migración (Node) — SQLite Invetario-Armalytech → MongoDB, fuera del runtime
-  (PENDIENTE: revisar el proyecto desktop para definir el mapping, ADR 0008)
+  (IMPLEMENTADO: `backend/scripts/migrate-sqlite.ts`, idempotente y con `--dry-run`, ADR 0008)
 ```
 
 Ya existía: la SPA (frontend/) y el deploy en Vercel. Nuevo: backend NestJS (backend/), panel,
@@ -71,39 +72,47 @@ comunidad (clientes + historial) e integración n8n + Meta WhatsApp Business API
 
 | # | Decisión | Estado |
 |---|---|---|
-| [ADR-0001](adrs/0001-stack-frontend-react-vite.md) | Stack del frontend | Aceptado (heredado) |
-| [ADR-0002](adrs/0002-despliegue-vercel-free-tier.md) | Despliegue Vercel free tier (frontend + backend NestJS serverless) | Aceptado (heredado) |
-| [ADR-0003](adrs/0003-base-de-datos-mongodb-atlas.md) | MongoDB Atlas con Mongoose, sin backups en esta versión | Aceptado |
-| [ADR-0004](adrs/0004-autenticacion-panel-admin.md) | Auth: hash en MongoDB + cookie firmada + Guards | Reemplazado por 0021 |
-| [ADR-0005](adrs/0005-contrato-de-api-rest.md) | Contrato de API REST en JSON (Controllers NestJS) | Aceptado |
-| [ADR-0006](adrs/0006-modelo-de-datos-tickets-e-inventario.md) | Modelo de datos + atomicidad de stock (update condicional, cascada) | Aceptado |
-| [ADR-0007](adrs/0007-estados-del-ticket.md) | 5 estados (incluye abandonado) + ciclo 7/15 días | Aceptado |
-| [ADR-0008](adrs/0008-migracion-de-inventario-desde-sqlite.md) | Migración SQLite (schema desktop revisado, script implementado) | Aceptado |
-| [ADR-0009](adrs/0009-manejo-de-estado-en-el-frontend.md) | Manejo de estado en el frontend | Aceptado |
-| [ADR-0010](adrs/0010-resiliencia-y-manejo-de-errores.md) | Resiliencia y manejo de errores | Aceptado |
-| [ADR-0011](adrs/0011-backend-nestjs.md) | Backend con NestJS | Aceptado |
-| [ADR-0012](adrs/0012-registro-comunidad-qr-nfc.md) | Registro a la comunidad vía QR/NFC (ruta pública) | Aceptado |
-| [ADR-0013](adrs/0013-modelo-datos-clientes-comunidad.md) | Modelo de datos de clientes de la comunidad | Aceptado |
-| [ADR-0014](adrs/0014-normalizacion-numeros-whatsapp.md) | Normalización de números de WhatsApp peruanos | Aceptado |
-| [ADR-0015](adrs/0015-consentimiento-marketing-meta.md) | Consentimiento explícito de marketing (política Meta) | Aceptado |
-| [ADR-0016](adrs/0016-integracion-n8n-meta-whatsapp.md) | Integración n8n + Meta WhatsApp Business API | Aceptado |
-| [ADR-0017](adrs/0017-resenas-google-maps.md) | Pedido de reseña en Google Maps post-entrega | Aceptado |
-| [ADR-0018](adrs/0018-historial-de-registro.md) | Historial de registro y asistencias | Aceptado |
-| [ADR-0019](adrs/0019-historial-panel-cierre-caja.md) | Historial del panel = cierre de caja diario | Aceptado |
-| [ADR-0020](adrs/0020-arquitectura-limpia-por-feature.md) | Arquitectura limpia por feature (backend y frontend) | Aceptado |
-| [ADR-0021](adrs/0021-autenticacion-jwt-en-cookie.md) | Auth con `@nestjs/jwt` en cookie httpOnly + `tokenVersion` | Aceptado |
-| [ADR-0022](adrs/0022-usuarios-y-roles-fijos.md) | Usuarios del panel con roles fijos (`owner`, `admin`) | Aceptado |
-| [ADR-0023](adrs/0023-seccion-personal.md) | Sección Personal: alta con contraseña temporal, desactivar, resetear | Aceptado |
-| [ADR-0024](adrs/0024-seccion-cuenta.md) | Sección Cuenta: cambiar username/contraseña con contraseña actual | Aceptado |
+| [ADR-0001](docs/adrs/0001-stack-frontend-react-vite.md) | Stack del frontend | Aceptado (heredado) |
+| [ADR-0002](docs/adrs/0002-despliegue-vercel-free-tier.md) | Despliegue Vercel free tier (frontend + backend NestJS serverless) | Aceptado (heredado) |
+| [ADR-0003](docs/adrs/0003-base-de-datos-mongodb-atlas.md) | MongoDB Atlas con Mongoose, sin backups en esta versión | Aceptado |
+| [ADR-0004](docs/adrs/0004-autenticacion-panel-admin.md) | Auth: hash en MongoDB + cookie firmada + Guards | Reemplazado por 0021 |
+| [ADR-0005](docs/adrs/0005-contrato-de-api-rest.md) | Contrato de API REST en JSON (Controllers NestJS) | Aceptado |
+| [ADR-0006](docs/adrs/0006-modelo-de-datos-tickets-e-inventario.md) | Modelo de datos + atomicidad de stock (update condicional, cascada) | Aceptado |
+| [ADR-0007](docs/adrs/0007-estados-del-ticket.md) | 5 estados (incluye abandonado) + ciclo 7/15 días | Aceptado |
+| [ADR-0008](docs/adrs/0008-migracion-de-inventario-desde-sqlite.md) | Migración SQLite (schema desktop revisado, script implementado) | Aceptado |
+| [ADR-0009](docs/adrs/0009-manejo-de-estado-en-el-frontend.md) | Manejo de estado en el frontend | Aceptado |
+| [ADR-0010](docs/adrs/0010-resiliencia-y-manejo-de-errores.md) | Resiliencia y manejo de errores | Aceptado |
+| [ADR-0011](docs/adrs/0011-backend-nestjs.md) | Backend con NestJS | Aceptado |
+| [ADR-0012](docs/adrs/0012-registro-comunidad-qr-nfc.md) | Registro a la comunidad vía QR/NFC (ruta pública) | Aceptado |
+| [ADR-0013](docs/adrs/0013-modelo-datos-clientes-comunidad.md) | Modelo de datos de clientes de la comunidad | Aceptado |
+| [ADR-0014](docs/adrs/0014-normalizacion-numeros-whatsapp.md) | Normalización de números de WhatsApp peruanos | Aceptado |
+| [ADR-0015](docs/adrs/0015-consentimiento-marketing-meta.md) | Consentimiento explícito de marketing (política Meta) | Aceptado |
+| [ADR-0016](docs/adrs/0016-integracion-n8n-meta-whatsapp.md) | Integración n8n + Meta WhatsApp Business API | Aceptado |
+| [ADR-0017](docs/adrs/0017-resenas-google-maps.md) | Pedido de reseña en Google Maps post-entrega | Aceptado |
+| [ADR-0018](docs/adrs/0018-historial-de-registro.md) | Historial de registro y asistencias | Aceptado |
+| [ADR-0019](docs/adrs/0019-historial-panel-cierre-caja.md) | Historial del panel = cierre de caja diario | Aceptado |
+| [ADR-0020](docs/adrs/0020-arquitectura-limpia-por-feature.md) | Arquitectura limpia por feature (backend y frontend) | Aceptado |
+| [ADR-0021](docs/adrs/0021-autenticacion-jwt-en-cookie.md) | Auth con `@nestjs/jwt` en cookie httpOnly + `tokenVersion` | Aceptado |
+| [ADR-0022](docs/adrs/0022-usuarios-y-roles-fijos.md) | Usuarios del panel con roles fijos (`owner`, `admin`) | Aceptado |
+| [ADR-0023](docs/adrs/0023-seccion-personal.md) | Sección Personal: alta con contraseña temporal, desactivar, resetear | Aceptado |
+| [ADR-0024](docs/adrs/0024-seccion-cuenta.md) | Sección Cuenta: cambiar username/contraseña con contraseña actual | Aceptado |
+| [ADR-0025](docs/adrs/0025-integracion-tickets-clientes-inventario-historial.md) | Integración Tickets ↔ Clientes ↔ Inventario ↔ Historial de Caja (piezas, cobros, clave cifrada) | Aceptado |
+| [ADR-0026](docs/adrs/0026-bot-whatsapp-ventana-24h-y-resena.md) | Bot de WhatsApp en n8n: ventana de 24 h y pedido de reseña al entregar | Aceptado |
+| [ADR-0027](docs/adrs/0027-mensajes-rapidos-desde-el-panel.md) | Mensajes rápidos de WhatsApp desde el panel (envío manual) | Aceptado |
+| [ADR-0028](docs/adrs/0028-tiempo-real-sse-invalidacion.md) | Tiempo real en el panel con SSE + invalidación de React Query | Aceptado |
+| [ADR-0029](docs/adrs/0029-plantillas-whatsapp-via-kapso.md) | Envío de plantillas de WhatsApp desde NestJS mediante Kapso | Aceptado |
 
 ## Modelo de datos
 
 Colecciones MongoDB (detalle en ADR-0006):
 
 - **tickets**: cliente (nombre, apellido, teléfono), equipo (tipo, marca, modelo, descripción),
-  estado (pendiente | trabajando | listo | entregado | abandonado), notas[], publicToken (aleatorio,
+  estado (**7 estados**: pendiente | aprobado | trabajando | listo | entregado | cancelado |
+  abandonado — ADR 0007, "Actualización (2026-09-25)"), notas[], publicToken (aleatorio,
   índice único), repuestosUsados[], historialEstados[], fechas. Contador de 7 días sin cambio →
-  `abandonado`; 15 días en abandonado → eliminar o conservar (por definir). **NUEVO, pendiente.**
+  `abandonado`; 15 días en abandonado → eliminar o conservar (por definir).
+  **IMPLEMENTADO** (`backend/src/tickets/`). Salvedad: el paso automático a `abandonado` exige un
+  job programado que **no existe todavía** (ver [BACKLOG.md](BACKLOG.md), E3).
 - **brands** → **models** (brandId) → **parts** (modelId, quantity): jerarquía del inventario
   migrada desde SQLite (`backend/scripts/migrate-sqlite.ts`, ADR 0008), referencia garantizada a
   nivel de aplicación; ajuste de `quantity` por update condicional atómico (ADR 0006 actualizado).
@@ -208,32 +217,42 @@ para el detalle de tareas y evidencia):
 - [ ] Un estado equivocado se puede revertir y el historial conserva el rastro.
 - [ ] Un ticket sin cambios durante 7 días se marca `abandonado` automáticamente; a los 15 días de
       abandonado se elimina o se conserva según la decisión pendiente.
+      **Estado:** la transición manual existe; el paso automático **no** está implementado (no hay job
+      programado). Queda como deuda P2 en [BACKLOG.md](BACKLOG.md).
 
 ### Flujo: seguimiento público del cliente
 
-- [ ] El enlace `/ticket/<publicToken>` muestra estado, notas y datos del equipo sin login.
-- [ ] Dado otro `publicToken` cualquiera, no se puede acceder al ticket de otro cliente (no
+- [x] El enlace `/ticket/<publicToken>` muestra estado, notas y datos del equipo sin login.
+- [x] Dado otro `publicToken` cualquiera, no se puede acceder al ticket de otro cliente (no
       secuencial, no adivinable).
-- [ ] **PENDIENTE**: recuperación de enlace perdido por teléfono. Falta definir el endpoint, qué
-      información se muestra y cómo se protege para no exponer tickets de otros clientes con el
-      mismo número.
+- [x] **Resuelto (implementado):** recuperación de enlace perdido con `POST /api/tickets/public/lookup`
+      (`codigo` + `telefono` → `publicToken`). Exige **ambos** datos y compara el celular normalizado a
+      dígitos, así que conocer el código no basta para abrir el ticket de otro cliente. Verificado en
+      `e2e/tests/public-ticket-tracking.spec.ts`.
+- [x] La página se refresca sola cuando cambia el estado (polling de 30 s + `visibilitychange` en
+      `frontend/src/ticket/TicketPage.jsx`), que es lo que el copy le promete al cliente.
 
 ### Flujo: inventario y stock
 
-- [ ] El admin crea/edita/elimina marcas, modelos y repuestos desde el panel.
-- [ ] Al registrar un repuesto usado que deja `cantidad` en 0, la operación completa y la API
-      devuelve advertencia `warning.stock_zero` visible para el admin.
-- [ ] **PENDIENTE**: definir mecanismo de atomicidad para el decremento de stock (transacción
-      Mongoose vs. update condicional) antes de implementar.
+- [x] El admin crea/edita/elimina marcas, modelos y repuestos desde el panel.
+- [~] Al registrar un repuesto usado que deja el stock en 0, la API lo informa de forma explícita.
+      **Estado:** el código `warning.stock_zero` de este documento **no** se implementó. La decisión
+      final (ADR 0025) es más estricta: si no hay stock, la operación no se completa y responde
+      `409 insufficient_stock` con el detalle (`faltantes: [{ productoId, nombre, necesita, hay }]`),
+      que el panel muestra nombrando la pieza. Cumple el caso borde del PRD ("avisar, no bloquear en
+      silencio"), pero con otro contrato.
+- [x] **Resuelto:** el decremento de stock es un update condicional atómico (`$inc` con filtro
+      `cantidad >= n`, `409 insufficient_stock` con el detalle de faltantes), no una transacción
+      Mongoose. Ver ADR 0006, "Actualización (2026-09-25)", y la sección de riesgos de este documento.
 
 ### Flujo: migración
 
-- [ ] **PENDIENTE**: revisar el proyecto de escritorio Invetario-Armalytech (schema/estructura de la
-      SQLite) para definir el mapping del inventario.
-- [ ] El script one-off lee la SQLite, exporta marcas/modelos/repuestos sin perder jerarquía y con
-      conteos por entidad en dry-run.
-- [ ] Ejecutado contra Atlas, los datos quedan disponibles en el panel y re-ejecutar no duplica
-      registros (idempotente).
+- [x] **Resuelto:** se revisó el schema del proyecto de escritorio
+      (`brands`/`models`/`parts`/`cierre_dia`). Decisión posterior: el inventario v2 arranca vacío y
+      el script migra **solo** `cierre_dia` (ADR 0008 y ADR 0006, "Actualización (2026-09-25)").
+- [x] El script one-off lee la SQLite, exporta y reporta conteos en `--dry-run`
+      (`backend/scripts/migrate-sqlite.ts`).
+- [x] Ejecutado contra Atlas, re-ejecutar no duplica registros (upsert por clave natural).
 
 ### Flujo: registro a la comunidad (público)
 
@@ -274,12 +293,16 @@ para el detalle de tareas y evidencia):
 - ~~**Consistencia jerárquica sin FKs**~~ — **Resuelto (2026-09-23)**: borrado en cascada al
   eliminar marca/modelo, replicando las FKs `ON DELETE CASCADE` de la SQLite desktop (ADR 0006
   actualizado).
-- **Recuperación de enlace por teléfono sin definir**: el PRD exige el caso borde, pero el contrato,
-  la información expuesta y la protección contra acceso cruzado están pendientes (ADR 0005).
+- ~~**Recuperación de enlace por teléfono sin definir**~~ — **Resuelto (2026-10-25)**: se implementó
+  `POST /api/tickets/public/lookup` (`codigo` + `telefono` → `publicToken`), con ambos datos
+  obligatorios y comparación del celular normalizado a dígitos. El criterio de "no exponer tickets
+  ajenos con el mismo número" se cumple porque el código también es obligatorio y el `publicToken`
+  sigue siendo la única llave de lectura.
 - **Sin backups (decisión explícita)**: un error en la migración o un borrado accidental puede
   perder datos; mitigación mínima: dry-run + re-import desde SQLite (ADR 0003).
 - **Ciclo de abandono 7/15 días**: falta confirmar si el ticket abandonado se elimina o se conserva,
-  y qué pasa si reaparece el cliente (ADR 0007).
+  y qué pasa si reaparece el cliente (ADR 0007). Además, el paso automático a `abandonado` no tiene
+  job programado todavía (ver [BACKLOG.md](BACKLOG.md), E3).
 - **Seguridad de la sesión**: el JWT firmado con `JWT_SECRET` y el hash de cada usuario son la
   barrera del panel (ADR-0021). Un secreto débil expondría todo el panel. La revocación se hace
   por `tokenVersion`. No hay recuperación de contraseña por correo: la resetea el `owner` (ADR

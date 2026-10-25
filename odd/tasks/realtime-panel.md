@@ -1,7 +1,7 @@
 # Funcionalidad: Panel en tiempo real (SSE + invalidación de React Query)
 
 ## Objetivo
-Que todo panel abierto refleje en ~1 s los cambios de otro admin y los registros públicos de clientes. Decisión en `frontend/adrs/0028-tiempo-real-sse-invalidacion.md`. Plan aprobado por el usuario el 2026-09-27: publicar desde cada caso de uso, no con un interceptor.
+Que todo panel abierto refleje en ~1 s los cambios de otro admin y los registros públicos de clientes. Decisión en `docs/adrs/0028-tiempo-real-sse-invalidacion.md`. Plan aprobado por el usuario el 2026-09-27: publicar desde cada caso de uso, no con un interceptor.
 
 ## Contrato
 - **Endpoint:** `GET /api/events` (`text/event-stream`), con sesión obligatoria (`SessionGuard` global, sin `@Public()`).
