@@ -8,7 +8,7 @@ import "../ContactPage/contact-page.css";
 const PHONE = "+51 924 548 268";
 const PHONE_LINK = "tel:+51924548268";
 const WHATSAPP_LINK = "https://wa.me/51924548268";
-const ADDRESS = "Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja, Lima, Perú";
+const ADDRESS = "Av. San Luis 1849-1851, Tienda 127, San Borja 15021 - MultiMercado San Borja, Lima, Perú";
 const LAST_UPDATED = "6 de octubre de 2026";
 
 const DATA_COLLECTED = [

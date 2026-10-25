@@ -23,7 +23,7 @@ const Location = () => {
                     UBICACIÓN:
                   </span>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja
+                    Av. San Luis 1849-1851, Tienda 127, San Borja 15021 - MultiMercado San Borja
                   </p>
                 </div>
               </div>

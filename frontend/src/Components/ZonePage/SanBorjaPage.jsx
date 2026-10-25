@@ -9,7 +9,7 @@ import { pricingFor } from '../../data/pricingData.js'
 const CANONICAL = 'https://www.armalytech.com/reparacion-de-celulares-san-borja'
 const TITLE = 'Reparación de celulares en San Borja | ArmalyTech'
 const DESCRIPTION =
-  'Taller de reparación de celulares en San Borja, Lima. Av. San Luis 1873, Tienda 127, MultiMercado San Borja. Lun–Sáb 10:00–20:00. Diagnóstico gratuito.'
+  'Taller de reparación de celulares en San Borja, Lima. Av. San Luis 1849-1851, Tienda 127, MultiMercado San Borja. Lun–Sáb 10:00–20:00. Diagnóstico gratuito.'
 
 const PHONE = '+51 924 548 268'
 const PHONE_LINK = 'tel:+51924548268'
@@ -67,7 +67,7 @@ const FAQS = [
   {
     question: '¿Dónde queda ArmalyTech en San Borja?',
     answer:
-      'Estamos en Av. San Luis 1873, Tienda 127, dentro del MultiMercado San Borja, en el distrito de San Borja, Lima.',
+      'Estamos en Av. San Luis 1849-1851, Tienda 127, dentro del MultiMercado San Borja, en el distrito de San Borja, Lima.',
   },
   {
     question: '¿Cuál es el horario de atención?',
@@ -143,7 +143,7 @@ const SanBorjaPage = () => {
           <h2 style={headingStyle}>Dónde estamos</h2>
           <ul style={{ ...paragraphStyle, paddingLeft: '1.25rem', listStyle: 'disc' }}>
             <li style={{ marginBottom: '0.5rem' }}>
-              <strong>Dirección:</strong> Av. San Luis 1873, Tienda 127, San Borja 15021, Lima.
+              <strong>Dirección:</strong> Av. San Luis 1849-1851, Tienda 127, San Borja 15021, Lima.
             </li>
             <li style={{ marginBottom: '0.5rem' }}>
               <strong>Referencia:</strong> dentro del MultiMercado San Borja.
@@ -160,7 +160,7 @@ const SanBorjaPage = () => {
         <section style={sectionStyle}>
           <h2 style={headingStyle}>Cómo llegar a la tienda</h2>
           <p style={paragraphStyle}>
-            Busca el MultiMercado San Borja sobre la Av. San Luis, en el número 1873, y ubica la Tienda 127 en su
+            Busca el MultiMercado San Borja sobre la Av. San Luis, en el número 1849-1851, y ubica la Tienda 127 en su
             interior. El mapa al final de esta página te muestra el punto exacto. Si prefieres confirmar la
             ubicación antes de salir, escríbenos por{' '}
             <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" style={linkStyle}>WhatsApp</a>.

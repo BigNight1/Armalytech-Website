@@ -20,7 +20,7 @@ const schema = {
     "url": "https://www.armalytech.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Av. San Luis 1873, Tienda 127 - MultiMercado San Borja",
+      "streetAddress": "Av. San Luis 1849-1851, Tienda 127 - MultiMercado San Borja",
       "addressLocality": "San Borja",
       "addressRegion": "Lima",
       "postalCode": "15021",
@@ -143,7 +143,7 @@ const sections = [
     heading: 'Restauración por daño de agua en San Borja, Lima',
     content: [
       [
-        'Estamos en Av. San Luis 1873, Tienda 127, dentro del MultiMercado San Borja, y atendemos de lunes a sábado de 10:00 a 20:00. Si tu celular se mojó, escríbenos por WhatsApp al +51 924 548 268 o consulta cómo llegar en la página de ',
+        'Estamos en Av. San Luis 1849-1851, Tienda 127, dentro del MultiMercado San Borja, y atendemos de lunes a sábado de 10:00 a 20:00. Si tu celular se mojó, escríbenos por WhatsApp al +51 924 548 268 o consulta cómo llegar en la página de ',
         { to: '/reparacion-de-celulares-san-borja', text: 'reparación de celulares en San Borja' },
         '.',
       ],

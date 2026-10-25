@@ -8,7 +8,7 @@ import ContactSection from "../ContactSection.jsx";
 
 const PHONE = "+51 924 548 268";
 const PHONE_LINK = "tel:+51924548268";
-const ADDRESS = "Av. San Luis 1873, Tienda 127, San Borja 15021 - MultiMercado San Borja";
+const ADDRESS = "Av. San Luis 1849-1851, Tienda 127, San Borja 15021 - MultiMercado San Borja";
 const HORARIO = "Lun–Sáb 10:00 – 20:00";
 
 const SERVICIO_TERMS = [
@@ -33,10 +33,10 @@ const ContactPage = () => {
     <div className="min-h-screen bg-white">
       <Helmet>
         <title>Contacto y Ubicación en San Borja | ArmalyTech</title>
-        <meta name="description" content="Reparamos tu celular en Av. San Luis 1873, Tienda 127, San Borja, Lima. Lun–Sáb 10:00 – 20:00. Llama al +51 924 548 268 o escríbenos por WhatsApp." />
+        <meta name="description" content="Reparamos tu celular en Av. San Luis 1849-1851, Tienda 127, San Borja, Lima. Lun–Sáb 10:00 – 20:00. Llama al +51 924 548 268 o escríbenos por WhatsApp." />
         <link rel="canonical" href="https://www.armalytech.com/contactanos" />
         <meta property="og:title" content="Contacto y Ubicación en San Borja | ArmalyTech" />
-        <meta property="og:description" content="Visítanos en Av. San Luis 1873, Tienda 127, San Borja. Atención Lun–Sáb 10:00 – 20:00. Llama o escríbenos por WhatsApp." />
+        <meta property="og:description" content="Visítanos en Av. San Luis 1849-1851, Tienda 127, San Borja. Atención Lun–Sáb 10:00 – 20:00. Llama o escríbenos por WhatsApp." />
         <meta property="og:url" content="https://www.armalytech.com/contactanos" />
         <meta property="og:type" content="website" />
       </Helmet>

@@ -51,7 +51,7 @@ const Home = () => {
           "email": "armalycell@gmail.com",
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Av. San Luis 1873, Tienda 127 - MultiMercado San Borja",
+            "streetAddress": "Av. San Luis 1849-1851, Tienda 127 - MultiMercado San Borja",
             "addressLocality": "San Borja",
             "addressRegion": "Lima",
             "postalCode": "15021",

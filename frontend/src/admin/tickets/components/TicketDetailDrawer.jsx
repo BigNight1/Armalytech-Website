@@ -1114,7 +1114,7 @@ export default function TicketDetailDrawer({
                 <div className="flex flex-col leading-tight">
                   <span className="text-lg font-extrabold">ArmalyTech</span>
                   <span className="text-[13px] text-slate-500">
-                    Av. San Luis 1859, San Borja · MultiMercado San Borja
+                    Av. San Luis 1849-1851, San Borja · MultiMercado San Borja
                   </span>
                   <span className="text-[13px] text-slate-500">WhatsApp +51 924 548 268</span>
                 </div>
