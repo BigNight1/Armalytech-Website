@@ -77,6 +77,35 @@ Se mantiene funcional y documentado en [ADR 0002](docs/adrs/0002-despliegue-verc
 - Backend: función serverless (`backend/api/index.ts` + [backend/vercel.json](backend/vercel.json)),
   que envuelve la app de Nest con `serverless-http` y una instancia cacheada entre invocaciones.
 
+### La trampa del autor del commit (deployment blocked)
+
+Vercel **no mira quién empuja**: mira el **autor del commit** y lo cruza con las cuentas de Vercel.
+Si el correo del autor no pertenece a una cuenta con acceso al proyecto, el deployment queda
+`Blocked` con "the commit author did not have contributing access to the project", y en el plan
+Hobby no se puede arreglar invitando colaboradores en un repo privado.
+
+Con dos cuentas de correo en la misma máquina esto pasa sin que nadie lo note: el push sale con la
+cuenta correcta de GitHub (`BigNight1`) y el commit queda firmado con el correo del trabajo
+(`desarrolladorfullstack5@aybarsac.com`), que Vercel resuelve a **otra** cuenta sin acceso.
+
+Regla para este repo: la identidad de commit tiene que ser la del dueño del proyecto en Vercel.
+
+```bash
+# Comprobar con qué identidad estás commiteando
+git config --show-origin --get user.email
+
+# Fijarla SOLO para este repo (el noreply de GitHub mapea a la cuenta)
+git config user.email "104038912+BigNight1@users.noreply.github.com"
+
+# Verificar el autor de lo último que empujaste
+git log -1 --format='%h %an <%ae>'
+```
+
+**Si ya quedó bloqueado** no sirve el botón "Redeploy": vuelve a evaluar el mismo commit y vuelve a
+bloquearse. Hace falta un **commit nuevo** con el autor correcto (ese sí despliega), o reescribir el
+autor de los commits anteriores y empujar de nuevo. Lo resuelto no se nota en GitHub, que acepta
+cualquier autor: solo se ve cuando Vercel rechaza el deployment.
+
 ## 3. Variables de entorno
 
 ### Backend (obligatorias — el arranque falla si faltan o son inválidas)
