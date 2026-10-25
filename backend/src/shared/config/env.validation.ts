@@ -50,6 +50,13 @@ class EnvironmentVariables {
   @IsNumberString()
   SESSION_MAX_AGE_SECONDS?: string;
 
+  // Number of reverse proxies to trust when reading the client IP (R-04).
+  // Optional: `resolveTrustProxyHops` defaults to 1 in production and 0
+  // elsewhere, so a missing value never blocks the boot.
+  @IsOptional()
+  @IsNumberString()
+  TRUST_PROXY_HOPS?: string;
+
   @IsOptional()
   @IsString()
   DNS_SERVERS?: string;

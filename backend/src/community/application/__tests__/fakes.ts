@@ -37,10 +37,10 @@ export class FakeClientRepository implements ClientRepository {
   async upsertVisit(input: UpsertVisitInput): Promise<UpsertVisitResult> {
     const existing = this.clients.find((c) => c.phoneE164 === input.phoneE164);
     if (existing) {
-      existing.firstName = input.firstName;
-      existing.lastName = input.lastName;
-      // Mirrors MongooseClientRepository: never downgrade approved consent,
-      // only upgrade declined -> approved (and refresh the consent date).
+      // Mirrors MongooseClientRepository: a repeat registration never rewrites
+      // the stored names (2026-10-25 hardening, C4).
+      // Consent never downgrades approved consent, only upgrades
+      // declined -> approved (and refreshes the consent date).
       if (!existing.marketingConsent && input.marketingConsent) {
         existing.marketingConsent = true;
         existing.consentAt = input.occurredAt;

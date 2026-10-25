@@ -14,6 +14,7 @@ import { USER_REPOSITORY } from './domain/user-repository.port';
 import { ADMIN_REPOSITORY } from './domain/admin-repository.port';
 import { PASSWORD_HASHER } from './domain/password-hasher.port';
 import { LoginUseCase } from './application/login.use-case';
+import { LogoutUseCase } from './application/logout.use-case';
 import { BootstrapAdminUseCase } from './application/bootstrap-admin.use-case';
 import { GetCurrentAdminUseCase } from './application/get-current-admin.use-case';
 
@@ -29,6 +30,7 @@ import { GetCurrentAdminUseCase } from './application/get-current-admin.use-case
     { provide: PASSWORD_HASHER, useClass: BcryptPasswordHasher },
     SessionTokenService,
     LoginUseCase,
+    LogoutUseCase,
     BootstrapAdminUseCase,
     GetCurrentAdminUseCase,
     { provide: APP_GUARD, useClass: SessionGuard },

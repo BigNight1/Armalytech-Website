@@ -17,8 +17,10 @@ import { TicketUseCases } from '../application/ticket.use-cases';
 import { TicketWhatsAppService } from '../application/ticket-whatsapp.service';
 import { toWhatsAppMessageDto } from '../../whatsapp/infrastructure/dto/whatsapp-message.dto';
 import { SendTicketWhatsAppDto } from './dto/ticket-whatsapp.dto';
+import { LookupPublicTicketDto } from './dto/lookup-public-ticket.dto';
 import { toWhatsAppHttpException } from './ticket-whatsapp-http-error';
 import {
+  AddTicketNoteDto,
   AvailabilityQueryDto,
   CreateTicketDto,
   ListTicketsQueryDto,
@@ -45,10 +47,8 @@ export class TicketsController {
   @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('public/lookup')
   @HttpCode(HttpStatus.OK)
-  async lookupPublicTicket(
-    @Body() body: { codigo?: string; telefono?: string },
-  ) {
-    return this.ticketUseCases.lookupPublicTicket(body.codigo, body.telefono);
+  async lookupPublicTicket(@Body() dto: LookupPublicTicketDto) {
+    return this.ticketUseCases.lookupPublicTicket(dto.codigo, dto.telefono);
   }
 
   @Post()
@@ -205,10 +205,10 @@ export class TicketsController {
   @Post(':id/notas')
   async addInternalNote(
     @Param('id') id: string,
-    @Body('nota') nota: string,
+    @Body() dto: AddTicketNoteDto,
     @CurrentAdmin() session: SessionPayload,
   ) {
     const userName = session?.email || 'Taller';
-    return this.ticketUseCases.addInternalNote(id, nota, userName);
+    return this.ticketUseCases.addInternalNote(id, dto.nota, userName);
   }
 }

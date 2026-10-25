@@ -9,6 +9,23 @@ server {
     # the backend is not up yet.
     resolver 127.0.0.11 valid=30s ipv6=off;
 
+    # Browser security headers for every response (C7 hardening). `always` also
+    # covers error responses (4xx/5xx).
+    # nginx inheritance rule: a level that declares any `add_header` does NOT
+    # inherit these, so every `location` below that sets its own header repeats
+    # the whole block. Keep the copies in sync.
+    # No CSP on purpose: inline JSON-LD, the Google Maps iframe and the
+    # WhatsApp widget need nonces plus visual QA first; tracked as a known
+    # pending item.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    # No includeSubDomains / preload: subdomains are not managed from this repo
+    # and preload is effectively irreversible. Browsers only honor HSTS over
+    # HTTPS, so plain http:// behaves exactly as before.
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
     # Realtime panel sync (ADR 0028): dedicated exact-match block, evaluated
     # before the prefix regex below, so this long-lived SSE connection never
     # gets buffered, compressed, or timed out like a normal short request.
@@ -44,6 +61,13 @@ server {
 
     location /assets/ {
         expires 1y;
+        # Repeats the server-level security headers (see the note at the top):
+        # declaring an add_header here drops the inherited ones.
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
         add_header Cache-Control "public, immutable";
         try_files $uri =404;
     }
@@ -61,11 +85,25 @@ server {
     # falls back to the empty SPA shell, never to index.html, which is the
     # prerendered home page.
     location = / {
+        # Security headers repeated on purpose (nginx drops inherited ones when
+        # a level declares its own add_header).
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
         add_header Cache-Control "no-cache";
         try_files /index.html =404;
     }
 
     location / {
+        # Security headers repeated on purpose (nginx drops inherited ones when
+        # a level declares its own add_header).
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
         add_header Cache-Control "no-cache";
 
         # One canonical URL per page: strip trailing slashes (mirrors

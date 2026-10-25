@@ -3,6 +3,19 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { createTestApp, closeTestApp } from './test-app';
 
+/** Full `Set-Cookie` header value (`name=value; Path=/; ...`) of a response. */
+function setCookieHeader(res: request.Response): string {
+  const raw = res.headers['set-cookie'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  expect(value).toBeDefined();
+  return value as string;
+}
+
+/** Just the `name=value` pair, ready to send back as a `Cookie` header. */
+function cookiePair(res: request.Response): string {
+  return setCookieHeader(res).split(';')[0];
+}
+
 describe('Auth (e2e)', () => {
   let app: INestApplication;
   let mongod: MongoMemoryServer;
@@ -63,5 +76,60 @@ describe('Auth (e2e)', () => {
 
     const afterLogout = await agent.get('/api/auth/me');
     expect(afterLogout.status).toBe(401);
+  });
+
+  // 2026-10-25 hardening (C1): logout used to only delete the cookie, so a
+  // copied token stayed valid for the rest of its 12 h. It now bumps
+  // `tokenVersion`, which the guard compares on every request.
+  it('revokes the session on logout: replaying the pre-logout cookie gives 401', async () => {
+    const loginRes = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: adminEmail, password: 'super-secret' });
+    expect(loginRes.status).toBe(200);
+
+    // Keep a copy of the cookie: this is the "stolen token" the revocation
+    // must kill, and this client never receives the clearing Set-Cookie.
+    const stolenCookie = cookiePair(loginRes);
+
+    const before = await request(app.getHttpServer())
+      .get('/api/auth/me')
+      .set('Cookie', stolenCookie);
+    expect(before.status).toBe(200);
+
+    const logoutRes = await request(app.getHttpServer())
+      .post('/api/auth/logout')
+      .set('Cookie', stolenCookie);
+    expect(logoutRes.status).toBe(200);
+    expect(logoutRes.body).toEqual({ ok: true });
+    expect(setCookieHeader(logoutRes)).toMatch(/^armalytech_session=;/);
+
+    const replay = await request(app.getHttpServer())
+      .get('/api/auth/me')
+      .set('Cookie', stolenCookie);
+    expect(replay.status).toBe(401);
+    expect(replay.body.ok).toBe(false);
+
+    // Revoking sessions does not lock the account: a fresh login still works.
+    const relogin = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: adminEmail, password: 'super-secret' });
+    expect(relogin.status).toBe(200);
+  });
+
+  it('logout is public and idempotent: 200 { ok: true } and a cleared cookie without a session', async () => {
+    const withoutSession = await request(app.getHttpServer()).post(
+      '/api/auth/logout',
+    );
+    expect(withoutSession.status).toBe(200);
+    expect(withoutSession.body).toEqual({ ok: true });
+    expect(setCookieHeader(withoutSession)).toMatch(/^armalytech_session=;/);
+
+    // A tampered/garbage cookie must not turn logout into an error (it must
+    // not reveal either whether it belonged to a real session).
+    const withGarbageCookie = await request(app.getHttpServer())
+      .post('/api/auth/logout')
+      .set('Cookie', 'armalytech_session=not-a-jwt');
+    expect(withGarbageCookie.status).toBe(200);
+    expect(withGarbageCookie.body).toEqual({ ok: true });
   });
 });

@@ -534,4 +534,100 @@ describe('Security (e2e)', () => {
       expect(cookie).not.toMatch(/;\s*Secure/i);
     });
   });
+
+  // 2026-10-25 hardening (C9): Express advertises itself by default; the
+  // bootstrap disables that so responses do not fingerprint the stack.
+  describe('Framework fingerprinting', () => {
+    let app: INestApplication;
+    let mongod: MongoMemoryServer;
+
+    beforeAll(async () => {
+      ({ app, mongod } = await createTestApp({ JWT_SECRET }));
+    });
+
+    afterAll(async () => {
+      await closeTestApp(app, mongod);
+    });
+
+    it('does not send an X-Powered-By header', async () => {
+      const res = await request(app.getHttpServer()).get('/api/health');
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-powered-by']).toBeUndefined();
+    });
+  });
+
+  // 2026-10-25 hardening (C8, SECURITY.md R-04): with no proxy trusted (the
+  // test default) `X-Forwarded-For` must be ignored, otherwise a caller picks
+  // its own throttle tracker by inventing an IP per request.
+  describe('Proxy trust and client IP (TRUST_PROXY_HOPS=0)', () => {
+    let app: INestApplication;
+    let mongod: MongoMemoryServer;
+    const adminEmail = 'proxy-admin@armalytech.com';
+
+    beforeAll(async () => {
+      ({ app, mongod } = await createTestApp({
+        JWT_SECRET,
+        TRUST_PROXY_HOPS: '0',
+        ADMIN_EMAIL: adminEmail,
+        ADMIN_PASSWORD: 'Sup3r-Secret-Password!',
+      }));
+    });
+
+    afterAll(async () => {
+      await closeTestApp(app, mongod);
+    });
+
+    it('ignores X-Forwarded-For: spoofed IPs still share one login bucket', async () => {
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await request(app.getHttpServer())
+          .post('/api/auth/login')
+          .set('X-Forwarded-For', `203.0.113.${i}`)
+          .send({ email: adminEmail, password: `wrong-${i}` });
+        statuses.push(res.status);
+      }
+
+      expect(statuses.slice(0, 5)).not.toContain(429);
+      expect(statuses[5]).toBe(429);
+    });
+  });
+
+  // The other half of the same knob: with one trusted proxy the header is
+  // honored, so each distinct forwarded IP gets its own bucket. This is what
+  // makes the login limit work behind nginx/Vercel instead of collapsing
+  // everyone into the proxy's single address.
+  describe('Proxy trust and client IP (TRUST_PROXY_HOPS=1)', () => {
+    let app: INestApplication;
+    let mongod: MongoMemoryServer;
+    const adminEmail = 'proxy-trusted-admin@armalytech.com';
+
+    beforeAll(async () => {
+      ({ app, mongod } = await createTestApp({
+        JWT_SECRET,
+        TRUST_PROXY_HOPS: '1',
+        ADMIN_EMAIL: adminEmail,
+        ADMIN_PASSWORD: 'Sup3r-Secret-Password!',
+      }));
+    });
+
+    afterAll(async () => {
+      await closeTestApp(app, mongod);
+    });
+
+    it('honors X-Forwarded-For: distinct forwarded IPs get distinct buckets', async () => {
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        const res = await request(app.getHttpServer())
+          .post('/api/auth/login')
+          .set('X-Forwarded-For', `198.51.100.${i}`)
+          .send({ email: adminEmail, password: `wrong-${i}` });
+        statuses.push(res.status);
+      }
+
+      expect(statuses).not.toContain(429);
+    });
+  });
 });

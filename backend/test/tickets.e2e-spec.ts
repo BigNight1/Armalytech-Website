@@ -137,6 +137,50 @@ describe('Tickets (e2e)', () => {
     );
   });
 
+  // 2026-10-25 hardening (C5): the public lookup had no DTO, so a non-string
+  // `codigo` reached the use case and surfaced as a 500.
+  it('validates the public lookup body: invalid input is a 400 with a Spanish message, never a 500', async () => {
+    const anon = request(app.getHttpServer());
+
+    const numericCodigo = await anon
+      .post('/api/tickets/public/lookup')
+      .send({ codigo: 1, telefono: '987654321' });
+    expect(numericCodigo.status).toBe(400);
+    expect(numericCodigo.body.ok).toBe(false);
+    const message = Array.isArray(numericCodigo.body.error.message)
+      ? numericCodigo.body.error.message.join(' | ')
+      : numericCodigo.body.error.message;
+    expect(message).toMatch(/texto/);
+
+    const missingPhone = await anon
+      .post('/api/tickets/public/lookup')
+      .send({ codigo: 'AT-000001' });
+    expect(missingPhone.status).toBe(400);
+    expect(missingPhone.body.ok).toBe(false);
+
+    const overlongCodigo = await anon
+      .post('/api/tickets/public/lookup')
+      .send({ codigo: 'A'.repeat(41), telefono: '987654321' });
+    expect(overlongCodigo.status).toBe(400);
+
+    // Functional behavior is unchanged: both values are still required and the
+    // phone is still normalized to digits before matching.
+    const found = await anon
+      .post('/api/tickets/public/lookup')
+      .send({ codigo: '1', telefono: '+51 987 654 321' });
+    expect(found.status).toBe(200);
+    expect(found.body.codigo).toBe('AT-000001');
+    expect(typeof found.body.publicToken).toBe('string');
+  });
+
+  it('still answers 400 (not 500) for an empty lookup body', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/tickets/public/lookup')
+      .send({});
+    expect(res.status).toBe(400);
+    expect(res.body.ok).toBe(false);
+  });
+
   it('exposes availability with stock, planificado and reservas, honoring excludeTicketId', async () => {
     const ticketRes = await owner.get('/api/tickets').query({ q: 'AT-000001' });
     const ticketId = ticketRes.body.tickets[0].id;
@@ -308,6 +352,46 @@ describe('Tickets (e2e)', () => {
     expect(publicRes.body.notasInternas).toBeUndefined();
     expect(publicRes.body.cliente.telefono).toBeUndefined();
     expect(publicRes.body.auditoriaClave).toBeUndefined();
+  });
+
+  // 2026-10-25 hardening (C10/R-06): the internal-note route read `@Body('nota')`
+  // raw, so an empty or unbounded note was accepted.
+  it('rejects an empty, missing or oversized internal note with 400, and still stores a valid one', async () => {
+    const createRes = await owner.post('/api/tickets').send({
+      cliente: { nombre: 'Notas', telefono: '966777888' },
+      equipo: { fallaReportada: 'Revisión general' },
+      titulo: 'Notas internas',
+      precioTotal: 0,
+    });
+    expect(createRes.status).toBe(201);
+    const ticketId = createRes.body.id;
+
+    const empty = await owner
+      .post(`/api/tickets/${ticketId}/notas`)
+      .send({ nota: '' });
+    expect(empty.status).toBe(400);
+    expect(empty.body.ok).toBe(false);
+    const message = Array.isArray(empty.body.error.message)
+      ? empty.body.error.message.join(' | ')
+      : empty.body.error.message;
+    expect(message).toMatch(/Ingresa el contenido de la nota/);
+
+    const missing = await owner.post(`/api/tickets/${ticketId}/notas`).send({});
+    expect(missing.status).toBe(400);
+
+    const oversized = await owner
+      .post(`/api/tickets/${ticketId}/notas`)
+      .send({ nota: 'x'.repeat(2001) });
+    expect(oversized.status).toBe(400);
+    expect(oversized.body.ok).toBe(false);
+
+    const valid = await owner
+      .post(`/api/tickets/${ticketId}/notas`)
+      .send({ nota: 'Cliente avisado por WhatsApp' });
+    expect(valid.status).toBe(201);
+    expect(valid.body.notasInternas).toContain(
+      '[owner@armalytech.com] Cliente avisado por WhatsApp',
+    );
   });
 
   it('lets only the owner annul a cobro; the admin gets 403', async () => {

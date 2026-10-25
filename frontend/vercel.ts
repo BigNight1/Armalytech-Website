@@ -37,7 +37,25 @@ if (!rawBackendUrl) {
 
 const backendUrl = rawBackendUrl.replace(/\/+$/, '');
 
+// Browser security headers for every response (C7 hardening). The nginx
+// template (`nginx/default.conf.template`) ships the same set for the Docker
+// deployment; keep both in sync when either changes. Vercel only honors HSTS
+// over HTTPS, so the http:// origin keeps working.
+// No CSP on purpose: the public site relies on inline JSON-LD, the Google Maps
+// iframe and the WhatsApp widget, so a strict policy needs nonces and a visual
+// QA pass. It is a documented pending item, not an oversight.
+const SECURITY_HEADERS = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  // No includeSubDomains / preload: subdomains are not managed from this repo
+  // and preload is effectively irreversible.
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+];
+
 export const config: VercelConfig = {
+  headers: [routes.header('/(.*)', SECURITY_HEADERS)],
   rewrites: [
     ...EXACT_PATHS.map((path) => routes.rewrite(`/api/${path}`, `${backendUrl}/api/${path}`)),
     ...BACKEND_PREFIXES.filter((prefix) => !EXACT_PATHS.includes(prefix)).map((prefix) =>

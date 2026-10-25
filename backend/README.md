@@ -3,7 +3,7 @@
 NestJS (TypeScript) backend for the ArmalyTech admin panel: authentication, inventory
 v2 (brands, phones, categories, products with stock movements) and daily cash closings
 ("Historial"). See `odd/tasks/inventario-v2.md` for the inventory v2 feature spec and
-API contract, and `frontend/adrs/` (0002, 0003, 0004, 0005, 0006, 0008, 0010, 0011,
+API contract, and `docs/adrs/` (0002, 0003, 0004, 0005, 0006, 0008, 0010, 0011,
 0020) for the accepted architecture decisions this backend implements — 0006's
 "Actualización (2026-09-25)" section is the source of truth for the inventory v2 data
 model.
@@ -51,6 +51,7 @@ See `.env.example`. Never commit `.env` (gitignored at the repo root and in
 | `SESSION_SECRET` | **Deprecated** alias for `JWT_SECRET`, kept only for the current deployment (local `.env` and Vercel still set this name). Accepted with the same length requirement, but logs a startup warning telling you to rename it. Set `JWT_SECRET` instead when you next touch the environment. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Used once, at bootstrap, to create the single admin account when the `admins` collection is empty. |
 | `SESSION_MAX_AGE_SECONDS` | Session cookie lifetime in seconds (default 12h). |
+| `TRUST_PROXY_HOPS` | How many reverse proxies Express trusts when reading the client IP (`app.set('trust proxy', …)`). Defaults to `1` when `NODE_ENV=production` (nginx in Docker / Vercel forward `X-Forwarded-For`) and `0` otherwise. Needed for the per-IP throttler to see the real client (login 5/min, public registration 5/min) instead of the proxy address; with `0` the app ignores `X-Forwarded-For` entirely, which is what tests and local dev want so a caller cannot spoof its IP. See `SECURITY.md` R-04. |
 | `TICKET_SECRET_KEY` | Encrypts/decrypts the ticket device key (`claveEquipo`, AES-256-GCM, ADR 0025). Required, at least 32 characters, long and random in production. Unlike `JWT_SECRET` there is **no fallback**: it never derives from `JWT_SECRET` or a hardcoded value, since that would let anyone reading the source decrypt stored device keys. The app refuses to start without one — add it to your local `.env`. |
 | `DNS_SERVERS` | Optional, local dev only. Comma-separated DNS servers (e.g. `8.8.8.8,1.1.1.1`) when the machine resolver refuses SRV lookups (`querySrv ECONNREFUSED` with `mongodb+srv://`). |
 
@@ -71,8 +72,11 @@ pnpm migrate:sqlite -- <path-to-sqlite-file> [--dry-run] [--help]
 All routes are under `/api` (global prefix). See the feature doc's **API contract**
 section for the full list (`auth`, `inventory`, `cash-closings`, `health`). Every
 route requires the signed session cookie except `GET /api/health`,
-`POST /api/auth/login` and a logged-out `POST /api/auth/logout`/`GET /api/auth/me`
-(the guard rejects those with `401`, not a redirect).
+`POST /api/auth/login` and `POST /api/auth/logout` — logout is public and
+idempotent (it always answers `200 { ok: true }` and clears the cookie, and it
+bumps `tokenVersion` when the cookie is valid, so the token it carried stops
+working). `GET /api/auth/me` still rejects a logged-out session with `401`, not
+a redirect (ADR 0021).
 
 Errors always come back as:
 

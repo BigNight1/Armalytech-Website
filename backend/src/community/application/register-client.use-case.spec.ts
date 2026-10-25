@@ -91,6 +91,32 @@ describe('RegisterClientUseCase', () => {
     expect(events.events.map((e) => e.type)).toEqual(['registro', 'registro']);
   });
 
+  // 2026-10-25 hardening (C4): the public QR form must not be able to rename
+  // an existing client by re-submitting the same phone number with other names.
+  it('keeps the stored name when an already-known phone number re-registers with a different one', async () => {
+    await useCase.execute({
+      firstName: 'Juana',
+      lastName: 'Perez',
+      phone: '965728013',
+      marketingConsent: true,
+      channel: 'qr',
+    });
+
+    const second = await useCase.execute({
+      firstName: 'Impostor',
+      lastName: 'Ajeno',
+      phone: '965728013',
+      marketingConsent: true,
+      channel: 'qr',
+    });
+
+    expect(second.isNewClient).toBe(false);
+    expect(second.client.firstName).toBe('Juana');
+    expect(second.client.lastName).toBe('Perez');
+    expect(clients.clients[0].firstName).toBe('Juana');
+    expect(clients.clients[0].lastName).toBe('Perez');
+  });
+
   it('rejects and logs an invalid phone number', async () => {
     await expect(
       useCase.execute({

@@ -1,9 +1,11 @@
 import { ValidationPipe, INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModuleBuilder } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/shared/infrastructure/http-exception.filter';
+import { resolveTrustProxyHops } from '../src/shared/config/trust-proxy';
 
 /**
  * Spins up a full Nest app against an in-memory MongoDB instance
@@ -35,6 +37,10 @@ export async function createTestApp(
   process.env.ADMIN_USERNAME = envOverrides.ADMIN_USERNAME ?? 'admin';
   process.env.ADMIN_PASSWORD = envOverrides.ADMIN_PASSWORD ?? 'test-password';
   process.env.SESSION_MAX_AGE_SECONDS = '43200';
+  // No proxy in front of the test server: `X-Forwarded-For` must be ignored,
+  // otherwise a spec could pick its own throttle tracker. A spec that needs to
+  // exercise the trusted-proxy path passes this override explicitly.
+  process.env.TRUST_PROXY_HOPS = envOverrides.TRUST_PROXY_HOPS ?? '0';
 
   const moduleRef = await configure(
     Test.createTestingModule({
@@ -43,8 +49,13 @@ export async function createTestApp(
   ).compile();
 
   // rawBody mirrors `createNestApp` (webhook signatures need the exact bytes).
-  const app = moduleRef.createNestApplication({ rawBody: true });
+  const app = moduleRef.createNestApplication<NestExpressApplication>({
+    rawBody: true,
+  });
   app.setGlobalPrefix('api');
+  // Mirrors `createNestApp` (B8): never advertise the framework in a response.
+  app.disable('x-powered-by');
+  app.set('trust proxy', resolveTrustProxyHops());
   // Cookies are verified as JWTs (ADR 0021), not via cookie-parser signing.
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));

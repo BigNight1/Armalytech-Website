@@ -44,14 +44,21 @@ export class CommunityController {
     private readonly sendMessage: SendCommunityMessageUseCase,
   ) {}
 
+  // 5 public registrations per minute per IP (2026-10-25 hardening, C4).
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
     @Body() dto: RegisterClientDto,
     @Query() query: RegisterChannelQueryDto,
-  ) {
+  ): Promise<{
+    ok: true;
+    data: {
+      client: { firstName: string; stamps: number };
+      isNewClient: boolean;
+    };
+  }> {
     const { client, isNewClient } = await this.registerClient.execute({
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -60,12 +67,15 @@ export class CommunityController {
       channel: query.canal ?? 'qr',
     });
 
+    // Public projection only (C4): the QR page reads `isNewClient`,
+    // `client.firstName` and `client.stamps` and nothing else. Never leak
+    // `phoneE164`, `consentAt`, `lastName`, dates or `visitCount` from an
+    // unauthenticated endpoint.
     return {
       ok: true,
       data: {
-        client,
+        client: { firstName: client.firstName, stamps: client.stamps },
         isNewClient,
-        visitCount: client.visitCount,
       },
     };
   }

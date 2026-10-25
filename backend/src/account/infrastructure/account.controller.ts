@@ -8,6 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import {
   UpdateEmailUseCase,
@@ -28,6 +29,9 @@ export class AccountController {
     private readonly configService: ConfigService,
   ) {}
 
+  // Both account routes verify the current password, so they are brute-force
+  // targets like login (2026-10-25 hardening, C2): 10 attempts per minute.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Patch('email')
   @HttpCode(HttpStatus.OK)
   async updateEmail(
@@ -58,6 +62,7 @@ export class AccountController {
     };
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Patch('password')
   @HttpCode(HttpStatus.OK)
   async updatePassword(

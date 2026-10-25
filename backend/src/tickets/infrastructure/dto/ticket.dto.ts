@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
   ValidateIf,
   ValidateNested,
@@ -260,6 +261,18 @@ export class AnularCobroDto {
   @IsNotEmpty({ message: 'Ingresa el motivo de la anulación' })
   @IsString()
   motivo!: string;
+}
+
+/**
+ * Body of `POST /api/tickets/:id/notas` (2026-10-25 hardening, C10/R-06).
+ * Before this DTO the route read `@Body('nota')` raw, so an empty, missing or
+ * arbitrarily long note was stored as-is.
+ */
+export class AddTicketNoteDto {
+  @IsString({ message: 'La nota debe ser texto' })
+  @IsNotEmpty({ message: 'Ingresa el contenido de la nota' })
+  @MaxLength(2000, { message: 'La nota no debe superar los 2000 caracteres' })
+  nota!: string;
 }
 
 export class ListTicketsQueryDto {

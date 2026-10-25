@@ -36,8 +36,9 @@ export class MongooseClientRepository implements ClientRepository {
       .findOne({ phoneE164: input.phoneE164 })
       .exec();
     if (existing) {
-      existing.firstName = input.firstName;
-      existing.lastName = input.lastName;
+      // Never overwrite the stored names on a repeat registration (2026-10-25
+      // hardening, C4): the public QR form must not be able to rename an
+      // existing client — only the authenticated panel update can.
       // Consent never downgrades on a repeat submission (2026-09-25): only
       // upgrade a previously-declined consent to approved, and record the
       // new consent date when that happens; an already-approved consent (and
