@@ -54,22 +54,51 @@ const SECURITY_HEADERS = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
 ];
 
+// Client-only routes (src/App.jsx) that are NOT prerendered and must resolve to
+// the SPA shell with HTTP 200. Anything else that is not a file or a prerendered
+// page falls through to dist/404.html with HTTP 404 (real 404s, no soft 404).
+// Keep in sync with the equivalent locations in nginx/default.conf.template and
+// with the <Route> list in src/App.jsx.
+const SPA_ONLY_PATHS = [
+  '/admin',
+  '/admin/:path*',
+  '/ticket',
+  '/ticket/:token',
+  '/consultar-ticket',
+  '/registrar/usuario',
+];
+
+// Private surfaces must never be indexed. They are NOT disallowed in robots.txt
+// on purpose: a crawler that cannot fetch the page never sees the noindex.
+const NOINDEX_SOURCES = [
+  '/admin',
+  '/admin/:path*',
+  '/ticket',
+  '/ticket/:path*',
+  '/registrar/:path*',
+];
+
 export const config: VercelConfig = {
-  headers: [routes.header('/(.*)', SECURITY_HEADERS)],
+  headers: [
+    routes.header('/(.*)', SECURITY_HEADERS),
+    ...NOINDEX_SOURCES.map((source) =>
+      routes.header(source, [{ key: 'X-Robots-Tag', value: 'noindex' }]),
+    ),
+  ],
   rewrites: [
     ...EXACT_PATHS.map((path) => routes.rewrite(`/api/${path}`, `${backendUrl}/api/${path}`)),
     ...BACKEND_PREFIXES.filter((prefix) => !EXACT_PATHS.includes(prefix)).map((prefix) =>
       routes.rewrite(`/api/${prefix}/:path*`, `${backendUrl}/api/${prefix}/:path*`),
     ),
-    // SPA fallback: everything not under /api/ (including /api/contact,
-    // which is handled by the frontend/api/contact.js serverless function
-    // and must NOT be rewritten to the backend) resolves to the empty SPA shell.
-    // Vercel checks the filesystem before applying rewrites, so prerendered
-    // pages (dist/precios.html, ...) are served first and only unknown routes
-    // (admin, tickets, registration, 404) fall through to the shell. The shell
+    // SPA-only routes resolve to the empty SPA shell. Vercel checks the
+    // filesystem before applying rewrites, so prerendered pages
+    // (dist/precios.html, ...) are served first. There is deliberately NO
+    // catch-all rewrite: any other unknown path gets dist/404.html with a real
+    // HTTP 404. /api/contact is handled by the frontend/api/contact.js
+    // serverless function and must NOT be rewritten to the backend. The shell
     // is dist/app-shell.html, written by scripts/prerender.mjs; index.html is
     // the prerendered home page and must not be used as the fallback.
-    routes.rewrite('/((?!api/).*)', '/app-shell'),
+    ...SPA_ONLY_PATHS.map((path) => routes.rewrite(path, '/app-shell')),
   ],
   // Prerendered pages are emitted as <route>.html; serve them extensionless
   // and keep one canonical URL per page (308 for /x.html and /x/).

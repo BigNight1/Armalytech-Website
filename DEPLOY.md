@@ -152,7 +152,7 @@ desechable de Playwright en `3100`. Ninguno de los dos se usa en producción.
 
 ## 5. Verificación post-despliegue
 
-Estos cuatro chequeos cubren el 90% de los despliegues rotos. Los tres primeros se pueden correr a
+Estos chequeos cubren el 90% de los despliegues rotos. Los primeros se pueden correr a
 mano; el último es la suite completa.
 
 ```bash
@@ -171,9 +171,34 @@ curl -sI https://www.armalytech.com/ | grep -iE "x-content-type-options|referrer
 # 4. La home responde y está prerenderizada (SEO).
 curl -s https://www.armalytech.com/ | grep -o '<title>[^<]*</title>'
 
-# 5. El flujo completo, en un navegador real y contra un backend desechable.
+# 5. Las rutas inexistentes responden 404 real (no el shell del SPA con 200) y las rutas
+#    solo-cliente siguen en 200.
+curl -s -o /dev/null -w "%{http_code}
+" https://www.armalytech.com/pagina-que-no-existe-xyz
+# → 404. Si sale 200, el fallback volvió a ser el shell (revisa vercel.ts / nginx).
+curl -s https://www.armalytech.com/pagina-que-no-existe-xyz | grep -o '<meta[^>]*robots[^>]*>'
+# → noindex, follow
+for p in /admin/login /ticket/abc /consultar-ticket /registrar/usuario; do
+  curl -s -o /dev/null -w "$p %{http_code}
+" "https://www.armalytech.com$p"; done
+# → 200 en las cuatro.
+curl -sI https://www.armalytech.com/admin/login | grep -i x-robots-tag
+# → x-robots-tag: noindex (igual en /ticket/* y /registrar/*; /consultar-ticket NO lo lleva).
+
+# 6. El flujo completo, en un navegador real y contra un backend desechable.
 cd e2e && pnpm test
 ```
+
+Los 404 reales dependen de `dist/404.html` (lo escribe `scripts/prerender.mjs`) y de que la lista de
+rutas solo-cliente (`SPA_ONLY_PATHS` en `vercel.ts`, `location` en nginx) coincida con las `<Route>`
+de `src/App.jsx`. Una ruta cliente nueva que no esté en esas listas devolverá 404.
+
+> **Pregunta abierta (sin resolver): ¿Vercel o Dokploy?** Este documento y el `Dockerfile` dan a
+> Dokploy/nginx como despliegue vigente, pero al 2026-11-04 la auditoría SEO observó la cabecera
+> `Server: Vercel` en `www.armalytech.com`. Hasta que el dueño confirme qué sirve producción, cada
+> cambio de enrutamiento o cabeceras se mantiene en **ambos** (`frontend/vercel.ts` y
+> `frontend/nginx/default.conf.template`). Confirmar con `curl -sI https://www.armalytech.com/ | grep -i '^server'`
+> y revisar a qué apunta el DNS.
 
 Y a mano en el navegador: entrar a `/admin/login`, iniciar sesión, crear un ticket de prueba, abrir
 `/consultar-ticket`, buscar ese ticket con el celular registrado y confirmar que la página pública

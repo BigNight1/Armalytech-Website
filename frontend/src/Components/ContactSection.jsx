@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./contact-section.css";
 
 // Placeholders: reemplazar con datos reales
@@ -9,6 +10,8 @@ const HORARIO = "Lun–Sáb 10:00 – 20:00";
 
 
 const ContactSection = () => {
+  // /contactanos renders this section too: do not link a page to itself.
+  const isContactPage = useLocation().pathname === "/contactanos";
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -62,6 +65,14 @@ const ContactSection = () => {
           </p>
           <p className="contact-section__intro">
             Escríbenos y agenda tu diagnóstico o reparación. Nuestro equipo te responderá a la brevedad.
+          </p>
+          <p className="contact-section__intro">
+            Antes de venir, revisa qué cubre nuestra <Link to="/garantia" className="underline">garantía de reparación</Link>
+            {isContactPage ? "." : (
+              <>
+                {" "}y consulta la <Link to="/contactanos" className="underline">dirección, el horario y las formas de contacto</Link> de la tienda.
+              </>
+            )}
           </p>
 
           <div className="contact-section__blocks">

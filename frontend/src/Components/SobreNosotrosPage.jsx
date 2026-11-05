@@ -85,8 +85,8 @@ const SobreNosotrosPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Sobre Nosotros | ArmalyTech — Técnicos en Reparación de Celulares Lima</title>
-        <meta name="description" content="Conoce al equipo de ArmalyTech. Técnicos especializados en reparación de celulares en Lima con años de experiencia, diagnóstico gratis y garantía en todos los servicios." />
+        <title>Sobre Nosotros | ArmalyTech, técnicos de celulares en Lima</title>
+        <meta name="description" content="Conoce a ArmalyTech: técnicos de celulares en San Borja, Lima. Diagnóstico gratis, repuestos de calidad y 3 meses de garantía en cada reparación." />
         <link rel="canonical" href="https://www.armalytech.com/sobre-nosotros" />
         <meta property="og:title" content="Sobre Nosotros | ArmalyTech Lima" />
         <meta property="og:description" content="Técnicos especializados en reparación de celulares en Lima. Conoce nuestra misión, proceso y garantía de calidad." />

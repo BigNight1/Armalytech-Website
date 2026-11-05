@@ -13,6 +13,7 @@ const EMAIL = "armalycell@gmail.com";
 const EMAIL_LINK = "mailto:armalycell@gmail.com";
 
 const SOCIAL_LINKS = [
+  { name: "Facebook", img: "/redes_sociales/facebook.svg", href: "https://www.facebook.com/profile.php?id=61590746588200" },
   { name: "Instagram", img: "/redes_sociales/instagram.svg", href: "https://instagram.com/armalytech" },
   { name: "TikTok", img: "/redes_sociales/tik-tok.svg", href: "https://tiktok.com/@armalytech" },
   { name: "WhatsApp", img: "/redes_sociales/whatsapp.svg", href: "https://api.whatsapp.com/send/?phone=%2B51924548268&text&type=phone_number&app_absent=0" },
@@ -49,7 +50,7 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             {SOCIAL_LINKS.map(({ name, img, href }) => (
               <a key={name} href={href} target="_blank" rel="noopener noreferrer" className="opacity-90 hover:opacity-100" aria-label={name}>
-                <img src={img} alt={name} className="h-5 w-5 object-contain invert" />
+                <img src={img} alt={`${name} de ArmalyTech`} className="h-5 w-5 object-contain invert" />
               </a>
             ))}
           </div>
@@ -215,7 +216,7 @@ const Navbar = () => {
             <div className="navbar-overlay__socials">
               {SOCIAL_LINKS.map(({ name, img, href }) => (
                 <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={name} onClick={closeMenu}>
-                  <img src={img} alt="" />
+                  <img src={img} alt={`${name} de ArmalyTech`} />
                 </a>
               ))}
             </div>

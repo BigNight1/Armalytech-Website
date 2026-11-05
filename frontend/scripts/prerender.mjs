@@ -8,8 +8,11 @@
 //     ...), so hosts with "clean URLs" serve it before any SPA fallback.
 //
 // dist/app-shell.html keeps the pristine, empty SPA shell: it is the fallback
-// for every non-prerendered route (admin, tickets, registration, 404), so
-// those routes never hydrate against another page's markup.
+// for the client-only routes (admin, tickets, registration), so those routes
+// never hydrate against another page's markup.
+//
+// dist/404.html is the prerendered PageError (meta robots noindex). Hosts serve
+// it with HTTP 404 for every unknown path (vercel.ts / nginx template).
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -33,6 +36,9 @@ async function readRoutes() {
 }
 
 const SHELL_FILE = 'app-shell.html'
+const NOT_FOUND_FILE = '404.html'
+// Any path outside App.jsx's <Route> list renders the catch-all PageError.
+const NOT_FOUND_ROUTE = '/__not-found__'
 
 async function bundleServerEntry() {
   await build({
@@ -159,6 +165,20 @@ async function main() {
     throw new Error(`${failures.length} route(s) failed to prerender`)
   }
 
+  // The 404 page: same pipeline, but it must be noindex and must not carry a
+  // canonical (it is not a URL of its own).
+  let notFoundPage
+  try {
+    const { html, helmet } = render(NOT_FOUND_ROUTE)
+    if (!html || html.trim().length === 0) throw new Error('empty #root')
+    notFoundPage = injectPage(template, html, helmet)
+    if (!/<meta\b[^>]*\bname="robots"[^>]*\bnoindex/i.test(notFoundPage)) throw new Error('404 page has no robots noindex')
+    if (/<link\b[^>]*\brel="canonical"/i.test(notFoundPage)) throw new Error('404 page must not have a canonical link')
+  } catch (error) {
+    console.error(`prerender FAILED ${NOT_FOUND_FILE}: ${error?.stack ?? error}`)
+    throw new Error('404 page failed to prerender')
+  }
+
   // Preserve the pristine shell before the home page overwrites index.html.
   await writeFile(path.join(distDir, SHELL_FILE), template)
 
@@ -169,6 +189,8 @@ async function main() {
     const bytes = Buffer.byteLength(page)
     console.log(`prerender ${route.padEnd(42)} ${String(bytes).padStart(7)} B  ${extractTitle(page)}`)
   }
+  await writeFile(path.join(distDir, NOT_FOUND_FILE), notFoundPage)
+  console.log(`prerender ${NOT_FOUND_FILE.padEnd(42)} ${String(Buffer.byteLength(notFoundPage)).padStart(7)} B  ${extractTitle(notFoundPage)}`)
   console.log(`prerender: ${pages.length} routes written, SPA shell at dist/${SHELL_FILE}`)
 }
 
