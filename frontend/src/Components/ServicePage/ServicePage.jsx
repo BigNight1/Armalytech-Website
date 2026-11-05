@@ -70,6 +70,17 @@ const ServicePage = ({ seo, schema, hero, items, priceNotes = [], sections = [],
       }
     : null
 
+  // Mirrors the visible breadcrumb below: Inicio > Servicios (/precios) > this service.
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://www.armalytech.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Servicios', item: 'https://www.armalytech.com/precios' },
+      { '@type': 'ListItem', position: 3, name: hero.title, item: seo.canonical },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -81,6 +92,7 @@ const ServicePage = ({ seo, schema, hero, items, priceNotes = [], sections = [],
         <meta property="og:url" content={seo.canonical} />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify(schema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         {faqSchema && <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>}
       </Helmet>
 

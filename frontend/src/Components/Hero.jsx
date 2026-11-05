@@ -54,7 +54,7 @@ const Hero = () => {
             <div className="order-2 md:order-2 lg:col-span-1 flex justify-center items-center py-8 lg:py-0">
               <img
                 src="/iphone.webp"
-                alt="iPhone"
+                alt="iPhone reparado por ArmalyTech"
                 width={280}
                 height={420}
                 fetchPriority="high"

@@ -6,13 +6,24 @@ import PricingBlock from "./PricingBlock.jsx";
 import AdditionalServicesSection from "./AdditionalServicesSection.jsx";
 import Navbar from "./Navbar/NavBar.jsx";
 import Footer from "./Footer.jsx";
-import { pricingCategories, getDesde, getDisplayItems, formatSoles } from "../data/pricingData.js";
+import { pricingCategories, getDesde, getDisplayItems, formatSoles, formatPrice, getRow } from "../data/pricingData.js";
 import ContactSection from "./ContactSection.jsx";
 import "./pricing-hero.css";
 
-const TITLE = "Precios de Reparación de Celulares en Lima (2026)";
-// Los montos "desde" salen de data/pricingData.js
-const DESCRIPTION = `Pantalla desde ${formatSoles(getDesde("reparacion-pantalla"))} y batería desde ${formatSoles(getDesde("cambio-bateria"))}; el precio final depende del modelo. Puerto de carga desde ${formatSoles(getDesde("puerto-carga"))}. Diagnóstico gratis y 3 meses de garantía.`;
+// Los montos salen de data/pricingData.js (única fuente de precios).
+const SCREEN_DESDE = formatSoles(getDesde("reparacion-pantalla"));
+const SCREEN_RANGE = formatPrice(getRow("reparacion-pantalla", "oled"));
+const TITLE = `Cuánto cuesta cambiar la pantalla de un celular: desde ${SCREEN_DESDE}`;
+const DESCRIPTION = `Cambio de pantalla de celular desde ${SCREEN_DESDE} (${SCREEN_RANGE} según el modelo) y batería desde ${formatSoles(getDesde("cambio-bateria"))}. Precios en Lima con diagnóstico gratis y 3 meses de garantía.`;
+const SITE = "https://www.armalytech.com";
+const BREADCRUMB_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": `${SITE}/` },
+    { "@type": "ListItem", "position": 2, "name": "Precios", "item": `${SITE}/precios` },
+  ],
+};
 
 const PricingPage = () => {
   const { state } = useLocation();
@@ -39,6 +50,7 @@ const PricingPage = () => {
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://www.armalytech.com/precios" />
         <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify(BREADCRUMB_SCHEMA)}</script>
       </Helmet>
       <Navbar />
       {/* Bloque separado del header: hero de precios con fondo oscuro (estilo TechPro) */}
@@ -46,7 +58,7 @@ const PricingPage = () => {
         <div className="pricing-hero">
           <div className="pricing-hero__inner">
             <h1 className="pricing-hero__title">
-              Precios<span className="pricing-hero__title-accent">.</span>
+              Precios de reparación de celulares en Lima<span className="pricing-hero__title-accent">.</span>
             </h1>
             <nav className="pricing-hero__breadcrumb" aria-label="Breadcrumb">
               <Link to="/">Inicio</Link>
@@ -64,6 +76,9 @@ const PricingPage = () => {
         </p>
         <p className="pricing-disclaimer__text">
           <span className="pricing-disclaimer__label">¿Lo necesitas el mismo día?</span> Deja un adelanto de la mitad del costo del repuesto, lo traemos del almacén y, cuando llega, instalamos tu repuesto nuevo en menos de 1 hora. En el puerto de carga no hace falta adelanto: tenemos zócalos de carga en stock para la mayoría de modelos, así que la reparación se hace al momento.
+        </p>
+        <p className="pricing-disclaimer__text">
+          <span className="pricing-disclaimer__label">Antes de decidir.</span> Revisa qué cubre nuestra <Link to="/garantia" className="underline">garantía de 3 meses</Link> y, si prefieres cotizar tu modelo, mira cómo llegar o escribirnos en la página de <Link to="/contactanos" className="underline">contacto</Link>.
         </p>
       </div>
 

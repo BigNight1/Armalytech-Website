@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import "./footer.css";
 
 const SOCIAL_LINKS = [
+  { name: "Facebook", img: "/redes_sociales/facebook.svg", href: "https://www.facebook.com/profile.php?id=61590746588200" },
   { name: "Instagram", img: "/redes_sociales/instagram.svg", href: "https://instagram.com/armalytech" },
   { name: "TikTok", img: "/redes_sociales/tik-tok.svg", href: "https://tiktok.com/@armalytech" },
   { name: "WhatsApp", img: "/redes_sociales/whatsapp.svg", href: "https://api.whatsapp.com/send/?phone=%2B51924548268&text&type=phone_number&app_absent=0" },
@@ -77,7 +78,7 @@ const Footer = () => {
                   className="footer__social-link"
                   aria-label={name}
                 >
-                  <img src={img} alt="" className="footer__social-icon" />
+                  <img src={img} alt={`${name} de ArmalyTech`} className="footer__social-icon" />
                 </a>
               ))}
             </div>

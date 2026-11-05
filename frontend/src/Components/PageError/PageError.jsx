@@ -6,8 +6,8 @@ const PageError = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-      {/* The SPA fallback serves unknown routes with HTTP 200, so tell crawlers
-          not to index them (avoids soft 404s). */}
+      {/* Prerendered to dist/404.html and served with HTTP 404 by the host;
+          noindex also covers client-side navigation to an unknown route. */}
       <Helmet>
         <title>Página no encontrada | ArmalyTech</title>
         <meta name="robots" content="noindex, follow" />

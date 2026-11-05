@@ -80,10 +80,60 @@ server {
         return 301 /precios;
     }
 
+    # Real 404s: unknown paths answer HTTP 404 with the prerendered PageError UI
+    # (dist/404.html, noindex), never the SPA shell with 200.
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+        # Security headers repeated on purpose (see the note at the top).
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Cache-Control "no-cache";
+    }
+
+    # The empty SPA shell is only reachable through the client-only locations
+    # below; a direct request for it is a 404.
+    location = /app-shell.html {
+        internal;
+    }
+
     # Prerendered pages live at <route>.html (see scripts/prerender.mjs) and are
-    # served extensionless. Anything else (admin, tickets, registration, 404)
-    # falls back to the empty SPA shell, never to index.html, which is the
-    # prerendered home page.
+    # served extensionless. Client-only routes (src/App.jsx) fall back to the
+    # empty SPA shell, never to index.html, which is the prerendered home page.
+    # Keep these two locations in sync with SPA_ONLY_PATHS in vercel.ts.
+
+    # Private surfaces: admin panel, public ticket page and QR registration.
+    # Not disallowed in robots.txt on purpose: crawlers must see the noindex.
+    location ~ ^/(admin(/.*)?|ticket(/[^/]+)?|registrar/usuario)/?$ {
+        # One canonical URL per page (mirrors trailingSlash: false in vercel.ts).
+        rewrite ^/(.+)/$ /$1 permanent;
+        # Security headers repeated on purpose (nginx drops inherited ones when
+        # a level declares its own add_header).
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Cache-Control "no-cache";
+        add_header X-Robots-Tag "noindex" always;
+        try_files /app-shell.html =404;
+    }
+
+    # Public ticket lookup: client-rendered (not prerendered) but indexable.
+    location ~ ^/consultar-ticket/?$ {
+        rewrite ^/(.+)/$ /$1 permanent;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Cache-Control "no-cache";
+        try_files /app-shell.html =404;
+    }
+
     location = / {
         # Security headers repeated on purpose (nginx drops inherited ones when
         # a level declares its own add_header).
@@ -112,8 +162,8 @@ server {
 
         # Files first, then <route>.html. Bare directory names (/servicios,
         # /reparaciones) are deliberately not matched by "$uri/": the
-        # directory has no index.html, so nginx would answer 403 instead of
-        # serving the shell.
-        try_files $uri $uri.html /app-shell.html;
+        # directory has no index.html. Anything else is a real 404 (served as
+        # dist/404.html through error_page above).
+        try_files $uri $uri.html =404;
     }
 }

@@ -39,6 +39,8 @@ const Home = () => {
         <meta property="og:description" content="Servicio técnico de celulares en San Borja. Pantalla en 2–3 horas, batería el mismo día y 3 meses de garantía. Diagnóstico gratis por WhatsApp o en tienda." />
         <meta property="og:url" content="https://www.armalytech.com/" />
         <meta property="og:type" content="website" />
+        {/* LCP: the hero iPhone image (Hero.jsx) is the largest above-the-fold asset. */}
+        <link rel="preload" as="image" href="/iphone.webp" fetchPriority="high" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "ElectronicsRepair",
@@ -57,6 +59,7 @@ const Home = () => {
             "postalCode": "15021",
             "addressCountry": "PE"
           },
+          "hasMap": "https://maps.google.com/?cid=207288328779688784",
           "geo": {
             "@type": "GeoCoordinates",
             "latitude": -12.085994,
@@ -71,6 +74,7 @@ const Home = () => {
             }
           ],
           "sameAs": [
+            "https://www.facebook.com/profile.php?id=61590746588200",
             "https://www.instagram.com/armalytech/",
             "https://www.tiktok.com/@armalytech"
           ],

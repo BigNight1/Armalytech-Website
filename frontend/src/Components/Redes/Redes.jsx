@@ -7,7 +7,7 @@ const Redes = () => {
     <div className="fondo">
       <Helmet>
         <title>Redes Sociales y Contacto | ArmalyTech Lima</title>
-        <meta name="description" content="Síguenos en Instagram y TikTok o escríbenos por WhatsApp. ArmalyTech, servicio técnico de celulares en San Borja, Lima. Diagnóstico gratuito." />
+        <meta name="description" content="Síguenos en Facebook, Instagram y TikTok o escríbenos por WhatsApp. ArmalyTech, servicio técnico de celulares en San Borja, Lima. Diagnóstico gratuito." />
         <link rel="canonical" href="https://www.armalytech.com/redes" />
         <meta property="og:title" content="Redes Sociales y Contacto | ArmalyTech Lima" />
         <meta property="og:url" content="https://www.armalytech.com/redes" />
@@ -33,6 +33,14 @@ const Redes = () => {
           </div>
         </div>
         <div className="box-redes">
+          <a
+            href="https://www.facebook.com/profile.php?id=61590746588200"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-btn"
+          >
+            Facebook
+          </a>
           <a
             href="https://www.instagram.com/armalytech/"
             target="_blank"
